@@ -69,5 +69,5 @@
   },
   "fengshenMentalModelVersion": "v0.16.41",
   "fengshenLearningHistoryUrl": "https://github.com/cipher-wb/fengshen-skillAI/releases/download/v{cliVersion}/fengshen-learning-history-v{mentalModelVersion}.tar.gz",
-  "fengshenLearningHistorySha256": ""
+  "fengshenLearningHistorySha256": "bccdceea59bffbb3470e39fe2d8a891117202eb7243548897cbbc96338ac145c"
 }
