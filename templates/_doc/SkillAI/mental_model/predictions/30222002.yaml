@@ -1,0 +1,93 @@
+sample_id: 30222002
+predicted_at: 2026-05-09T12:00:00+08:00
+predicted_with_mental_model_version: v0.2
+phase: holdout
+
+# B-001 D-6 教训：先读 SkillConfig 5 硬信号
+skill_config_metadata_seen:
+  SkillNameEditor: null   # 编辑器内显示名缺失
+  SkillSubType: 102       # 与 30431000（金身法）相同 = 奇术
+  Icon: "Skill/GongFa/Mu/skill_mu_302203"  # 木宗门功法图标
+  EnhanceSkillBuffConfigID: 0   # 非心法（非替换型普攻）
+  SkillEffectPassiveExecuteInfo_nonzero: true  # Passive=32001376 → 双 root
+  # 扩展字段
+  CdType: 1   # ⚠️ 新值！B-001 只见 3/4/5
+  SkillIndicatorType: 3  # 直线指示器
+  SkillTagsList_size: 2   # 顶层声明 320029 / 320050
+  SkillDamageTagsList_size: 3   # 顶层 tag 3 / 1201 / 1202 → 1+2+3 号子弹伤害对子
+  notes: |
+    硬信号交叉解读（基于 v0.2 mental_model）：
+    - SkillSubType=102 = 奇术 → 与 30431000（金身法）同型，
+      [Buff系统.md] 反直觉 3 提示："身法/奇术不映射到位移机制，是 buff 串联控制效果"。
+      但本样本名"落木遁形"含"遁形"= 隐身/位移语义，
+      与"奇术=buff串联"假设冲突？需谨慎。
+    - Passive≠0 → [SkillEntry系统.md] 不变量 2：宗门技能多双 root（4/5 比例），
+      落木遁形也走 Active+Passive 双流程。
+    - CdType=1 是 v0.2 没见过的新值（[控制流子系统.md] 仍不确定 2 已 flag）。
+      推测：CdType=1 可能是"短 CD 即时型"，但无证据。
+    - Icon 路径 skill_mu_302203 提示"功法（GongFa）"分类，木属性。
+    - SkillDamageTagsList 含 1+2+3 号子弹的全部威力系数 tag（3/1201/1202）→
+      [SkillTag系统.md] 不变量 D：3 个子弹的伤害对子全打开 → 多段攻击。
+      但额外伤害 tag（5/1211/1212）一个都没有，矛盾？
+      可能"额外伤害 tag" 是可选的（只配威力系数也合法）。
+
+# 拓扑/范式预测
+prediction:
+  node_count: 110   # corpus_scan = 108，参考 ±10 范围
+  topology_mermaid: |
+    graph LR
+      Active[Active root: SkillEffectExecuteInfo<br/>SkillEffectConfigID=32000462] --> RUN_TEMPL[TSET_RUN_SKILL_EFFECT_TEMPLATE]
+      RUN_TEMPL --> TPL["38xxxxxxx 系列?<br/>（连招型多段攻击）"]
+      TPL --> Bullets[3 BulletConfig<br/>1+2+3号子弹依次飞出]
+      Bullets --> Damage[damage 对子<br/>3/1201/1202 威力系数]
+      Passive[Passive root: SkillEffectPassiveExecuteInfo<br/>SkillEffectConfigID=32001376] --> PassiveTree[Passive 子树<br/>命中触发后续效果?]
+      style Active fill:#fff
+      style Passive fill:#fff
+  templates_used:
+    - "RUN_TEMPL 13 次（class_counts 已知）→ 高概率单 root + 1 个高阶模板"
+    - "推测 38xxxxxxx 段位连招型模板（B-001 30431000 奇术身法用 38000289）"
+    - "或 14xxxxxxx 段位（如 146003779 持续施法）若是"遁形"位移型"
+  subsystems_touched:
+    - 模板系统    # RUN_TEMPL=13，强信号
+    - 控制流子系统 # ORDER=12 + DELAY=7 + REPEAT=1 + CONDITION=3
+    - SkillEntry 系统 # 双 root（Passive≠0）
+    - SkillTag 系统  # 顶层声明 + flow 内 5 SkillTagsConfigNode + 6 GET_TAG + 2 MOD_TAG
+    - Buff 系统    # 1 ADD_BUFF（轻量）
+    - 子弹系统    # 3 BulletConfig + 3 CREATE_BULLET（伤害对子配齐）
+  prediction_confidence: 中
+  reasoning: |
+    显式 cite v0.2 子系统页：
+
+    1. **[模板系统.md] 反直觉 1**："节点数 ≥ 80 + RUN_TEMPL ≥ 5 时先怀疑套了核心模板"
+       → 本样本 108 节点 + RUN_TEMPL=13，**强烈预测单 root + 高阶模板**。
+       这是 v0.1 的 baseline 预测会完全漏掉的（baseline 拓扑 = 0/5）。
+
+    2. **[控制流子系统.md] 不变量 D（CdType 三语义）**：
+       本样本 CdType=1 是新值，**不确定其语义**。但 SkillSubType=102 与 30431000
+       同型（B-001 中 30431000 是 CdType=5），CdType≠4 暗示不是普通连招型。
+       需 hold-out 后回填 v0.2 的 CdType 字典。
+
+    3. **[SkillEntry系统.md] 不变量 2**：Passive=32001376 ≠ 0 → 双 root 入口。
+       预测 Passive 子树规模较小（~20 节点），Active 子树更大（~80 节点）。
+
+    4. **[SkillTag系统.md] 不变量 A 三声明源 + 不变量 D 伤害对子**：
+       - 顶层 SkillTagsList 声明 2 个 tag（320029 / 320050）= 自定义业务 tag
+       - 顶层 SkillDamageTagsList 声明 3 个伤害 tag（3 / 1201 / 1202）= 1+2+3 号子弹
+       - flow 内 5 SkillTagsConfigNode = 第 1 声明源
+       → 三源齐备，lint E019 应不报或低误报。
+
+    5. **[Buff系统.md] 反直觉 3**：
+       - SkillSubType=102（奇术/身法）+ ADD_BUFF=1 = 轻量 buff 用法
+       - 不像 30431000 的 4 buff 串联（那是控制效果型），本样本只 1 个 buff
+       - 但有 SET_ENTITY_COLLISION_ENABLE_STATE=4 + DESTROY_ENTITY=1
+       → 高度怀疑：**"落木遁形"是"创建 3 个木叶替身 entity 误导敌人"机制**
+         （= 召唤型！但 has_summon=False ⚠️ 矛盾，可能 entity 不是 summon flag）
+
+    **关键拓扑预测**（使用 v0.2 模板系统认知）：
+    单 root → RUN_TEMPL 高阶模板 → 模板内嵌 3 BulletConfig（带子弹伤害对子）
+    + Active 主流程 + Passive 旁路。控制流（ORDER=12 + CONDITION=3）大量在模板内部。
+
+    **风险点**：
+    - "落木遁形"如果是真正的位移/隐身机制，那 v0.2 [Buff系统.md] 反直觉 3 说"身法/奇术不位移"
+      可能在此样本被推翻（变成新 delta）。这是 hold-out 的真实价值。
+    - CdType=1 的语义未知，预测可能不准。

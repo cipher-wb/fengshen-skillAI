@@ -1,0 +1,23 @@
+sample_id: 740040
+filename: SkillGraph_740040_【模板】移动至目标单位.json
+subcat: 模板-技能
+nodes: 12
+segment_guess: 740_3d_模板_移动至目标单位
+closed_book_inferences:
+  - master_flag: 1 (IsTemplate=True / filename 含【模板】)
+  - structure: 12 nodes 小 / 移动模板 → 推断 SCN + 移动节点 (MOVE_TO_TARGET) + 触发器
+  - SubClass: 可能 NSC dual_NULL (D-2706 + D-4004 模板第 3 形态) OR NSC + AR (子模板带主动形态)
+  - SC=True / NSC=可能 True
+  - ConfigJson.SkillMainType / SubType: 推断 0 (模板) 或非 0 (子模板特殊)
+  - ConfigJson.ElementType: 0 (模板 / D-4006 ET=None 解耦 / 5/5 模板实证 ET=None)
+  - 段位号系 ref: 0 (技能模板独立)
+  - filename_pattern: 【模板】移动至目标单位 → 模板 + 功能名
+deltas_touched_predicted:
+  - D-2401 (master flag): expect 1 (【模板】filename)
+  - D-2706 (模板第 3 形态 IsTemplate 开放矩阵): expect True
+  - D-2801 (NSC 独立平行路径): possible True
+  - D-4002 (A) (30512xxx 木心法 ConfigJson 标量全零 → cousin 候选): cousin family 候选 (跨模板族扩展待 B-044 R1 candidate 段标 cousin)
+  - D-4004 (模板 NSC dual_NULL): expect True
+  - D-4006 (path ≠ ET): expect ET=None
+  - 元发现新候选 #66: 移动模板族 (MOVE_TO_TARGET / TARGET 模板) 命名规则
+predicted_sample_score_self: 0.75 (模板 12 nodes 小型 / 模板第 3 形态强预测 / 移动节点 schema 可能含未见枚举)

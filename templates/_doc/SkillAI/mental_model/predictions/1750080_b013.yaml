@@ -1,0 +1,46 @@
+---
+batch: B-013
+sample_id: "1750080"
+bucket: 175xxx
+role: train
+phase: predict_close_book
+predicted_at: 2026-05-10
+mental_model_version_used: v0.11
+---
+
+# 闭卷预测
+
+## 5 硬信号 + extractor
+
+- SkillNameEditor: None（filename 含"模板/伤害爆发/法宝吸血"）
+- SkillSubType: 0
+- IsTemplate顶层: False / 但 Mode E（双 0 fallback）/ ActiveRoot=0 / PassiveRoot=0
+- bullet=0, buff=0, template=False, register_event=False
+
+## v0.11 mental_model 段位归纳预测
+
+- 175xxx 段位字典：核心工具 / 通用流程模板段（175_0001 子弹通用命中 / 175_0102 连招 / 175_0024 位移）
+- 1750080 filename "模板/伤害/吸血" → 应是数值/伤害类工具模板
+- Mode E + 顶层 IsTemplate=False + ActiveRoot/PassiveRoot 都为 0 → **类别 3 内嵌 SkillConfigNode 之 fallback 流程容器** OR **类别 2 模板本体但顶层 IsTemplate=False** 之边缘案例
+- v0.6.1 cross-check 已知 Mode E 多为模板内入口 = 类别 2
+
+## 预测节点数
+
+- corpus_scan node_count = 22
+- corpus_scan top_classes: TSET_GET_ENTITY_ATTR_VALUE × 5 / TSET_GET_SKILL_TAG_VALUE × 5 / TSET_NUM_CALCULATE × 3 / TSET_FIRE_SKILL_EVENT × 2 / TSET_CURE × 1 / TSET_GET_MAX_VALUE × 1
+- **关键信号**：TSET_CURE 出现 1 次 + 有 SkillConfigNode（顶层有）+ 数值取值器多 → "伤害爆发/吸血"工具模板，把 ATTR/TAG 值送 NUM_CALCULATE 算治疗量后 CURE
+- 拓扑：[GET_ATTR / GET_TAG] × N → NUM_CALCULATE 算 → CURE / FIRE_EVENT
+
+## 触碰子系统
+
+- 模板系统（175xxx 工具段位）
+- 数值/SkillTag 系统（GET_ATTR + GET_TAG 多）
+- 治疗/Cure 单点
+
+## 仍不确定的地方
+
+- 175xxx 段位真的全是"工具/流程"吗？175_0001 = 子弹通用命中（mental_model 描述），但 1750080 是 CURE/吸血工具，与"子弹/HIT/DAMAGE"关键词差异较大
+
+## confidence
+
+- 中：175xxx 段位字典 BULLET/HIT/DAMAGE 关键词预测命中率不高

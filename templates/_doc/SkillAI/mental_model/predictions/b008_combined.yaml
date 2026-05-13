@@ -1,0 +1,364 @@
+batch_id: B-008
+date: 2026-05-10
+mode: 闭卷 PREDICT (GATE-MENTAL-IN)
+sample_count: 9
+mental_model_version: v0.8
+
+# v0.8 心智回想（GATE-MENTAL-IN）
+mental_model_recall:
+  涉及子系统:
+    - SkillEntry系统（v0.8 65.7% 编码 / 7 主轴 type1-6 + 2 罕见 type7-8 / Mode E 真技能 19 例 + Mode C 164 例 refs 完全重叠）
+    - Buff系统（v0.8 §6 闭环 / type3a/b 独立轴软化 / multi_overlap 14.7%）
+    - 模板系统（IsTemplate=True 优先决策 / SkillEditor 文件三分类）
+  本任务核心不变量:
+    - rule_4 强制：覆盖率主张必须 .py 可重现，type 升主轴必须脚本判定规则
+    - rule_3 v2 反向警告：互斥框架被反驳 → 软化为独立轴，不允许凭空复活旧概念
+    - 不变量 1（v0.8 注脚）：Mode E type1-6 主轴 + type7-8 罕见 + UNKNOWN 34.3%（70 例）
+  仍不确定:
+    - RQ-B8-1 心法 Mode C/E 切换条件（v0.6.1 §仍不确定 §8）
+    - RQ-B8-2 SubType=1101/1001 长尾形态（v0.6.1 §仍不确定 §7）
+    - RQ-B8-3 70 例 UNKNOWN 是否还能再编码 / 是否真"不可统一编码"
+
+# ============================================================================
+# 样本 1: 301903【金宗门】须弥功法
+# ============================================================================
+- sample_id: "301903"
+  date: 2026-05-10
+  reason: phase1_mode_c_subtype_701_small_refs
+
+  skill_config_metadata_seen:
+    SkillNameEditor: "须弥功法"
+    SkillSubType: 701
+    Icon: ""
+    EnhanceSkillBuffConfigID: 0  # 待开卷验证
+    SkillEffectPassiveExecuteInfo_nonzero: true  # Mode C 推断 passive≠0
+    Mode: "C_pure_passive"
+    refs_count: 2
+    flow_list_len: 0
+    notes: |
+      关键信号：路径含"宗门心法/废弃（老心法）"！这立刻提示极有可能是
+      **deprecated 老心法残留** —— 与 v0.7 D-603-R1 corpus 反例数据
+      "Mode C 164 例 refs 完全与 Mode E 19 重叠"匹配——极小 refs Mode C 极
+      可能是 deprecated 占位文件，而 Mode E 真活心法是 19 例"宗门心法"非废弃目录。
+      硬信号 5：SkillSubType=701（心法）+ refs=2 + 废弃目录 = 极简占位形态。
+
+  prediction:
+    estimated_node_count: 2  # refs=2 闭卷已知（含 SkillConfigNode 1 + 可能 1 个 BuffConfig 或 SkillTagsConfig）
+    topology_sketch: |
+      闭卷预测拓扑：
+      SkillConfigNode (passive root != 0) → BuffConfig 或 SkillTagsConfig 单节点
+      （废弃心法残留，passive_root 指向某 buff_id 但本文件不含那个 buff 实体）
+    expected_templates: []
+    touched_subsystems: [SkillEntry系统, Buff系统]
+    predicted_classification: "deprecated_old_xinfa_skeleton（type C 极简占位）"
+    rq_b8_1_hypothesis: |
+      Mode C 极小 refs 形态 = deprecated 老心法残留 + passive_root 引用外部 buff_id
+      （本文件不含 buff 实体，仅 SkillConfigNode 占位 + 1 个空容器）。
+      **Mode C/E 切换条件假说**：不是 refs 决定，而是
+      （a）passive_root_id 是否 != 0（C 的本质）
+      （b）是否有 SkillEffectFlowList 内部 flow（E 的本质）
+      —— corpus 反例的 refs 重叠是因为 Mode C 大量在 deprecated 占位，Mode E
+      19 例是真活技能，两者 refs 本就同区间。
+
+# ============================================================================
+# 样本 2: 303921【水宗门】鱼灵法
+# ============================================================================
+- sample_id: "303921"
+  date: 2026-05-10
+  reason: phase1_mode_c_subtype_701_small_refs
+
+  skill_config_metadata_seen:
+    SkillNameEditor: "鱼灵法"
+    SkillSubType: 701
+    Icon: "Buff/BF0000_i_01"  # buff 图标，强提示与 buff 关联
+    Mode: "C_pure_passive"
+    refs_count: 3
+    notes: |
+      与样本 1 类似——废弃目录 + Mode C + 小 refs；Icon 是"Buff/BF0000"
+      额外提示该心法以"buff 注册"为主体（passive 入口绑定到某 buff_id）。
+
+  prediction:
+    estimated_node_count: 3
+    topology_sketch: |
+      SkillConfigNode (passive root) → BuffConfig (内嵌 buff 实体) → 1 节点尾
+      （3 节点中 1 是 SkillConfig 1 是 Buff 1 是某 effect/tag）
+    expected_templates: []
+    touched_subsystems: [SkillEntry系统, Buff系统]
+    predicted_classification: "deprecated_old_xinfa_with_buff_skeleton"
+
+# ============================================================================
+# 样本 3: 720001 灵宠光环-猪1（对照非废弃路径）
+# ============================================================================
+- sample_id: "720001"
+  date: 2026-05-10
+  reason: phase1_mode_c_subtype_701_lingchong_lightenv
+
+  skill_config_metadata_seen:
+    SkillNameEditor: "灵宠之力"
+    SkillSubType: 701
+    Icon: ""
+    Mode: "C_pure_passive"
+    refs_count: 3
+    flow_list_len: 0
+    notes: |
+      路径：灵宠心法/SkillGraph_720001_灵宠光环-猪1.json
+      **非废弃目录**！与样本 1/2 形成对照。SkillSubType=701 心法 + 灵宠光环
+      —— 灵宠系统普遍极简（learning_log §1.2 灵宠心法 51 个 / 节点数 p50=3）
+      = 极简光环型 + 永久挂 buff 模式。
+
+  prediction:
+    estimated_node_count: 3
+    topology_sketch: |
+      SkillConfigNode (passive_root → BuffConfig_id) → BuffConfig (光环效果)
+      → 可能 1 个 effect_list 或 attr_modify
+    expected_templates: []
+    touched_subsystems: [SkillEntry系统, Buff系统]
+    predicted_classification: "lingchong_aura_xinfa（极简光环型）"
+    rq_b8_1_hypothesis_continued: |
+      非废弃 Mode C 极简心法 = 灵宠/坐骑/装备光环型。
+      与样本 1/2 deprecated 残留不同，720xxx 是活的极简光环（生产环境在用）。
+      → 修正样本 1 假说：Mode C 极小 refs 不限于 deprecated，**根本是"被动绑 buff"
+      入口模式**，passive_root != 0 直接绑外部 buff_id 是核心范式。
+      flow 不在本文件，由 buff 触发器 / SkillEvent 驱动（在外部）。
+
+# ============================================================================
+# 样本 4: 350011 神位技能-1（SubType=1101 长尾）
+# ============================================================================
+- sample_id: "350011"
+  date: 2026-05-10
+  reason: phase2_subtype_1101_long_tail
+
+  skill_config_metadata_seen:
+    SkillNameEditor: "神位技能-1"
+    SkillSubType: 1101
+    Mode: "E_dual_zero_fallback"
+    refs_count: 1
+    flow_list_len: 0
+    notes: |
+      **极简至 refs=1**！整个文件仅 1 个 RefId（SkillConfigNode 自己）。
+      路径"测试/SkillGraph_350011_神位技能测试.json" + 名字"神位技能-1"
+      → 极有可能是测试占位 / 待填充骨架文件（IsTemplate 待验，可能 false）
+      SubType=1101 long-tail 候选；corpus 仅 4 例其中 2 例 refs=1（350011/350012）
+
+  prediction:
+    estimated_node_count: 1
+    topology_sketch: |
+      仅 SkillConfigNode 1 个，无任何后续节点（极端占位）
+    expected_templates: []
+    touched_subsystems: [SkillEntry系统]
+    predicted_classification: "test_placeholder_subtype_1101 / type1_pure_empty_shell 候选"
+    rq_b8_2_partial_answer: |
+      SubType=1101 形态可能分两类：
+      （a）"神位"测试占位（350011/350012 refs=1，测试目录）
+      （b）"化身"实战连招（309000 refs=24 / 309001 refs=73，Mode A 主动型）
+      → SubType=1101 不是单一形态，**像 SubType=0 一样跨形态泛用**。
+
+# ============================================================================
+# 样本 5: 1860213【BUFF】训练场无敌buff
+# ============================================================================
+- sample_id: "1860213"
+  date: 2026-05-10
+  reason: phase3_unknown_morphology_min_buff_meta
+
+  skill_config_metadata_seen:
+    SkillNameEditor: "训练场无敌buff" (推断)
+    SkillSubType: 0
+    Mode: "E_dual_zero_fallback"
+    refs_count: 3
+    flow_list_len: 0
+    flags: {has_buff: true, buff_with_effect_list: false, has_reg_event: false}
+    notes: |
+      已知 flags：has_buff=true 但 buff_with_effect_list=false 且
+      has_reg_event=false —— 既不是 type3a（buff 内部 effect_list 字段）
+      也不是 type3b（外驱 REGISTER_SKILL_EVENT），属"BUFF 极小元数据形态"。
+      路径"BUFF/" + 名字"训练场无敌" → 测试用永久无敌效果。
+
+  prediction:
+    estimated_node_count: 3
+    topology_sketch: |
+      SkillConfigNode → BuffConfigNode (无 effect_list 字段，纯属性 modify 标记)
+      → 可能 1 个 attr_modify 类节点
+    expected_templates: []
+    touched_subsystems: [SkillEntry系统, Buff系统]
+    predicted_classification: "type9_candidate_buff_meta_only（候选新主轴：BUFF 元数据型）"
+    rq_b8_3_hypothesis: |
+      70 例 UNKNOWN 中可能藏一类"BUFF 元数据型"（type9 候选）：
+      has_buff=true + buff_with_effect_list=false + has_reg_event=false + refs ≤ 5
+      = 仅做 buff 标识 + 属性 modify，不挂 effect_list 也不外驱事件。
+      corpus 中类似形态可能 5-15 例（min_buff_meta 组 2 例 + 部分 small_no_signals
+      含 buff 子集）。
+
+# ============================================================================
+# 样本 6: 940068 【天命气运】伙伴同心
+# ============================================================================
+- sample_id: "940068"
+  date: 2026-05-10
+  reason: phase3_unknown_morphology_min_buff_no_drive
+
+  skill_config_metadata_seen:
+    SkillNameEditor: "伙伴同心" (推断)
+    SkillSubType: 0
+    Mode: "E_dual_zero_fallback"
+    refs_count: 9
+    flow_list_len: 0
+    flags: {has_buff: true, buff_with_effect_list: false, has_reg_event: false}
+    notes: |
+      路径：特殊玩法/论剑玩法/天命气运/SkillGraph_146000835
+      标题"天命气运 / 伙伴同心" → 玩法专属增益 buff
+      flags 与 1860213 类似（has_buff 单独）但 refs=9 中等
+      → 同 type9 候选但更复杂，可能含若干 SkillTag 或属性 modify
+
+  prediction:
+    estimated_node_count: 9
+    topology_sketch: |
+      SkillConfigNode → BuffConfigNode → 数个 attr_modify / SkillTag get-modify
+      （玩法增益型，无外驱事件，挂上 buff 立即生效）
+    expected_templates: []
+    touched_subsystems: [SkillEntry系统, Buff系统, SkillTag 系统]
+    predicted_classification: "type9_candidate_buff_meta_with_attrs（type9 中等变体）"
+
+# ============================================================================
+# 样本 7: 940058 【天命气运】九转还魂丹
+# ============================================================================
+- sample_id: "940058"
+  date: 2026-05-10
+  reason: phase3_unknown_morphology_small_no_signals
+
+  skill_config_metadata_seen:
+    SkillNameEditor: "九转还魂丹" (推断)
+    SkillSubType: 0
+    Mode: "E_dual_zero_fallback"
+    refs_count: 3
+    flow_list_len: 0
+    flags: {has_buff: false, has_tag_cfg: false, has_tmpl_run: false, has_reg_event: false, has_bullet: false, has_damage: false, "全 0"}
+    notes: |
+      路径：特殊玩法/论剑玩法/天命气运/SkillGraph_146000838
+      **所有 flag 都是 0/false** —— 这是真正的 "全空 + 极小 refs" UNKNOWN
+      可能是：deprecated 残留 / 测试骨架 / 仅靠模板运行时拼装的极简文件
+      名字"九转还魂丹" 可能是道具效果调用模板（玩法）
+
+  prediction:
+    estimated_node_count: 3
+    topology_sketch: |
+      SkillConfigNode + 2 个不识别的低层节点（可能 RefConfigBaseNode / 数据容器）
+    expected_templates: []
+    touched_subsystems: [SkillEntry系统]
+    predicted_classification: "type10_candidate_pure_meta_placeholder（候选新形态：纯元数据占位）"
+    rq_b8_3_hypothesis_continued: |
+      70 例 UNKNOWN 中可能再藏一类 "type10 纯元数据占位"：
+      所有 flag 全 0 + refs ≤ 5 + Mode E + SubType=0 = 纯文件占位 / 模板运行时拼装
+      corpus small_no_signals 组 23 例都是这种候选（虽然组内可能再分子型）。
+
+# ============================================================================
+# 样本 8: 1750104【测试】玩家训练场关卡效果
+# ============================================================================
+- sample_id: "1750104"
+  date: 2026-05-10
+  reason: phase3_unknown_morphology_mid_refs_unknown
+
+  skill_config_metadata_seen:
+    SkillNameEditor: "玩家训练场关卡效果" (推断)
+    SkillSubType: 0
+    Mode: "E_dual_zero_fallback"
+    refs_count: 13
+    flow_list_len: 0
+    flags: {has_buff: false, has_tmpl_run: false, has_reg_event: true, has_damage: false, "其他全 0"}
+    notes: |
+      路径"测试/SkillGraph_1750104【测试】玩家训练场关卡效果"
+      关键 flag：has_reg_event=true（有 REGISTER_SKILL_EVENT）但其他全 0
+      → 形态 = 训练场环境效果（无 buff / 无伤害 / 无模板运行 / 仅注册事件监听）
+      预测：纯事件订阅型骨架（被动监听玩家进入训练场触发某些行为）
+
+  prediction:
+    estimated_node_count: 13
+    topology_sketch: |
+      SkillConfigNode → 数个 TSET_REGISTER_SKILL_EVENT → 数个事件 callback 容器
+      （监听某事件 → 触发某副作用，但无伤害无 buff 是纯环境事件链）
+    expected_templates: []
+    touched_subsystems: [SkillEntry系统, SkillEvent 系统]
+    predicted_classification: "type11_candidate_event_only_listener（候选：纯事件订阅型）"
+    rq_b8_3_hypothesis_continued: |
+      type11 候选：has_reg_event=true 单独命中 + 其他全 0 + refs 中等
+      = 纯事件订阅监听（无 buff 包裹 ≠ type3b，无 effect 实体）
+      corpus 类似可能 3-8 例（mid_refs_unknown 组中含 reg_event 的子集）。
+
+# ============================================================================
+# 样本 9: 1290141【模板】抛物线锁敌目标
+# ============================================================================
+- sample_id: "1290141"
+  date: 2026-05-10
+  reason: phase3_unknown_morphology_large_refs_unknown
+
+  skill_config_metadata_seen:
+    SkillNameEditor: "抛物线锁敌目标" (推断)
+    SkillSubType: 0
+    Mode: "E_dual_zero_fallback"
+    refs_count: 121  # 大型！
+    flow_list_len: 0
+    flags: {has_buff: false, modify_attr_count: 8, num_calculate_count: 21}
+    notes: |
+      路径：通用模板/属性/SkillGraph_1290141_【模板】抛物线锁敌目标
+      ⚠️ **重要风险**：路径含"通用模板/属性/" + 名字"【模板】"
+      → 极有可能是 IsTemplate=True 模板本体，不是技能！
+      现有 _skill_config_extractor.py mode 判定基于 active/passive 字段，
+      模板本体也可能 mode=E（active=passive=0）。
+      modify_attr_count=8 + num_calculate_count=21 总计 29，刚好低于 type7
+      启发式阈值 30，所以未命中 type7。
+      若是 IsTemplate=True，应被排除（recode_full_scan.py 已 skip is_template_top）
+      但此例进入 corpus 说明 IsTemplate=False 或解析问题。
+
+  prediction:
+    estimated_node_count: 121
+    topology_sketch: |
+      若是真技能：大型属性计算骨架（修正后接近 type7 阈值）
+      若 IsTemplate=True：应排除，是模板系统问题
+    expected_templates: []
+    touched_subsystems: [SkillEntry系统, 模板系统]
+    predicted_classification: "type7_attribute_batch_calculation 边缘候选 OR template_body_misclassified"
+    rq_b8_3_hypothesis_continued: |
+      type7 阈值 30 可能略高，1290141 含 8+21=29 几乎踩线。
+      若开卷 IsTemplate=True → 工具链 _skill_config_extractor.py 漏标 bug
+      （mode=E 路径未检 IsTemplate）；若 IsTemplate=False → type7 阈值可松到 25-29
+
+# ============================================================================
+# 4 个研究问题的闭卷预测答案（PREDICT 阶段假说）
+# ============================================================================
+research_questions_predict:
+  RQ-B8-1_mode_c_e_switch_condition:
+    hypothesis: |
+      Mode C/E 切换不由 refs 决定，由两个独立信号决定：
+      （a）passive_root != 0 → Mode C（被动入口绑外部 buff_id）
+      （b）SkillEffectFlowList_len > 0 → Mode E（顶层 fall-back flow）
+      v0.7 D-603-R1 揭示 corpus refs 完全重叠的真因：
+      - Mode C 164 例大量是 deprecated 老心法（refs 2-7 极小占位）+ 灵宠光环
+        （活的极简光环 refs 3）+ 主动心法被动副作用（中等 refs）
+      - Mode E 19 例是真活技能（refs 跨度大）
+      → refs 是表象，Mode 由 active/passive 字段定义本就互斥（不是切换）
+
+  RQ-B8-2_subtype_long_tail:
+    hypothesis: |
+      SubType=1101 跨形态泛用（化身实战 vs 测试占位）→ 不是单一形态
+      SubType=1001 corpus 仅 1 例（B-007 940107）→ 真长尾 / 可能 deprecated
+      → SubType 长尾本身不是问题，每个 SubType 内部仍按 Mode + flags 分形态
+
+  RQ-B8-3_unknown_morphology_extension:
+    hypothesis: |
+      70 例 UNKNOWN 可能再编码出 3 类候选：
+      - type9_buff_meta_only（has_buff=true + 无驱动 + refs ≤ 15）
+        预估 corpus 5-15 例（min_buff_meta + min_buff_no_drive 组）
+      - type10_pure_placeholder（全 flag 0 + refs ≤ 5）
+        预估 corpus 15-23 例（small_no_signals 组）
+      - type11_event_only_listener（has_reg_event 单独 + 其他全 0）
+        预估 corpus 3-8 例（mid_refs_unknown 组中 reg_event 子集）
+      合计可再编码 23-46 例 → 覆盖率 65.7% → 77-88%（保守 70%-80%）
+      但需 rule_4 严格：必须 .py 可重现 + 真新增字段判定
+
+  RQ-B8-4_candidate_05_overall_convergence:
+    hypothesis: |
+      candidate-0.5 三批（B-006 6 + B-007 9 + B-008 9 = 24 样本）调研 Mode E
+      真技能 + Mode C 极小 refs，预期画像：
+      - SkillEntry §0 决策树扩展到 9-11 类（type1-6 主轴 + type7-8 罕见 + type9-11 候选）
+      - Mode C/E 切换条件答案落地（D-603-R1 闭环）
+      - 编码覆盖率 65.7% → 75-85%（保守目标 70%）
+      若 B-008 验证 type9-11 候选成立 + Mode C/E 答案落地 → candidate-0.5 收尾
+      若 type9-11 部分失败 → candidate-1 续作（Mode B 双 root + Mode A 主动技调研）

@@ -1,0 +1,22 @@
+sample_id: 30121100
+filename: SkillGraph_30121100【金宗门】地阶功法2-招式.json
+subcat: 宗门-金 / 金宗门技能
+nodes: 38
+segment_guess: 30121_5d_金主动_地阶功法2_招式
+closed_book_inferences:
+  - master_flag: 0 (宗门主动 / 不是模板)
+  - structure: 38 nodes 中等 / 标准主动技能形态 / 推断 SCN + AR + 多 BUFF/伤害节点 / 可能含子弹 CREATE_BULLET
+  - SubClass: SCN + 主动 AR (D-2501 225xxxxxxx 9d 跨 AR/PR 子命名空间开放矩阵 / 期待 AR=225xxxxxxx)
+  - SC=True / NSC=False
+  - ConfigJson.SkillMainType / SubType: 非 0 (主动技 / 推断 SubType=1 主动)
+  - ConfigJson.ElementType: 1 (金 / D-3801 ET 完整枚举 / 1=金 5/5 实证)
+  - 段位号系 (AR): 推断 225xxxxxxx 9d (D-2501 enforce 第 4 批 / 30121xxx 金主动 9d 225 段位号系一致)
+  - filename_pattern: 【金宗门】地阶功法2-招式 → 中文宗门 + 段位 + 名称 + 招式
+deltas_touched_predicted:
+  - D-2401 (master flag): expect 0 (主动技)
+  - D-2501 (225 段位号系跨 AR/PR 开放矩阵): expect AR=225xxxxxxx 9d (强续累积 / B-044 sample_3 30121001 已加固 / 30121100 同号系族近邻 / +1 例预测)
+  - D-3801 (ET 完整枚举 6/8): expect ET=1 (金) / 已实证 / 不增加新 ET
+  - D-4001 (44 段位号系跨子号系开放矩阵): N/A (无 44xxx ref / 30121xxx 段位)
+  - D-4006 (path ≠ ET 解耦): expect path=金 + ET=1 = 一致 (5/5 enforce 续累积)
+  - D-5601-B (9d 220xxxxxxx ref): low prob (30121100 已在 225 子命名空间 / 不进 220)
+predicted_sample_score_self: 0.80 (金主动 38 nodes 标准形态 + D-2501 225 段位号系强预测)

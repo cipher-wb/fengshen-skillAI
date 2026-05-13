@@ -1,0 +1,45 @@
+# Dependencies
+node_modules/
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Build artifacts
+dist/
+build/
+*.tgz
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Test fixtures (scaffold output)
+test/fixtures/*/.claude/
+test/fixtures/*/doc/SkillAI/
+test/fixtures/*/CLAUDE.local.md
+test/fixtures/*/fengshen.config.json
+test/.tmp/
+test/output/
+
+# Coverage / reports
+coverage/
+.nyc_output/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Local env
+.env
+.env.local
+
+# Release staging (本地准备 release tar.gz 用 / 不进 git)
+.release-staging/
+fengshen-learning-history-*.tar.gz
+fengshen-learning-history-*.sha256

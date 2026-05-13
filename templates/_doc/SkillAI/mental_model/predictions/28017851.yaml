@@ -1,0 +1,52 @@
+sample_id: "28017851"
+date: "2026-05-10"
+batch: B-005
+focus: "2B: 280xxx caller closed-book test (大型剧情战斗模板，95 RUN_TEMPL)"
+
+skill_config_metadata_seen:
+  SkillNameEditor: "?"
+  SkillSubType: null  # 与 28023113 同状况
+  Icon: null
+  EnhanceSkillBuffConfigID: null
+  SkillEffectExecuteInfo_root: null
+  SkillEffectPassiveExecuteInfo_root: null
+  SkillEffectFlowList_len: 0
+  IndicatorType: null
+  notes: |
+    与 28023113 同：无 SkillConfigNode（即"非技能"流程编排模板），但规模翻倍（95 RUN_TEMPL，342 nodes）。
+    路径："战斗流程/SkillGraph_28017851_【剧情战斗】战斗4000361_第二版新手岛主线_第六场.json"
+    文件名"剧情战斗_战斗4000361_第二版新手岛主线_第六场" = 单场剧情战斗的"剧本"。
+    与 28023113（拜宗门前体验）同源，但是更大规模的剧情场。
+    顶部 top template: 28003147 (×30) + 28017974 (×22) + 28018656 (×11) ——
+    高频 ID 28003147 极有可能是"战斗事件 / 出怪 / 阶段切换"通用模板（待 READ 验证）。
+
+prediction:
+  estimated_node_count: 342  # corpus_scan
+  topology_sketch: |
+    1 root ORDER → 大量 RUN_TEMPL × 95（基本全是 280xxx）
+    DELAY/REPEAT 编排时间轴
+    可能含 IsTemplate=true 顶层（自身也作为可被调用的"剧情战斗模板"）
+    无 SkillConfigNode + 无 Active/Passive
+  expected_templates: [28003147, 28017974, 28018656]  # top 3 高频
+  expected_template_segments: ["280xxx × 94", "300xxx × 1"]  # 已扫确认
+  touched_subsystems:
+    - 模板系统  # 280xxx 段位 + 模板复用模式（28003147 × 30 复用次数极高）
+    - 控制流子系统  # ORDER + DELAY/REPEAT 编排
+    - "（同 28023113，无典型技能子系统）"
+
+  entry_mode_prediction: "Z (非技能：与 28023113 同模式)"
+  entry_mode_rationale: |
+    若 28023113 已确认是"非技能流程编排模板"，本样本同源同模式（剧情战斗目录相同）。
+    本批次 2/2 样本应**一致命中"非技能模板"模式 Z**——这是 v0.5 SkillEntry 5 类入口模式
+    的边界外候选。
+
+  expected_quality:
+    sample_score_target: 0.70+
+    high_risk_dimensions: ["子系统识别", "拓扑结构（95 RUN_TEMPL 大型编排）"]
+
+  # 与 28023113 联合发现的延伸假设
+  expected_280xxx_semantics: |
+    若 2/2 280xxx 样本均印证"非技能模板"假设，则 D-502 提案核心：
+    - 模板系统 §段位字典 280xxx 行从"怪物模板段（最多）"重写为"流程编排模板段（剧情战斗/关卡/怪物）"
+    - 模板系统 新增 §"模板调用模板"模式（templates calling templates）
+    - SkillEntry 系统加注 §0 "非技能文件识别清单"（没有 SkillConfigNode 的文件不属于 5 类入口模式）

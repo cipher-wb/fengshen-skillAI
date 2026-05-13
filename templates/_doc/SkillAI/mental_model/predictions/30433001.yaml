@@ -1,0 +1,61 @@
+sample_id: 30433001
+date: 2026-05-09
+batch: B-002
+
+skill_config_metadata_seen:
+  SkillNameEditor: "潜行水底"
+  SkillSubType: 901
+  Icon: "(空)"
+  EnhanceSkillBuffConfigID: 0
+  SkillEffectPassiveExecuteInfo_nonzero: false
+  CdType: 0
+  notes: |
+    SkillSubType=901 — **新值！v0.2 仅认识 102（奇术）**。901 推测是水属性专用身法子类。
+    CdType=0 — **再一个新 CdType 值**（v0.2 仅识别 3/4/5；本批已发现 1/0 两个新值）。
+    EnhanceSkillBuffConfigID=0 → 非心法。
+    Active=44014223 / Passive=0 → 纯 Active，与 30215001 / 30222002 一致（奇术/身法多无 Passive）。
+
+prediction:
+  reasoning_summary: |
+    本样本与 30215001 (土奔岩突进) 高度相似——都有 ADD_FORCE-like 位移机制 + 实体碰撞控制。
+    特殊：SET_ENTITY_COLLISION × 4（多于 30215001 的 ×2），可能含"分阶段开关碰撞"（如阶段1=关，阶段2=半关，阶段3=开）。
+    APPLY_ENTITY_EFFECT × 2（与 hold-out 30222002 落木遁形的"主角变透明"机制一致）— **预测：本样本也是隐身/视觉效果型身法**。
+    "潜行水底"语义：暗示**潜入水中（视觉沉入 + 不可被攻击）+ 期间释放/移动 + 浮出**。
+
+    citing [模板系统.md] 教训 1：root = ORDER + IsTpl=False
+    citing [Buff系统.md] 反直觉 3 修订：身法/奇术因技能而异
+    citing B-002 教训 3 (实体碰撞)：COLL_OFF → 位移 → COLL_ON 模式
+
+  estimated_root_class: TSET_ORDER_EXECUTE
+  estimated_node_count: 57
+  topology_sketch: |
+    flowchart LR
+      ROOT[ORDER root ID=44014223] --> ANIM[PLAY_ROLE_ANIM 潜入动作]
+      ROOT --> COLL_OFF1[SET_COLL=0 关碰撞]
+      ROOT --> APPLY1[APPLY_ENTITY_EFFECT 入水变透明]
+      ROOT --> CREATE_BULLET1[CREATE_BULLET 水波纹]
+      ROOT --> ADD_BUFF[ADD_BUFF × 3 潜行 buff]
+      ROOT --> DELAY[DELAY 潜行时长]
+      DELAY --> APPLY2[APPLY_ENTITY_EFFECT 浮出可见]
+      DELAY --> COLL_ON[SET_COLL=1 恢复]
+      DELAY --> CREATE_BULLET2[CREATE_BULLET 浮出水波]
+      ROOT --> RUN_TEMPL[RUN_TEMPL × 3]
+
+  expected_subsystems_touched:
+    - 控制流子系统 (ORDER × 8 + DELAY × 2 + REPEAT × 1)
+    - 模板系统 (RUN_TEMPL × 3)
+    - SkillTag 系统 (GET × 1 + MOD × 1)
+    - Buff 系统 (ADD × 3 + ConfigNode × 3 — buff 串联强)
+    - 实体碰撞与可见性 (SET_COLL × 4 + APPLY_ENTITY_EFFECT × 2 — 子系统建页核心样本)
+    - 实体属性 (MOD_ATTR × 4 + GET_ATTR × 4 + ADD_ATTR × 1 — 改自身属性)
+    - 实体生命 (REMOVE_ENTITY_AI × 1 + DESTROY_ENTITY × 1 + CREATE_ROLE × 1)
+    - SkillEvent 系统 (REG × 1)
+    - 子弹/触发器 (CREATE_BULLET × 2 + BulletConfig × 2 + CIRCLE × 1)
+
+  expected_F4_F6_strong_evidence: |
+    本样本是 [实体碰撞与可见性.md] 子系统建页的**最强证据样本**（4 SET_COLL + 2 APPLY_ENTITY_EFFECT）。
+    比 30215001 (2 COLL) 更完整，比 30222002 (4 COLL + APPLY 1) 也更系统。
+
+  expected_new_finding_F8: |
+    SkillSubType 字典扩充 — v0.2 仅识别 102（奇术）。本样本 901 暗示 SubType 范围更广，
+    可能 9xx 段是水属性专用 / 8xx 段是火属性专用。需后续样本验证。

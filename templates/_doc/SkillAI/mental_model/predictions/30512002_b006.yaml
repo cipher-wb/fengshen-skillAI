@@ -1,0 +1,46 @@
+sample_id: 30512002
+batch: B-006
+sample_name: 【木宗门】密卷-长青术
+predict_date: 2026-05-10
+mode_hardconfirmed: E_dual_zero_fallback
+
+skill_config_metadata_seen:
+  SkillID: 30512002
+  SkillSubType: 701
+  CdType: 0
+  EnhanceID: 0
+  ActiveRoot: 0
+  PassiveRoot: 0
+  SkillEffectFlowList_len: 0
+  IndicatorType: 0
+  refs_count: 1
+  filename_hint: "宗门心法/木宗门心法 / '密卷-长青术' / SubType=701（被动响应型心法）"
+
+mental_model_in_state:
+  关于_SubType_701:
+    已学认知: "已学 3 例（30510007 / 30525001 / 30532001）全为 Mode C 纯 Passive — 'SubType=701 → Mode C' 是已学样本归纳但不是必然。"
+    corpus_全集: "v0.6.1 R2 corpus_full_scan 实测 SubType=701 内 Mode E 19 例 — 30512002 是其中之一。"
+  关于心法_Mode_C_vs_E_切换条件_RQ3:
+    已学 Mode C 心法范式: "30510007 无伤诀 / 30525001 / 30532001 青藤之力 — 都有 Passive 入口指向 Passive flow（含完整逻辑节点链：Passive root → SkillTag 操作 → 计算 → Apply/Output）。refs_count 较大（推测 10-30+）。"
+    Mode E 心法对照: "30512002 refs_count=1 — 这是关键差异。Mode C 心法 refs_count 必然 ≥ 5（要装下 Passive 完整流程）。30512002 refs=1 = 文件几乎只含 SkillConfigNode 自身。"
+    RQ3 假设: "Mode C 心法 = '在 SkillEditor 内画完整逻辑'；Mode E 心法 = '逻辑不在 SkillGraph 内，依赖外部驱动'。切换条件可能是：心法是否需要内置自定义逻辑（Mode C 复杂自定义） vs 仅作为标识 + 外部 Buff 表驱动（Mode E）。"
+
+prediction:
+  node_count_estimate:
+    range: [1, 2]
+    rationale: "refs_count=1 = 几乎只有 SkillConfigNode 自身。极可能 0 个其他节点。"
+  topology_shape: "empty_marker — 文件作为 SkillID 占位符 + SubType=701 标识，无任何内部 flow。完全依赖外部驱动。"
+  真实入口机制_RQ1猜测:
+    候选优先级: "1. 外部召唤入口（最可能 95%）— Excel 表格 SkillXinfaConfig.xlsx 或类似表驱动，技能 ID 仅作为引用；2. SkillEvent callback（次可能 4%）— 全局事件订阅但效果在外部代码定义；3. SerializedNodes 内嵌（≤ 1%）— 显然不可能因 refs=1。"
+    关键洞察: "30512002 是'空壳心法' — Mode E 在 corpus 165 例中至少有一类 = 极简空壳（依赖表格 / Excel 驱动）"
+  4子类_RQ2立场: "30512002 不属于 v0.4-v0.6 列举的 4 子类（法宝/装备型被动 / 法宝召唤激发 / 被动响应型心法 / 主动型长 CD 大招）— '被动响应型心法'子类原本对应的是有 Passive 入口的心法（实际是 Mode C），不是这种空壳心法。**预测 4 子类框架既不完整也不准确 — 需重新归纳**。"
+  涉及子系统:
+    - SkillEntry 系统（核心 — Mode E 真技能空壳子类）
+    - 待新建子系统页：心法系统（confidence: 待建）— 心法 Mode C vs E 切换是核心问题
+  闭卷预测_RQ3立场: "Mode C/E 切换条件 = 心法是否需要自定义逻辑。Mode C = 自定义心法逻辑写在 SkillGraph；Mode E = 依赖表格 + 外部 Apply 通用 Buff/标签。"
+  闭卷预测_RQ4立场: 不适用（非 1101/1001）
+
+self_assessment_pre_open:
+  conviction_level: 高（85%）
+  最大不确定: "refs=1 是否意味着真的就 1 个 SkillConfigNode？还是 SkillConfigNode + 0-2 个隐藏的元数据节点？"
+  核心赌注: "refs=1 极小 = 必然依赖外部驱动 — 这是 RQ1 候选 1（SerializedNodes 内嵌）的强反证。"

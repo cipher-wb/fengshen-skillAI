@@ -1,0 +1,48 @@
+sample_id: "400019"
+date: "2026-05-10"
+batch: B-005
+focus: "1C: SubType=501 Mode C closed-book test (drift fix)"
+
+skill_config_metadata_seen:
+  SkillNameEditor: "纹章叠刃刺"  # 可读
+  SkillSubType: 501
+  Icon: "(empty)"
+  EnhanceSkillBuffConfigID: 0
+  SkillEffectExecuteInfo_root: 0
+  SkillEffectPassiveExecuteInfo_root: 44001662  # ⭐ 非 0
+  SkillEffectFlowList_len: 0
+  IndicatorType: 0
+  notes: |
+    Active=0 / Passive=44001662 / SubType=501 → **Mode C 纯 Passive！**
+    法宝目录 + SubType=501 + RUN_TEMPL=0 (corpus_scan 扫描确认) + has_register_event + has_skill_event_callback。
+    **drift 关键测试点**：v0.5 已学的 400001 (魔气妖婴 SubType=501) 是 Mode E 双 0 入口；
+    本样本 400019 同 SubType=501 但 Passive≠0 → Mode C。
+    再次印证 SubType ≠ 入口模式。
+
+prediction:
+  estimated_node_count: 141  # corpus_scan 已知
+  topology_sketch: |
+    单 root（Passive=44001662）→ ORDER →
+      [REGISTER_SKILL_EVENT × N]（has_register_event = True）
+      → callback 内部 [SkillTag 检查 / Buff 应用 / 元素属性逻辑]
+      可能 0 RUN_TEMPL（141 nodes 全自写不调模板，也很反直觉，但 corpus_scan 已确认）
+    法宝/装备型被动 + 事件驱动型，与 400001 区别：400001 用 buff 时间轴自驱（Mode E），
+    400019 用 SkillEvent callback 链自驱（Mode C）—— 同 SubType=501 两种实现路径
+  expected_templates: []  # corpus_scan 显示 0 RUN_TEMPL，全自写
+  touched_subsystems:
+    - SkillEntry  # Mode C 验证
+    - SkillEvent  # 主驱动机制
+    - Buff
+    - SkillTag
+
+  entry_mode_prediction: "C"  # ⭐
+  entry_mode_rationale: |
+    Active=0 / Passive=44001662 → 模式 C 纯 Passive（v0.5 不变量 1）。
+    与 400001 (Mode E 双 0) 区别在 Passive 是否为 0：
+    - 400001: Active=0 + Passive=0 → Mode E (fall-back 入口)
+    - 400019: Active=0 + Passive≠0 → Mode C (Passive 入口驱动)
+    SubType=501 内同时存在 Mode C / Mode E，与 SubType=701/303 三模式镜像。
+
+  expected_quality:
+    sample_score_target: 0.80+  # 0 RUN_TEMPL + 141 nodes 全自写，模板维度为 NA
+    high_risk_dimensions: ["拓扑（141 nodes 全自写不易准确预测节点子结构）"]

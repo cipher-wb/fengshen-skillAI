@@ -1,0 +1,44 @@
+---
+batch: B-013
+sample_id: "30621006"
+bucket: 30xxxxxxx_8d
+role: holdout
+phase: predict_close_book
+predicted_at: 2026-05-10
+mental_model_version_used: v0.11
+---
+
+# 闭卷预测
+
+## 5 硬信号 + extractor
+
+- SkillNameEditor: None（filename 含"金系秘籍套装-虎啸剑神-蓄力"）
+- SkillSubType: 301 → 待查 SubType 字典（已知 303=法宝 / 301=?）
+- IsTemplate顶层: False
+- ActiveRoot=225005343（22xxx 段位真技能内部 SkillEffect ID 命名空间，v0.11 D-1202-R1 注脚）/ PassiveRoot=0 → Mode A 纯主动
+- bullet=5, buff=0, template_run=True, register_event=False
+- corpus_scan top_classes: TSET_RUN_SKILL_EFFECT_TEMPLATE × 7 / TSET_DELAY_EXECUTE × 7 / ModelConfigNode × 7 / TSET_ORDER_EXECUTE × 6 / TSET_PLAY_ROLE_ANIM × 6 / TSET_CREATE_BULLET × 5 / BulletConfigNode × 5 / TSET_CREATE_EFFECT × 4
+
+## v0.11 mental_model 形态预测（D-1201-R1 30xxxxxxx_8d 段位 candidate pending 加固）
+
+- 30xxxxxxx_8d 段位 v0.11 实证：节点数 23-145（6 倍跨度）/ Mode A/C 双轨 / Bullet 0-10 / Template 1-18
+- 30621006 node_count=54（中位区）+ Mode A + bullet=5 + RUN_TEMPL=7 → **典型宗门技能装配车间形态**
+- filename "蓄力" → 推测含蓄势/Charge 阶段 + DELAY_EXECUTE × 7 联动
+- 拓扑预测：ActiveRoot → ORDER × 6 → DELAY × 7 → CREATE_BULLET × 5 + RUN_TEMPL × 7（命中链）+ PLAY_ANIM × 6（动画）+ MODEL × 7（特效模型）
+
+## 触碰子系统
+
+- 模板系统（RUN_TEMPL × 7 / 推测含 19xxx 三联包）
+- SkillEntry 系统（Mode A / SubType=301）
+- 子弹系统（5 弹）
+- 时间轴（DELAY × 7 + ORDER × 6 编排）
+
+## 关键发现 / 加固 D-1201-R1
+
+- 30621006 为 D-1201-R1 §仍不确定 §8.X 30xxxxxxx_8d 加固第 7 例（B-012 已 6 例）
+- 节点数 54 / Mode A / Bullet=5 / Template=7 落在 v0.11 实证区间内
+- "302 / 304 / 306 系" 段位（B-012 全是 301/302/305）首次扩大到 306 系 → 加固"段位前缀不主导形态" hedge
+
+## confidence
+
+- 中：D-1201-R1 加固单点（rule_3 v2 单证不升字典）

@@ -1,0 +1,31 @@
+meta:
+  ir_version: '1.0'
+  skill_id: 30225001
+  skill_name: 土宗门地阶奇术1
+  author: decompiled
+skill:
+  element: 土
+  main_type: 功法技
+  sub_type: 奇术
+  damage_type: 直接伤害
+  cd_type: 连招且技能结束后CD
+  cd_frames: 240
+  range: 600
+  ai_range: 600
+  buffer_frame: 15
+  base_duration: 90
+  xinfa_energy: 100
+  skill_name_text: 土宗门地阶奇术1
+  skill_desc_text: 向前冲刺并在路径上留下多个土柱。
+flow:
+- raw_node:
+    cls: TSET_RUN_SKILL_EFFECT_TEMPLATE
+    params:
+    - entity:主体
+    - entity:目标
+    - 38000289
+    - 44016232
+    - 120
+    - 44016720
+    - 0
+    desc: SkillGraph_175_0102【模板】技能连招(2段).json

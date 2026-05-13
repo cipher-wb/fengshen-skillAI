@@ -1,0 +1,62 @@
+sample_id: 30531005
+sample_path: 宗门技能/SkillGraph_30531005【金宗门】传承心法-强化普攻3.json
+predicted_at: 2026-05-09
+mental_model_version_used: v0.1
+metadata_known_at_prediction:
+  node_count: 91
+  category: 宗门技能
+  sub_category: 金宗门技能
+  top_classes_visible:
+    TSET_ORDER_EXECUTE: 12
+    TSET_DELAY_EXECUTE: 9
+    TSET_RUN_SKILL_EFFECT_TEMPLATE: 8
+    TSET_GET_SKILL_TAG_VALUE: 4
+    TSET_MODIFY_SKILL_TAG_VALUE: 8
+  flags_visible:
+    is_xinfa_or_passive: true_likely  # 名字含"心法"
+prediction:
+  semantic_intent: |
+    "传承心法-强化普攻3" — 名字直觉是"被动心法 / 普攻强化 buff"。
+    心法 = 通常是被动技能（不消耗法力，不主动释放，挂载后修改其他行为）；
+    "强化普攻3" = 第3级强化，可能挂在普攻技能上添加效果，或在普攻命中时触发额外伤害；
+    91 节点 + DELAY=9 → 不像纯被动 buff（buff 通常很简洁），
+    更像"事件钩子型"心法：监听普攻事件 → 注入额外效果。
+    MOD_TAG=8 ≥ GET_TAG=4 → 写多读少，可能用于计层数（如"普攻命中3次后触发特效"）。
+  topology_mermaid: |
+    flowchart LR
+      A[心法触发入口] --> B[GET_TAG 当前层数]
+      B --> C{VALUE_COMPARE 是否满层?}
+      C -->|否| D[MOD_TAG 层数+1]
+      C -->|是| E[ORDER 触发强化效果]
+      E --> F[RUN_TEMPL 额外伤害模板]
+      E --> G[DELAY]
+      G --> H[RUN_TEMPL 视觉特效]
+      H --> I[MOD_TAG 重置层数]
+  predicted_node_count: 75
+  templates_used_predicted:
+    - 通用伤害模板
+    - 金属性破甲/锐利 buff 模板
+    - 普攻强化命中特效模板
+  subsystems_touched_predicted:
+    - 控制流子系统 (大量 ORDER + DELAY)
+    - SkillTag 系统 (层数计数器)
+    - 伤害管线
+    - 模板系统
+    - 时间轴与生命周期 (DELAY 9 次说明分多个时间点触发)
+  prediction_confidence: 中低
+  reasoning: |
+    名字带"心法"是关键信号——但我对心法/被动的内部结构认知低。
+    Postmortem #017/#019 提到 SkillTag 跨技能/实体级，心法很可能就是用这个机制
+    把状态钩到普攻技能上。
+    91 节点对"心法"来说较多，怀疑：
+    1) 不止一个触发分支（如初次/累积/释放3条线）
+    2) 可能用 Switch 管理状态（但 has_switch flag 我不知）
+    3) DELAY=9 暗示有"动画后摇/CD/buff 持续期"等多时间锚点
+    最大不确定：
+    - 心法的触发机制（事件订阅？Hook？）
+    - "普攻3"的"3"是层数还是别的什么
+    - 心法相对常规技能的额外约束（CD 复用？无指示器？）
+expected_blind_spots:
+  - 心法/被动技能的入口（哪个节点是"被监听"端口）
+  - 普攻强化与原普攻技能的耦合方式
+  - 计层重置的常见 pattern

@@ -1,0 +1,82 @@
+sample_id: 30133001
+predicted_at: 2026-05-09T12:00:00+08:00
+predicted_with_mental_model_version: v0.2
+phase: holdout
+
+skill_config_metadata_seen:
+  SkillNameEditor: "水天阶普攻"
+  SkillSubType: 101   # 与 30124001 同（普攻）
+  Icon: "Skill/GongFa/Shui/skill_shui_303103"  # 水宗门功法
+  EnhanceSkillBuffConfigID: 0   # 非心法
+  SkillEffectPassiveExecuteInfo_nonzero: false  # Passive=0 → 单 root only
+  CdType: 4   # 连招型
+  SkillIndicatorType: 0   # 无指示器（普攻常态）
+  SkillTagsList_size: 0    # 顶层无 tag 声明
+  SkillDamageTagsList_size: 2   # tag 3 / 5 → 1 号子弹标准对子
+  notes: |
+    硬信号交叉解读（基于 v0.2 mental_model）：
+    - SkillNameEditor="水天阶普攻" 直白：天阶档次的连招型普攻
+      [SkillEntry系统.md] 反直觉 1 警告："普攻也常有 Passive"，但本样本 Passive=0，
+      偏离 4/5 大流（B-001 普攻 30124001 有 Passive=220004066）。
+      **可能是个 hold-out 学习点**：普攻是否 Passive 不一定有？还是水属性特殊？
+    - CdType=4 = [控制流子系统.md] 不变量 D：连招型，必有 ComboCdList。
+      与 30124001（火普攻）同 CdType。
+    - SkillDamageTagsList = [tag3:0, tag5:165] → tag3 威力系数=0 + tag5 额外伤害=165
+      [SkillTag系统.md] 不变量 D：1 号子弹标准对子（tag3+tag5），证据完整。
+      tag3=0 不寻常（威力系数 0）→ 推测纯额外伤害型？或 flow 内通过 MOD_TAG 设置真值。
+    - 没有 Passive + 没有 EnhanceSkillBuffConfigID → 是"原生普攻"而非心法/特殊普攻。
+
+prediction:
+  node_count: 65   # corpus_scan = 62
+  topology_mermaid: |
+    graph LR
+      Active[Active root: SkillEffectExecuteInfo<br/>SkillEffectConfigID=44014261] --> RUN_TEMPL[TSET_RUN_SKILL_EFFECT_TEMPLATE]
+      RUN_TEMPL --> TPL["38000289?<br/>连招 2 段模板（B-001 复用）"]
+      TPL --> Anim[4 PLAY_ROLE_ANIM<br/>对应连招 4 段动画?]
+      TPL --> Bullets[4 BulletConfig + 4 CREATE_BULLET<br/>1 号子弹伤害对子（tag3/5）]
+      Bullets --> Damage[威力系数 0% + 额外 165<br/>tag3=0 / tag5=165]
+      style Active fill:#fff
+  templates_used:
+    - "**38000289（连招 2 段模板）** ← v0.2 [模板系统.md] 不变量 2 强信号：
+       38xxxxxxx 是连招型，本样本 CdType=4 = 连招型 = 高度匹配"
+    - "RUN_TEMPL 13 次 → 单 root + 1 高阶模板 + 12 嵌套 RUN_TEMPL"
+  subsystems_touched:
+    - 模板系统    # RUN_TEMPL=13 + 推测 38000289
+    - 控制流子系统 # ORDER=12 + DELAY=5 + CONDITION=2 + CdType=4
+    - SkillEntry 系统 # 单 root only（Passive=0 反例）
+    - 子弹系统    # 4 BulletConfig + 4 CREATE_BULLET（4 段连招）
+    - SkillTag 系统  # 1 号子弹伤害对子（顶层声明）
+    - Buff 系统    # 1 ADD_BUFF + 1 BuffConfig + 1 HAS_BUFF（轻量，可能用于"普攻命中后短 buff"）
+  prediction_confidence: 高
+  reasoning: |
+    显式 cite v0.2 子系统页：
+
+    1. **[模板系统.md] 反直觉 3**："普攻也走超模板"：30124001（火普攻）走 38000289。
+       本样本是水天阶普攻 + CdType=4（连招型）+ RUN_TEMPL=13 → **强烈预测套用 38000289**。
+
+    2. **[控制流子系统.md] 不变量 D**：CdType=4 = 连招型 → 必有 ComboCdList，
+       4 段连招对应 4 PLAY_ROLE_ANIM + 4 CREATE_BULLET（节奏化攻击）。
+
+    3. **[SkillEntry系统.md] 不变量 2 反例**：Passive=0 → 单 root only。
+       这是 v0.2 中 4/5 大流的反例。
+       **解释假设**：30124001 火普攻 Passive=220004066 是地阶火球型，30133001 是天阶招式，
+       可能"招式型"普攻不带 Passive 旁路（v0.2 仍不确定 1 提示 Passive 触发条件未知）。
+
+    4. **[SkillTag系统.md] 不变量 D**：1 号子弹伤害对子 tag3+tag5 顶层声明完备。
+       威力系数=0 + 额外伤害=165 比较反常（多数普攻 tag3 应是 1000~3000 区间）→
+       推测 flow 内通过 MOD_TAG 调整为真值（但 class_counts 没有 MOD_TAG）⚠️ 未解。
+
+    5. **[Buff系统.md]**：1 ADD_BUFF + 1 BuffConfig + 1 TSCT_HAS_BUFF
+       = "命中检测某 buff 状态决定是否走 buff 触发"模式。
+       推测：连招衔接靠某个临时 buff（类似 30531005 心法计层），但只 1 buff = 简单状态。
+
+    **关键预测**：
+    - 拓扑：典型"普攻连招 + 模板包装"——单 root → 38000289 模板 → 内嵌 4 段连招
+      （动画+子弹+轻 buff 检测）。
+    - 这是 v0.2 [模板系统.md] 反直觉 3 + [控制流子系统.md] CdType 4 双重支撑的预测，
+      v0.1 不会预测到。
+
+    **风险点**：
+    - tag3 威力系数=0 的真实含义未知。
+    - 没 MOD_TAG 又没顶层非 0 → 可能是模板内部决定伤害值。
+    - Passive=0 的水普攻 vs Passive≠0 的火普攻差异点是 hold-out 学习重点。

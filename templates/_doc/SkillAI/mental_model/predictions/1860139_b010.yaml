@@ -1,0 +1,46 @@
+sample_id: "1860139"
+date: 2026-05-10
+batch: B-010
+subdir: 子弹
+mode: closed-book PREDICT
+
+skill_config_metadata_seen:
+  category: "**SkillConfigNode 存在 + IsTemplate=False**（罕见）— extractor 标 is_skill=True 但目录在 技能模板/"
+  filename_hint: "【模板】多向子弹"
+  refs_count: 32
+  IsTemplate_count: 1
+  TemplateParam_count: 0
+  SubType_seen: 0
+  top_classes: {NUM_CALC: 10, ATTR: 3, ORDER: 2, GET_ORIGIN_SKILL_ID: 2, CONDITION: 2, VALUE_CMP: 2}
+  notes: |
+    **B-010 罕见模式样本**：技能模板/子弹/ 目录但带 SkillConfigNode 顶层（is_skill=True）。
+    意味着这是「**技能模板包装的子弹模板**」——不是纯 type 2 模板本体（无 SkillConfigNode），而是 v0.6 §SkillEditor 文件三分类的边界类型（候选 D-1001：3 分类骨架可能要扩为 4 分类，或 类别 2 内部分 a/b 子型）。
+    GET_ORIGIN_SKILL_ID × 2 = 取调用方原技能 ID，typical "通用工具型"模板做参数化。
+    NUM_CALC × 10 + VALUE_CMP × 2 + CONDITION × 2 = 多向角度数学计算。
+
+prediction:
+  estimated_node_count: 40  # 32 refs + ~5 端口 + ORDER 双 root（Active + Passive 假设）
+  topology_sketch: |
+    SkillConfigNode (顶层，IsTemplate 标记在 ORDER root 上)
+      → ORDER root (IsTemplate=True, ID=1860139)
+        → CONDITION × 2 (按子弹数量 / 按角度模式分支)
+        → NUM_CALC × 10 (角度增量 / 半径 / 速度向量计算)
+        → GET_ORIGIN_SKILL_ID × 2 (取原技能 ID 用作参数 fallback)
+        → VALUE_COMPARE × 2 (角度 vs 阈值)
+        → ATTR × 3 (取施法者朝向 / 速度等)
+  expected_templates_called: []  # 内部数学逻辑，不调子模板
+  touched_subsystems: [模板系统, 子弹系统（首次正式触碰候选）, SkillTag 系统（GET_ORIGIN_SKILL_ID 间接）]
+  predicted_template_form: |
+    形态：**子弹角度计算工具型模板**——把"多向子弹"的角度增量数学计算封装为一个可调用模板，被某个真技能 RUN_TEMPL 引用。
+    与 v0.6 D-510 候选「子弹系统首次建页」形成 driver 信号。
+  predicted_internal_signature_for_skillentry_diff: |
+    **B-010 RQ-B10-1 候选答案**：3 分类骨架可能需要细化：
+    - 类别 2a：纯模板本体（无 SkillConfigNode）→ 146004907 / 146001847 / 32004137 / 66000081 = 4/6 样本
+    - **类别 2b：SkillConfigNode 包装的模板本体**（is_skill_file=True 但 IsTemplate=True 在 ORDER root 上）→ 1860139 + 940021 = 2/6 样本
+    类别 2b 的真实差异：
+    - SkillConfigNode 的 ID 与 root.ID 可能不同（与 175_0001 反例同模式：1860139 文件名 ID = 1860139；SkillConfigNode.ID = ?；root.ID = ?）
+    - SkillSubType 可能为 0（默认/无 SubType 的工具模板包装）— 已在 metadata 看到 SubType=0 √
+  notes: |
+    高 confidence：子弹/ 目录 + 多向 + 角度数学 = 角度计算工具模板（v0.6 D-510 候选首次触碰）。
+    高 confidence：类别 2b 子型存在（Z 线索：SkillConfigNode 存在 + IsTemplate=True 同时成立 = 包装型）。
+    中 confidence：类别 2b 在 corpus 全集占比（待 verify 阶段从 B-009 数据反查）。

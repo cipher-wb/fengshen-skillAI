@@ -1,0 +1,58 @@
+sample_id: 30524001
+date: 2026-05-10
+batch: B-012
+mode: closed_book
+
+skill_config_metadata_seen:
+  SkillNameEditor: null
+  SkillSubType: 0
+  Icon: ""
+  EnhanceSkillBuffConfigID: 0
+  SkillEffectPassiveExecuteInfo_nonzero: true
+  Mode: C_pure_passive
+  IsTemplate: false
+  CdType: 0
+  CdTime: 0
+  SkillIndicatorType: 0
+  notes: |
+    硬信号判读：
+    - SkillNameEditor=null + Icon="" → 标签效果配置类，非玩家技能
+    - SkillSubType=0 → 非主动技能子类型（标签效果/Buff 模板的常规值）
+    - Mode=C_pure_passive = 纯被动（仅 PassiveRoot 或 SkillEffectFlowList，无 ActiveRoot）
+    - PassiveExecuteInfo_nonzero=true → 通过被动事件触发
+    - CdType=0 + CdTime=0 + IndicatorType=0 → 无 CD 无指示器，标签效果范式
+    - 文件名"标签效果_灼伤" → SkillTag-driven 火属性持续伤害效果
+
+prediction:
+  estimated_node_count: 25
+  estimated_node_count_range: [10, 50]
+  topology_sketch: |
+    SkillConfigNode → SkillTagsConfigNode (灼伤 tag)
+        ↓
+    PassiveRoot OR SkillEffectFlowList[N]
+        ↓ (REGISTER_SKILL_EVENT 或 REPEAT_EXECUTE 周期触发)
+        ↓
+    GET_SKILL_TAG_VALUE (读灼伤层数)
+        ↓ VALUE_COMPARE (判定层数 > 0)
+        ↓
+    NUM_CALCULATE (计算每跳伤害)
+        ↓
+    TSET_DAMAGE 或 RUN_SKILL_EFFECT_TEMPLATE (175xxx 持续伤害模板)
+        ↓
+    （可能 MODIFY_SKILL_TAG_VALUE 衰减层数）
+  expected_templates:
+    - "175xxx 持续伤害模板（候选）"
+    - "可能直接 TSET_DAMAGE / TSET_QUICK_DAMAGE 不调模板"
+  touched_subsystems:
+    - "技能入口与生命周期 (SkillEntry Mode C)"
+    - "SkillTag 系统 (核心 — 灼伤 tag 读写衰减)"
+    - "条件系统 (VALUE_COMPARE)"
+    - "数值计算 (NUM_CALCULATE)"
+    - "Buff/Effect 周期触发 (REGISTER_SKILL_EVENT 或 REPEAT_EXECUTE)"
+
+confidence_self_assess: 0.6
+rationale: |
+  Mode=C_pure_passive + SkillSubType=0 + 名字"灼伤" = 高置信度被动型标签效果配置。
+  与 30531xxx 金宗门标签效果系列同范式（已学样本可对照）。
+  最大不确定：是用 REPEAT_EXECUTE 周期跳还是 REGISTER_SKILL_EVENT 攻击触发？
+  火宗门"灼伤"传统 DOT 范式 → 倾向 REPEAT_EXECUTE 周期跳。

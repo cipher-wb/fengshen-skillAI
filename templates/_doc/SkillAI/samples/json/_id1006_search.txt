@@ -1,0 +1,14 @@
+=== Search for ID=1006 in 30212010 ===
+
+=== All SkillTagsConfigNode IDs in 30212010 ===
+  ID=320098 Desc=叶散风行子弹数量
+  ID=320110 Desc=叶散风行被心法强化
+  ID=320127 Desc=叶散风行追踪范围
+  ID=320160 Desc=叶散风行触发免控开关
+
+=== Search "ParamType: 1" + small Value in 30212010 SkillEffects ===
+  ID=66001758 cls=TSET_NUM_CALCULATE: Param has V=1007 PT=3
+  ID=66001754 cls=TSET_NUM_CALCULATE: Param has V=1007 PT=3
+  ID=66001755 cls=TSET_MATH_COS: Param has V=1006 PT=3
+  ID=66001759 cls=TSET_MATH_SIN: Param has V=1006 PT=3
+  ID=66001785 cls=TSET_GET_ANGLE_BETWEEN_POINT: Param has V=1004 PT=3

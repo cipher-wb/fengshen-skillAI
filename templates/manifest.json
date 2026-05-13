@@ -1,0 +1,1770 @@
+{
+  "version": 1,
+  "generatedAt": "2026-05-13T13:08:30.317Z",
+  "files": {
+    "_claude/agents/skill-designer.md.hbs": {
+      "sha256": "0a9998194beed9f6616a952a9fe2516a903c577fef4de1a7f83a38c15b0f57e7",
+      "hbs": true,
+      "py": false,
+      "bytes": 10184
+    },
+    "_claude/agents/skill-knowledge-auditor.md.hbs": {
+      "sha256": "f51f5d09aac800767779b7ba60e59b226ea72355797c19eaf2fc690f1358becf",
+      "hbs": true,
+      "py": false,
+      "bytes": 10999
+    },
+    "_claude/agents/skill-knowledge-curator.md.hbs": {
+      "sha256": "3b25305c50bcd0d8138753a91d851c5fb39f65b2d0f4dc1a47e8945fd85edc20",
+      "hbs": true,
+      "py": false,
+      "bytes": 10183
+    },
+    "_claude/agents/skill-reviewer.md.hbs": {
+      "sha256": "86dbbba77d60c6353e9b7f247a8c0b5cbb685e3d7e8b3849d13eead6ab125fbb",
+      "hbs": true,
+      "py": false,
+      "bytes": 5761
+    },
+    "_claude/settings.json.hbs": {
+      "sha256": "fb74b9a262e9ce59a76ea47ba3b5100bf21a05d3c702369f82c9e7694abf245b",
+      "hbs": true,
+      "py": false,
+      "bytes": 671
+    },
+    "_claude/skills/skill-design/references/postmortem_template.md.hbs": {
+      "sha256": "fd7acbcc325552d40857bbc4d13d614336d0f23df986dc0ea81910bbf1a3143f",
+      "hbs": true,
+      "py": false,
+      "bytes": 3071
+    },
+    "_claude/skills/skill-design/SKILL.md.hbs": {
+      "sha256": "70c5aa9f4a9c82937835608557454713d011eec98fcb5f3b02c7ef166d4fccf3",
+      "hbs": true,
+      "py": false,
+      "bytes": 18709
+    },
+    "_claude/skills/skill-review/SKILL.md.hbs": {
+      "sha256": "be101b0d9310bf953c6a0ef9878eb1080df244cd74670ddbc9ea057ccb8ed126",
+      "hbs": true,
+      "py": false,
+      "bytes": 8122
+    },
+    "_doc/SkillAI/docs/StickyNote_模板.md": {
+      "sha256": "8e3df542faf4cb2c435a104c2070fa802b5ae5defc6d9bd83cc3f91b8a306c41",
+      "hbs": false,
+      "py": false,
+      "bytes": 11195
+    },
+    "_doc/SkillAI/docs/旋转扩张子弹圈_使用指南.md": {
+      "sha256": "7a9886181d04a1b7b8e3896f26beff76c8c8e9c899131c041690914b23a0bba3",
+      "hbs": false,
+      "py": false,
+      "bytes": 3749
+    },
+    "_doc/SkillAI/docs/易错点速查.md": {
+      "sha256": "f6dd677f08bb4d6f6e3da35ffb9e9cfe4a2842e666837e8eec2cce051f6e2e96",
+      "hbs": false,
+      "py": false,
+      "bytes": 42447
+    },
+    "_doc/SkillAI/docs/模板库.md": {
+      "sha256": "c07f8d2f28e7801293ea6759894388469c362ff68502770f888a1cda27f03a85",
+      "hbs": false,
+      "py": false,
+      "bytes": 22442
+    },
+    "_doc/SkillAI/docs/编辑器架构.md": {
+      "sha256": "1cc92e4ed3e73d7065cbbd7930f7cec391df63c47e4f45b8a20db45a2f09fa1a",
+      "hbs": false,
+      "py": false,
+      "bytes": 21945
+    },
+    "_doc/SkillAI/docs/节点字典.md": {
+      "sha256": "120eb6ecbd8bdfac3e6e6eb6a0778c7444ce4b46857949f6b4809ef9bb6c949d",
+      "hbs": false,
+      "py": false,
+      "bytes": 36435
+    },
+    "_doc/SkillAI/mental_model/batch_buffer/_seed/B-DESIGNER-CHAIN-001_yaml_COMMITTED_v0_16_39.md": {
+      "sha256": "8ceb48ea9b5c8a55c5dcb46504830bf8082b9e3e1e6ec8c9c4c1c68aaec2224e",
+      "hbs": false,
+      "py": false,
+      "bytes": 21816
+    },
+    "_doc/SkillAI/mental_model/batch_buffer/_seed/README.md": {
+      "sha256": "ceca6c2af7fc14ab55b957cac28502378f0a92a5c71e615828c590f4d4882d8e",
+      "hbs": false,
+      "py": false,
+      "bytes": 342
+    },
+    "_doc/SkillAI/mental_model/batch_buffer/_seed/_aggregate_learning_inventory.py": {
+      "sha256": "8315ea074f36082a5b05b0cd7379ae1a9fa08903e12f1d3b6a950d86e481cac3",
+      "hbs": false,
+      "py": true,
+      "bytes": 10221
+    },
+    "_doc/SkillAI/mental_model/Buff系统.md": {
+      "sha256": "3bf3ad3de9089de7b16d919ca78ea6889b985eacf8ccf246fdaa2ddba2c68095",
+      "hbs": false,
+      "py": false,
+      "bytes": 45173
+    },
+    "_doc/SkillAI/mental_model/diffs/146003779-T.md": {
+      "sha256": "1a7c36267d4b339fa6c40c77761557db2b4b671cc6c3820bf1af40d481b1ca3d",
+      "hbs": false,
+      "py": false,
+      "bytes": 6695
+    },
+    "_doc/SkillAI/mental_model/diffs/175_0001-T.md": {
+      "sha256": "b3e6373731280d5fc2df8f1578d64b28a97467b8475c8b0aa124e7c406b45f2d",
+      "hbs": false,
+      "py": false,
+      "bytes": 5376
+    },
+    "_doc/SkillAI/mental_model/diffs/190008535_holdout_v6.md": {
+      "sha256": "b5eda301ff75aab205b3605d3b09b262b485864a3eb0c4a71ae3e3aee7f0a60e",
+      "hbs": false,
+      "py": false,
+      "bytes": 3898
+    },
+    "_doc/SkillAI/mental_model/diffs/1900246_holdout_v6.md": {
+      "sha256": "ce5b8875237f434aa828e832d5c70fd864b03685759920863da8cebe8ff1372a",
+      "hbs": false,
+      "py": false,
+      "bytes": 5098
+    },
+    "_doc/SkillAI/mental_model/diffs/28017851.md": {
+      "sha256": "507433d97be3875f02d6e68a9c8d7aa6cd57f1562e16f265cfbb7410a02e9157",
+      "hbs": false,
+      "py": false,
+      "bytes": 5504
+    },
+    "_doc/SkillAI/mental_model/diffs/28023113.md": {
+      "sha256": "8afb502b9d954fc43fb1e852cf511ebfa0890223f7b2ad838e20179e16608eb5",
+      "hbs": false,
+      "py": false,
+      "bytes": 4188
+    },
+    "_doc/SkillAI/mental_model/diffs/300701_holdout_v6.md": {
+      "sha256": "16c479deb1b9e3de177dc5af435c448d22ee465f291e648a78fbf51cff816ac0",
+      "hbs": false,
+      "py": false,
+      "bytes": 3971
+    },
+    "_doc/SkillAI/mental_model/diffs/30073901_holdout_v5.md": {
+      "sha256": "aacf76555f9ca168450b7c6701707407b55c02565bc7c3c8950eb5d3dd43b193",
+      "hbs": false,
+      "py": false,
+      "bytes": 4776
+    },
+    "_doc/SkillAI/mental_model/diffs/30124001.md": {
+      "sha256": "fdad4cb4cb616a4898fcd2fc2c4e5e9e4d5f56eabd970aea7ce7b63813b84be3",
+      "hbs": false,
+      "py": false,
+      "bytes": 5615
+    },
+    "_doc/SkillAI/mental_model/diffs/30133001_holdout.md": {
+      "sha256": "b022964b4afd029c61d284ac373074259c877c93a4ae6ecf5b52555e4b771d31",
+      "hbs": false,
+      "py": false,
+      "bytes": 4176
+    },
+    "_doc/SkillAI/mental_model/diffs/30134001_b003.md": {
+      "sha256": "b0fd379f157a63d195b4f38d17aaad5c278d86c972c22f32f3a2ad2973ceb74d",
+      "hbs": false,
+      "py": false,
+      "bytes": 5384
+    },
+    "_doc/SkillAI/mental_model/diffs/30214004_holdout_v3.md": {
+      "sha256": "c8704f894a165ffa267f58682f6694ac67697f651a09c81da0f2870df8ebca2d",
+      "hbs": false,
+      "py": false,
+      "bytes": 8802
+    },
+    "_doc/SkillAI/mental_model/diffs/30215001.md": {
+      "sha256": "e92379302b514d836280f83bb8f0e7b70fe2118a8daf17c8a4b431c90646b4aa",
+      "hbs": false,
+      "py": false,
+      "bytes": 6420
+    },
+    "_doc/SkillAI/mental_model/diffs/30222002_holdout.md": {
+      "sha256": "772b849cd0b3a7f0d81af711721b93cf909d818b296ae155e826f0606526ee5a",
+      "hbs": false,
+      "py": false,
+      "bytes": 4410
+    },
+    "_doc/SkillAI/mental_model/diffs/30225001_holdout_v5.md": {
+      "sha256": "92d05de3ddda97352f31cfb7f1759a329a6ce22378325794d068ec0839a9b934",
+      "hbs": false,
+      "py": false,
+      "bytes": 4518
+    },
+    "_doc/SkillAI/mental_model/diffs/30234006.md": {
+      "sha256": "ac5ecf5028d0fc23f980e8b2d6b2591648f2d8c620e44262a6a596988ad7742f",
+      "hbs": false,
+      "py": false,
+      "bytes": 4929
+    },
+    "_doc/SkillAI/mental_model/diffs/30315001_holdout_v3.md": {
+      "sha256": "cd4ba1ee8ac1e443096551ff453c8015017bc2aa178d809233f45ef95186b773",
+      "hbs": false,
+      "py": false,
+      "bytes": 8836
+    },
+    "_doc/SkillAI/mental_model/diffs/30324002_b003.md": {
+      "sha256": "ed6844f970969de9f59dce118ff6f93ac53094ace9e7fa166e1750aae22d20fa",
+      "hbs": false,
+      "py": false,
+      "bytes": 5145
+    },
+    "_doc/SkillAI/mental_model/diffs/30325001_b003.md": {
+      "sha256": "1c5ffffa8029cc5c38bc53ecdba692c3b04d14dfdf10c0ef13cd55aa3bc3fb17",
+      "hbs": false,
+      "py": false,
+      "bytes": 5172
+    },
+    "_doc/SkillAI/mental_model/diffs/30325002.md": {
+      "sha256": "9b8e6289066b5eab36db8e062ef39a9bb7588d36642a536f655ab6f1e75f6e96",
+      "hbs": false,
+      "py": false,
+      "bytes": 6130
+    },
+    "_doc/SkillAI/mental_model/diffs/30331000_holdout_v3.md": {
+      "sha256": "6f7210fca30398e06489942acd1aad5c66e2bf369556d4902356bd2145e567c3",
+      "hbs": false,
+      "py": false,
+      "bytes": 8428
+    },
+    "_doc/SkillAI/mental_model/diffs/30431000.md": {
+      "sha256": "cdb01a598a1153640c58274a97ebd6d21460de19010c6b62b61c84b95a300807",
+      "hbs": false,
+      "py": false,
+      "bytes": 5464
+    },
+    "_doc/SkillAI/mental_model/diffs/30433001.md": {
+      "sha256": "1d0e87c467ef7b9b1ac04e1dfa347a37c70402f14d21451f6cc2922b66099698",
+      "hbs": false,
+      "py": false,
+      "bytes": 5425
+    },
+    "_doc/SkillAI/mental_model/diffs/30510007.md": {
+      "sha256": "3919cc9a1118c72e11a2b537efcb20ff8b9940a45ba7d14c1d20f38418f805bb",
+      "hbs": false,
+      "py": false,
+      "bytes": 2787
+    },
+    "_doc/SkillAI/mental_model/diffs/30525001_holdout_v5.md": {
+      "sha256": "bbafc083797b992f445d57b19434ee85567f5ed89b5622fa93f81b4acefaa664",
+      "hbs": false,
+      "py": false,
+      "bytes": 4886
+    },
+    "_doc/SkillAI/mental_model/diffs/30531005.md": {
+      "sha256": "24945feca8547ce283989394a8dfdb384995a0fe8d0b0bcd9555129c4f8588ad",
+      "hbs": false,
+      "py": false,
+      "bytes": 5401
+    },
+    "_doc/SkillAI/mental_model/diffs/30531006_holdout.md": {
+      "sha256": "adcfe7a93c58810800f83b7e3ceb6be355e6d3b6d920e4bd3fc9600e106950ef",
+      "hbs": false,
+      "py": false,
+      "bytes": 4807
+    },
+    "_doc/SkillAI/mental_model/diffs/30531008_b003.md": {
+      "sha256": "112dc4e7e507554eac9d703d35283b3649d3d3683faaf15fd99822af24c70860",
+      "hbs": false,
+      "py": false,
+      "bytes": 6501
+    },
+    "_doc/SkillAI/mental_model/diffs/30534004.md": {
+      "sha256": "77020f8010d1d29ff534f86b9719b4592b552ded5e7676d2ece863c9a7256719",
+      "hbs": false,
+      "py": false,
+      "bytes": 5965
+    },
+    "_doc/SkillAI/mental_model/diffs/30535000_b003.md": {
+      "sha256": "1b72b9eff6a7547982f0e6cb31465ed8ebd76a1d569c31673d9556822c72c1bc",
+      "hbs": false,
+      "py": false,
+      "bytes": 5956
+    },
+    "_doc/SkillAI/mental_model/diffs/308071.md": {
+      "sha256": "552069e5213da913ee603aa792969dc5bfdc0787765337bee5770c82ee4aa38c",
+      "hbs": false,
+      "py": false,
+      "bytes": 4014
+    },
+    "_doc/SkillAI/mental_model/diffs/400019.md": {
+      "sha256": "a1312e13b459d7d921f40cd79e1e986c03eff4b86217438f32eb4a87cb93c608",
+      "hbs": false,
+      "py": false,
+      "bytes": 4160
+    },
+    "_doc/SkillAI/mental_model/diffs/B-004_diffs.md": {
+      "sha256": "1536fe456499884792e961f4089d2845b3883e13d1b2626f89708760c729e41d",
+      "hbs": false,
+      "py": false,
+      "bytes": 14470
+    },
+    "_doc/SkillAI/mental_model/diffs/B-008_diffs.md": {
+      "sha256": "c537436ed4944e3ebeb91c56e61da2bd03aaf181c1364b63ef03eafeea85a781",
+      "hbs": false,
+      "py": false,
+      "bytes": 13384
+    },
+    "_doc/SkillAI/mental_model/diffs/B-010_consolidated.md": {
+      "sha256": "4a6e581f16633ef5aa4f3255378c69bf1255ff7a6456a86822bece34c4d1f13a",
+      "hbs": false,
+      "py": false,
+      "bytes": 20917
+    },
+    "_doc/SkillAI/mental_model/diffs/B-021_diff.md": {
+      "sha256": "18f9794429906c1a8948a56fef7455492fe3fa81dad238a90173f9a73e1f805e",
+      "hbs": false,
+      "py": false,
+      "bytes": 8369
+    },
+    "_doc/SkillAI/mental_model/diffs/B-045/_summary.md": {
+      "sha256": "e3b6d7d4a4877f2327d2262ea9545110359d54ff2915f8c504bf7d909b5b2f0f",
+      "hbs": false,
+      "py": false,
+      "bytes": 13115
+    },
+    "_doc/SkillAI/mental_model/diffs/README.md": {
+      "sha256": "5deb7e4b9d16ac860484c1515db7122f1e13f55b4e0f8246e3c4c30338a44e5c",
+      "hbs": false,
+      "py": false,
+      "bytes": 206
+    },
+    "_doc/SkillAI/mental_model/diffs/_30073901_ir.yaml": {
+      "sha256": "6995b1536534ae69ff51c17dcc028ebe98f47a8608924f4ec943b9dcba6caa36",
+      "hbs": false,
+      "py": false,
+      "bytes": 525
+    },
+    "_doc/SkillAI/mental_model/diffs/_30225001_ir.yaml": {
+      "sha256": "f2f077b191d16761047e424aaa2da171254d1db0d96d423c5f33c65f0f3315c0",
+      "hbs": false,
+      "py": false,
+      "bytes": 719
+    },
+    "_doc/SkillAI/mental_model/diffs/_30525001_ir.yaml": {
+      "sha256": "90d4d0968f66b010343fadf152441d9b9b942cad943b1a4a718fa13f0d72ffd9",
+      "hbs": false,
+      "py": false,
+      "bytes": 506
+    },
+    "_doc/SkillAI/mental_model/learning_log.md": {
+      "sha256": "969352ac7493f4c444dbf2e7dd77ec4c9e86d8d6e6e1e3376ed300caf7c3d9e1",
+      "hbs": false,
+      "py": false,
+      "bytes": 1105510
+    },
+    "_doc/SkillAI/mental_model/predictions/140040_b013.yaml": {
+      "sha256": "58eb9626ae96985db04c0f388ff98a5e104eec5985de74187d0105fd78281a73",
+      "hbs": false,
+      "py": false,
+      "bytes": 2385
+    },
+    "_doc/SkillAI/mental_model/predictions/146001847_b010.yaml": {
+      "sha256": "c5bb5b4c83907c1f3cddad0c816145b659332eafba1cdf340df8e469c5428c43",
+      "hbs": false,
+      "py": false,
+      "bytes": 2410
+    },
+    "_doc/SkillAI/mental_model/predictions/146003779-T.actual.yaml": {
+      "sha256": "f44717a9619162a435ed12e8dfd78602a3f3e96e3e90f732a53bb4452a68bbf4",
+      "hbs": false,
+      "py": false,
+      "bytes": 202
+    },
+    "_doc/SkillAI/mental_model/predictions/146003779-T.yaml": {
+      "sha256": "df179b178b28ae705742dc311b02f5c36f48af7254f98221ee8c9cd368df40ce",
+      "hbs": false,
+      "py": false,
+      "bytes": 2976
+    },
+    "_doc/SkillAI/mental_model/predictions/146004907_b010.yaml": {
+      "sha256": "a6ca6b45c9a767a52916dc9a19c11bf3ce675254cfde925fde66ba29355ba037",
+      "hbs": false,
+      "py": false,
+      "bytes": 3284
+    },
+    "_doc/SkillAI/mental_model/predictions/1460082_b006.yaml": {
+      "sha256": "255f86f2f1fd405076fdc4393150efcbbf3d7ad9ff8eb8ca6ab8599c54290057",
+      "hbs": false,
+      "py": false,
+      "bytes": 3945
+    },
+    "_doc/SkillAI/mental_model/predictions/1460095_b006.yaml": {
+      "sha256": "c76f8c95b58fea6a6ad6d4b818f9a9cdc814e7b25bf4529c042d7e123a2317bb",
+      "hbs": false,
+      "py": false,
+      "bytes": 2564
+    },
+    "_doc/SkillAI/mental_model/predictions/1750075_b014.yaml": {
+      "sha256": "ea135af5ffe00931adeaea9022326f9222b7f2d8aaf462baa7aac7e8e03d9687",
+      "hbs": false,
+      "py": false,
+      "bytes": 4412
+    },
+    "_doc/SkillAI/mental_model/predictions/1750080_b013.yaml": {
+      "sha256": "1547a794a0ddb25f392c31b36a7240de195557040a0dfaea509d3b412fb54168",
+      "hbs": false,
+      "py": false,
+      "bytes": 1923
+    },
+    "_doc/SkillAI/mental_model/predictions/1750087_b006.yaml": {
+      "sha256": "72b5be7ea3dff31998ef537ac742ead8df7e58ff8999beb1aca880e74627c69c",
+      "hbs": false,
+      "py": false,
+      "bytes": 3027
+    },
+    "_doc/SkillAI/mental_model/predictions/175_0001-T.yaml": {
+      "sha256": "9362db474b7f78ba621cf2a7ecd05d467e5fe424558ef81a33538ae35adfd7fe",
+      "hbs": false,
+      "py": false,
+      "bytes": 2767
+    },
+    "_doc/SkillAI/mental_model/predictions/1860139_b010.yaml": {
+      "sha256": "551b5b83ef30723620cb0b1e65d0a156b2ceeeba9225ee948f34e554c94f3601",
+      "hbs": false,
+      "py": false,
+      "bytes": 3206
+    },
+    "_doc/SkillAI/mental_model/predictions/1860195_b013.yaml": {
+      "sha256": "867dfbd20bc71a48632f173bfd691b325833db4d25b08fcaacf548742a9b1a65",
+      "hbs": false,
+      "py": false,
+      "bytes": 1916
+    },
+    "_doc/SkillAI/mental_model/predictions/190008535_holdout_v6.yaml": {
+      "sha256": "4d12ebd03d3218c1fa9285e3379461bbd7517b7b153d00a3b80792ada85e8f57",
+      "hbs": false,
+      "py": false,
+      "bytes": 5467
+    },
+    "_doc/SkillAI/mental_model/predictions/1900234_b013.yaml": {
+      "sha256": "e3482f016b7e03e5eaaf953520a29f0ac3a502cd915768581e9026f534b2f142",
+      "hbs": false,
+      "py": false,
+      "bytes": 2131
+    },
+    "_doc/SkillAI/mental_model/predictions/1900246_holdout_v6.yaml": {
+      "sha256": "b6091d81c95c4af69be151866496717199be150648975bc399fad2000149f0eb",
+      "hbs": false,
+      "py": false,
+      "bytes": 5855
+    },
+    "_doc/SkillAI/mental_model/predictions/2005901_b014.yaml": {
+      "sha256": "274b15a1b401104238acf950c0dfd023b8b28f925799b56fcc29bd7d1b985e19",
+      "hbs": false,
+      "py": false,
+      "bytes": 4532
+    },
+    "_doc/SkillAI/mental_model/predictions/2250030_b014.yaml": {
+      "sha256": "38fd24edfc4080164c55fc0e7744c73041abd1ac00aac6189accb50ce1f216f8",
+      "hbs": false,
+      "py": false,
+      "bytes": 4335
+    },
+    "_doc/SkillAI/mental_model/predictions/280082_b014.yaml": {
+      "sha256": "69184ddcd8bbd639f01dd2fd59b7da43ccc59291b0fbb72bd8aefbc8815b10ed",
+      "hbs": false,
+      "py": false,
+      "bytes": 5036
+    },
+    "_doc/SkillAI/mental_model/predictions/28017851.yaml": {
+      "sha256": "9a66419865e40ff1dd46d75c47d5c40a0954f82300a4908bd24afacf26718c4e",
+      "hbs": false,
+      "py": false,
+      "bytes": 2781
+    },
+    "_doc/SkillAI/mental_model/predictions/28023113.yaml": {
+      "sha256": "a96da4434ef8c1003e3f17ed624b39b53fabef402304d1b2536c753859afd259",
+      "hbs": false,
+      "py": false,
+      "bytes": 3136
+    },
+    "_doc/SkillAI/mental_model/predictions/300701_holdout_v6.yaml": {
+      "sha256": "03777dc9029630b29a93d0776200ebf124143c78d6e2f93322033864b92d99cd",
+      "hbs": false,
+      "py": false,
+      "bytes": 5779
+    },
+    "_doc/SkillAI/mental_model/predictions/30073901_holdout_v5.yaml": {
+      "sha256": "eafe2a0742ea85fa7e63b32cd071a4045c3a96cf3c1975aeb6b6591236f2b7c1",
+      "hbs": false,
+      "py": false,
+      "bytes": 7031
+    },
+    "_doc/SkillAI/mental_model/predictions/301102_b006.yaml": {
+      "sha256": "ad71dd04597fc287c7a08f0c3ed4c425b2ff939f15ffce93658634ce4643b644",
+      "hbs": false,
+      "py": false,
+      "bytes": 4293
+    },
+    "_doc/SkillAI/mental_model/predictions/30121000_b012.yaml": {
+      "sha256": "5f0955bb5595d53446ad170650abbacee523a2e6d0f9b80db33f28837a7c1546",
+      "hbs": false,
+      "py": false,
+      "bytes": 1948
+    },
+    "_doc/SkillAI/mental_model/predictions/30122001_b012.yaml": {
+      "sha256": "33ac74f8f9a7c5f281a8cf8765e79b43dce26e629847332b5e5c7be44f54e92c",
+      "hbs": false,
+      "py": false,
+      "bytes": 2211
+    },
+    "_doc/SkillAI/mental_model/predictions/30124001.yaml": {
+      "sha256": "7ca991c9d8b17599334a96f96009011dfbbc55d81bb89389ce877ec9c003a4bf",
+      "hbs": false,
+      "py": false,
+      "bytes": 2706
+    },
+    "_doc/SkillAI/mental_model/predictions/30133001.yaml": {
+      "sha256": "1e25baa78e3d98e59ad04d9d4b7446d4fe789e23e8cebd29b2061cfd247b55d9",
+      "hbs": false,
+      "py": false,
+      "bytes": 4894
+    },
+    "_doc/SkillAI/mental_model/predictions/30134001.yaml": {
+      "sha256": "0c1ec4afb0c2f621df68a8d9270be1354c816ae09327318b44a18339bc8a18ec",
+      "hbs": false,
+      "py": false,
+      "bytes": 4077
+    },
+    "_doc/SkillAI/mental_model/predictions/30214001_b012.yaml": {
+      "sha256": "5eed57e90d1de25dbafa6bbcec20f3511465c40614df4ba3a8de0243d29fb922",
+      "hbs": false,
+      "py": false,
+      "bytes": 1988
+    },
+    "_doc/SkillAI/mental_model/predictions/30214004_holdout_v3.yaml": {
+      "sha256": "5e0b0edd3815e4e26f456fb18874a40d43cf9dacfad5c5870026c13984f8ee44",
+      "hbs": false,
+      "py": false,
+      "bytes": 8155
+    },
+    "_doc/SkillAI/mental_model/predictions/30215001.actual.yaml": {
+      "sha256": "c5769b8fbc96ec5427a11b8bff4098167640f09bd35508de539357db6b4c1490",
+      "hbs": false,
+      "py": false,
+      "bytes": 1792
+    },
+    "_doc/SkillAI/mental_model/predictions/30215001.yaml": {
+      "sha256": "e5e25bb0615b493dd6e73ea38a49983cb39a313dc1021643e65a8f7bcbb363d2",
+      "hbs": false,
+      "py": false,
+      "bytes": 3378
+    },
+    "_doc/SkillAI/mental_model/predictions/30221000.yaml": {
+      "sha256": "c0632b5c9c7f27a0c391055a3c91fc7a1586cd334a7ba1ab6f89c8a2d0671ee4",
+      "hbs": false,
+      "py": false,
+      "bytes": 4411
+    },
+    "_doc/SkillAI/mental_model/predictions/30221120.yaml": {
+      "sha256": "1dc3997c791013613c64cf8d033217497269203e42f5277f0e95afe76148f6ad",
+      "hbs": false,
+      "py": false,
+      "bytes": 4014
+    },
+    "_doc/SkillAI/mental_model/predictions/30222002.yaml": {
+      "sha256": "683aba2b23bc1691943906ed9b92d94e7b6dd95ed85f9976e0322728c5131619",
+      "hbs": false,
+      "py": false,
+      "bytes": 5645
+    },
+    "_doc/SkillAI/mental_model/predictions/30225001_holdout_v5.yaml": {
+      "sha256": "97657075af5f108c8fd2d9291384c5239bfd46c94333863ce5884d79e4457855",
+      "hbs": false,
+      "py": false,
+      "bytes": 6731
+    },
+    "_doc/SkillAI/mental_model/predictions/30225003_b012.yaml": {
+      "sha256": "e7877036d027f386ac1bb19785f9fe7cf91d247645e91ba875f6c74f7c1fe92f",
+      "hbs": false,
+      "py": false,
+      "bytes": 2287
+    },
+    "_doc/SkillAI/mental_model/predictions/30234006.yaml": {
+      "sha256": "58eff8e36afed695cc106a5ff92c709b90f843aedadc97023f6f6f1e738d90fe",
+      "hbs": false,
+      "py": false,
+      "bytes": 2505
+    },
+    "_doc/SkillAI/mental_model/predictions/30315001_holdout_v3.yaml": {
+      "sha256": "d7aea1235fb36e79988cf7738fa375718be679c070704e204e97c8db8708aa49",
+      "hbs": false,
+      "py": false,
+      "bytes": 7729
+    },
+    "_doc/SkillAI/mental_model/predictions/30324002.yaml": {
+      "sha256": "4eddea6271f8786acd58dbfe345fccded7fa19bdc611be0e18f30d2352fc6e63",
+      "hbs": false,
+      "py": false,
+      "bytes": 3773
+    },
+    "_doc/SkillAI/mental_model/predictions/30325001.yaml": {
+      "sha256": "ab73b5f83548badb92419b1e9806f4cef131d11c9e1cb5e94e225918638ea25f",
+      "hbs": false,
+      "py": false,
+      "bytes": 3797
+    },
+    "_doc/SkillAI/mental_model/predictions/30325002.yaml": {
+      "sha256": "872853946f9e1a24b022a897df2fe5a29bbe21922751dbedf1a8900582c4d2f1",
+      "hbs": false,
+      "py": false,
+      "bytes": 2827
+    },
+    "_doc/SkillAI/mental_model/predictions/30331000_holdout_v3.yaml": {
+      "sha256": "51cfe23152329414e65c0a8e5bc180f30e4274f74fde3689a521708a260ffc8a",
+      "hbs": false,
+      "py": false,
+      "bytes": 7389
+    },
+    "_doc/SkillAI/mental_model/predictions/30431000.yaml": {
+      "sha256": "bb4026cb59d7d87acd87b30bd915aed4d5eb28a23be83f3aa211ba4b515af9bb",
+      "hbs": false,
+      "py": false,
+      "bytes": 2496
+    },
+    "_doc/SkillAI/mental_model/predictions/30433001.yaml": {
+      "sha256": "89c972460279869864b1d747b8a80586e88e71cebd700dd5758745e408f0484b",
+      "hbs": false,
+      "py": false,
+      "bytes": 3217
+    },
+    "_doc/SkillAI/mental_model/predictions/30510007.yaml": {
+      "sha256": "f28f68885972510cd518015ddcbffda40b6b1265a8ba08b53928a0deb7691ddb",
+      "hbs": false,
+      "py": false,
+      "bytes": 2864
+    },
+    "_doc/SkillAI/mental_model/predictions/30512002_b006.yaml": {
+      "sha256": "b4b93170c89ae2e0d2c7899aa6cd5dac402ecd7c32e7687594068af64bb47406",
+      "hbs": false,
+      "py": false,
+      "bytes": 3524
+    },
+    "_doc/SkillAI/mental_model/predictions/30524001_b012.yaml": {
+      "sha256": "543cdfeb9cb01041b3f9b132b7b4cc743a4c1fe0fac76c78c8a670d9adc801f1",
+      "hbs": false,
+      "py": false,
+      "bytes": 2262
+    },
+    "_doc/SkillAI/mental_model/predictions/30524007_b006.yaml": {
+      "sha256": "86a538d5c327292fc5f49dab0609f247cdb52dcf83d7717ba869708b8369b9e5",
+      "hbs": false,
+      "py": false,
+      "bytes": 2615
+    },
+    "_doc/SkillAI/mental_model/predictions/30525001_holdout_v5.yaml": {
+      "sha256": "b4376d77b14fa3d577a5cfbf01f2099506ae32b954e2b548777c609629d691f6",
+      "hbs": false,
+      "py": false,
+      "bytes": 7014
+    },
+    "_doc/SkillAI/mental_model/predictions/30531005.yaml": {
+      "sha256": "d2608042b3c010811752c88a6b09dd7d6a2ffafbb2a5cc1ca2d26ba37ab93f9c",
+      "hbs": false,
+      "py": false,
+      "bytes": 2830
+    },
+    "_doc/SkillAI/mental_model/predictions/30531006.yaml": {
+      "sha256": "59c60d8070d5fb731beabcf9329706ef056d9af61282520e8e9e27876a9705d9",
+      "hbs": false,
+      "py": false,
+      "bytes": 5765
+    },
+    "_doc/SkillAI/mental_model/predictions/30531008.yaml": {
+      "sha256": "2506180d800fd88cb3fedd9cf648e0b6d1549870333370debebae05ce6affffd",
+      "hbs": false,
+      "py": false,
+      "bytes": 5340
+    },
+    "_doc/SkillAI/mental_model/predictions/30532001.yaml": {
+      "sha256": "a7135194daa42cc98d10ef9d5a6ead53ed5eeeef31ef784447ffff819de2a538",
+      "hbs": false,
+      "py": false,
+      "bytes": 4919
+    },
+    "_doc/SkillAI/mental_model/predictions/30533001_b012.yaml": {
+      "sha256": "0ab92cf92e8edf074e4c2b48aa8aa78da46c378e85683bbeb7f66abd08f9565c",
+      "hbs": false,
+      "py": false,
+      "bytes": 2584
+    },
+    "_doc/SkillAI/mental_model/predictions/30534004.yaml": {
+      "sha256": "a59308309ffa78376e1f5ca87861160ba641c81b893adc9df24879217200bab5",
+      "hbs": false,
+      "py": false,
+      "bytes": 4336
+    },
+    "_doc/SkillAI/mental_model/predictions/30535000.yaml": {
+      "sha256": "9c1f2d42c30977612b6e25771e1327bb868509c48d746fb4e9494a401c097262",
+      "hbs": false,
+      "py": false,
+      "bytes": 4106
+    },
+    "_doc/SkillAI/mental_model/predictions/30621006_b013.yaml": {
+      "sha256": "e79bb6b9f0d0a86d1dcfeb557b6916276368ccb27f9028c3484dfd7943d758d1",
+      "hbs": false,
+      "py": false,
+      "bytes": 2049
+    },
+    "_doc/SkillAI/mental_model/predictions/308071.yaml": {
+      "sha256": "1cc6dd1252a960964444aba0bceaf235cca6bb3941cb2cb77f623f4d4ee1fa3e",
+      "hbs": false,
+      "py": false,
+      "bytes": 2663
+    },
+    "_doc/SkillAI/mental_model/predictions/308072.yaml": {
+      "sha256": "e2720da795306f5e2a8285e63cc3da86358903b4f17f37cf5a5663d05b1d5589",
+      "hbs": false,
+      "py": false,
+      "bytes": 3618
+    },
+    "_doc/SkillAI/mental_model/predictions/32004137_b010.yaml": {
+      "sha256": "7757c5c7a76a88f9c2d23ddf8bb4e3f78c35e10442aa0a44ad35418abc5bc6ff",
+      "hbs": false,
+      "py": false,
+      "bytes": 2563
+    },
+    "_doc/SkillAI/mental_model/predictions/400001.yaml": {
+      "sha256": "6ecd2dc1049b8def8925c051e6ecbc09adc105a136ecf7358055c5556d1fdaad",
+      "hbs": false,
+      "py": false,
+      "bytes": 3933
+    },
+    "_doc/SkillAI/mental_model/predictions/400019.yaml": {
+      "sha256": "1dfffa21b6ee02d178d351702b0483be9f1cd200284832a586898ddc8c434d25",
+      "hbs": false,
+      "py": false,
+      "bytes": 2251
+    },
+    "_doc/SkillAI/mental_model/predictions/4400001_b014.yaml": {
+      "sha256": "d3cb6e29e87b815c87fbbdff2a0b9a3b2d5cd4b2a1fe41af9dd57bb8922e793d",
+      "hbs": false,
+      "py": false,
+      "bytes": 4338
+    },
+    "_doc/SkillAI/mental_model/predictions/6582401_b014.yaml": {
+      "sha256": "327e8cefa44a16ea1809afa1057b6db7bd53845ad81d258b5bcfd4b0b97af476",
+      "hbs": false,
+      "py": false,
+      "bytes": 4286
+    },
+    "_doc/SkillAI/mental_model/predictions/66000081_b010.yaml": {
+      "sha256": "c6edc0eca451cd31624e79603bc3bc05029d8cbcbbe80bc029ad1b3584263efe",
+      "hbs": false,
+      "py": false,
+      "bytes": 1809
+    },
+    "_doc/SkillAI/mental_model/predictions/660007_b013.yaml": {
+      "sha256": "4324e4b6ad0f45ae929648d4022a5f70d775edf48d4538bad6448f6d9106215f",
+      "hbs": false,
+      "py": false,
+      "bytes": 2161
+    },
+    "_doc/SkillAI/mental_model/predictions/940021_b010.yaml": {
+      "sha256": "46404578c1e20c3965570704f635a8621fe0ba1efe7b22348dc380e9fe2607a0",
+      "hbs": false,
+      "py": false,
+      "bytes": 3297
+    },
+    "_doc/SkillAI/mental_model/predictions/B-021_predictions.yaml": {
+      "sha256": "121f37d3ee96affe8e3bffad09cc7a9737bc2cadb9349baabe3e9112599ad995",
+      "hbs": false,
+      "py": false,
+      "bytes": 9144
+    },
+    "_doc/SkillAI/mental_model/predictions/B-045/146004518.yaml": {
+      "sha256": "1d9bd98260a91fe0ea8686ce9df626ea8ef5abcf1d2f9f5b16335fdb8881eaff",
+      "hbs": false,
+      "py": false,
+      "bytes": 1569
+    },
+    "_doc/SkillAI/mental_model/predictions/B-045/146004519.yaml": {
+      "sha256": "2aa8d8e6a7c105a4f6b8a34f2565354e5e537756383f7831ee87018523f97641",
+      "hbs": false,
+      "py": false,
+      "bytes": 1449
+    },
+    "_doc/SkillAI/mental_model/predictions/B-045/1460085.yaml": {
+      "sha256": "4cd012f8a2f02a459aa43ff3609164c6d539a265d98d2cb677c77d4520159974",
+      "hbs": false,
+      "py": false,
+      "bytes": 1627
+    },
+    "_doc/SkillAI/mental_model/predictions/B-045/30121100.yaml": {
+      "sha256": "3d001436967bb741520a97bbd36c8e8a01a68a711a5ad3e3d9f334d67fc653ae",
+      "hbs": false,
+      "py": false,
+      "bytes": 1625
+    },
+    "_doc/SkillAI/mental_model/predictions/B-045/30212007.yaml": {
+      "sha256": "befa30f94eb3a27723298ab7cbaec2150d484e28d24894933654458f59c75133",
+      "hbs": false,
+      "py": false,
+      "bytes": 1539
+    },
+    "_doc/SkillAI/mental_model/predictions/B-045/30334002.yaml": {
+      "sha256": "3db606c53d7b1b185bcf407c3103cf6bb752881931ebba0b27816483e4b9b9ff",
+      "hbs": false,
+      "py": false,
+      "bytes": 1621
+    },
+    "_doc/SkillAI/mental_model/predictions/B-045/30522004.yaml": {
+      "sha256": "245dbfda64fc181dac3fb4493d81c8dbeb0163468cba57e209f34e447d74e6f5",
+      "hbs": false,
+      "py": false,
+      "bytes": 1460
+    },
+    "_doc/SkillAI/mental_model/predictions/B-045/30525007.yaml": {
+      "sha256": "c0f9a096108951c3f6a7393badd280a2c5623a772d5dccb246aa6884971b619d",
+      "hbs": false,
+      "py": false,
+      "bytes": 1669
+    },
+    "_doc/SkillAI/mental_model/predictions/B-045/30531001.yaml": {
+      "sha256": "dec5f7a3d4d48d899b7baca773ad1a99c691fbad04872fd723c04f6e93dc4487",
+      "hbs": false,
+      "py": false,
+      "bytes": 1444
+    },
+    "_doc/SkillAI/mental_model/predictions/B-045/740040.yaml": {
+      "sha256": "23f17b93c9a8147cb9baeb0d096091e13c44068d3726a94235e8869c2f7f07c5",
+      "hbs": false,
+      "py": false,
+      "bytes": 1470
+    },
+    "_doc/SkillAI/mental_model/predictions/B-045/_index.yaml": {
+      "sha256": "cb14909de881ec2ea678dba1fbc16d62d9f00aaa753760bd9ea21b1a670c780e",
+      "hbs": false,
+      "py": false,
+      "bytes": 1975
+    },
+    "_doc/SkillAI/mental_model/predictions/b007_combined.yaml": {
+      "sha256": "7d1b9046a1e743ffa8a22e09d5b3cb418c688b4a55017cf36711802fc8e952f7",
+      "hbs": false,
+      "py": false,
+      "bytes": 19848
+    },
+    "_doc/SkillAI/mental_model/predictions/b008_combined.yaml": {
+      "sha256": "1d6350e9a42770e60d087983b3bb4dcf9342de8005fe944166e86ae8a71e85cc",
+      "hbs": false,
+      "py": false,
+      "bytes": 18356
+    },
+    "_doc/SkillAI/mental_model/predictions/README.md": {
+      "sha256": "75ab37e28181dbacd76b1614608bdd483cd240748e0ad79f6199ae271b1bdae9",
+      "hbs": false,
+      "py": false,
+      "bytes": 275
+    },
+    "_doc/SkillAI/mental_model/README.md": {
+      "sha256": "9053383d89dcee72d5b4fc3422d48070dcab99cdddf826bd4cbdb3f0b54ccb8f",
+      "hbs": false,
+      "py": false,
+      "bytes": 730378
+    },
+    "_doc/SkillAI/mental_model/SkillEditor文件结构.md": {
+      "sha256": "d909f3202dbdaa7e911c7de5da60b8d3a46a5f47198f0c31f8cadfa470e5ee75",
+      "hbs": false,
+      "py": false,
+      "bytes": 16493
+    },
+    "_doc/SkillAI/mental_model/SkillEntry系统.md": {
+      "sha256": "7e04823eb9753ce06eedd6d8909c8f14c7bcc7f254d18246d15356b725090422",
+      "hbs": false,
+      "py": false,
+      "bytes": 384755
+    },
+    "_doc/SkillAI/mental_model/SkillEvent系统.md": {
+      "sha256": "9c38d196dcf7f7cf8284a1158a82e82fbdf95b7e89033ba7dd06de8dfc45e4b9",
+      "hbs": false,
+      "py": false,
+      "bytes": 27634
+    },
+    "_doc/SkillAI/mental_model/SkillTag系统.md": {
+      "sha256": "1c01bb8c6d62cf3e4e6b9bea9043ad9b28d16fee040ff7a9a7d1f14fa1cf6023",
+      "hbs": false,
+      "py": false,
+      "bytes": 37893
+    },
+    "_doc/SkillAI/mental_model/伤害管线.md": {
+      "sha256": "0904b01244fc3fa4aaba369c4d3f3abc44eeacdc529ed70fabfad9b0a6d8d1a9",
+      "hbs": false,
+      "py": false,
+      "bytes": 20597
+    },
+    "_doc/SkillAI/mental_model/参数与上下文.md": {
+      "sha256": "7221d57d6a8e8f02889c6187a96081b4a62c2576fdac1e9a8802398e309dfdcf",
+      "hbs": false,
+      "py": false,
+      "bytes": 12422
+    },
+    "_doc/SkillAI/mental_model/子弹系统.md": {
+      "sha256": "b582badae6ee3d60183c42fa9d43118f8b221376826e007f52c9c063dac093e6",
+      "hbs": false,
+      "py": false,
+      "bytes": 11535
+    },
+    "_doc/SkillAI/mental_model/学习清单.md": {
+      "sha256": "10836f884455b1b4ed0c997831f5a73948fcfef84c64ea46d698934fc5f50330",
+      "hbs": false,
+      "py": false,
+      "bytes": 39178
+    },
+    "_doc/SkillAI/mental_model/学习范围_v2.md": {
+      "sha256": "305349cfb405147561639ddade00f805ea1587c2cfa383783b3b1a739209ae3e",
+      "hbs": false,
+      "py": false,
+      "bytes": 17785
+    },
+    "_doc/SkillAI/mental_model/实体碰撞与可见性.md": {
+      "sha256": "e3c599dcafbe48f95568973e30ce09e7b568ae67685e6698ebfdf70b91a49c49",
+      "hbs": false,
+      "py": false,
+      "bytes": 8578
+    },
+    "_doc/SkillAI/mental_model/工具链.md": {
+      "sha256": "ed8e0b8b584b6fdbe05b5b08436013739b8082968cdaa72b24c23eacf7f3dfff",
+      "hbs": false,
+      "py": false,
+      "bytes": 24059
+    },
+    "_doc/SkillAI/mental_model/控制流子系统.md": {
+      "sha256": "c552cc1ce20e9bd23b0d9cadd0dd3c6d853094ecc329eff13b57385c0256752d",
+      "hbs": false,
+      "py": false,
+      "bytes": 10805
+    },
+    "_doc/SkillAI/mental_model/模板系统.md": {
+      "sha256": "2aedfa07d54197f9b685355a988383de9d2e03c20c4ecd02b7a394bd3116ba34",
+      "hbs": false,
+      "py": false,
+      "bytes": 279291
+    },
+    "_doc/SkillAI/mental_model/链状指示器子弹.md": {
+      "sha256": "620b3d751110c01e299572e1ab0f0309121eaaf2b86ff0cb3cf4396efe6b06aa",
+      "hbs": false,
+      "py": false,
+      "bytes": 7331
+    },
+    "_doc/SkillAI/postmortem/2026-05-08-002-ir-v1.1-mvp-fields.md": {
+      "sha256": "17c3e621000fbccd48e735c0b001a03531776e0496553d989ae131acd15e3cb1",
+      "hbs": false,
+      "py": false,
+      "bytes": 3628
+    },
+    "_doc/SkillAI/postmortem/2026-05-08-003-explosion-aoe-misconception.md": {
+      "sha256": "8dc61118c21ad8a9949826c0a83ea20a2816f59720bcb9996bad39e000a04709",
+      "hbs": false,
+      "py": false,
+      "bytes": 5145
+    },
+    "_doc/SkillAI/postmortem/2026-05-08-004-cast-vs-buffer-end.md": {
+      "sha256": "9bc04813009ec39e3796dfc6df3581b6ab85c4f32b5199a244f169ce5d85d17d",
+      "hbs": false,
+      "py": false,
+      "bytes": 2637
+    },
+    "_doc/SkillAI/postmortem/2026-05-08-005-firstpass-quality.md": {
+      "sha256": "9056ccc77b0c932546dddafad170561d5950402739367ba44b947782b289afdd",
+      "hbs": false,
+      "py": false,
+      "bytes": 4157
+    },
+    "_doc/SkillAI/postmortem/2026-05-08-006-ir-v1.2-boomerang-pattern.md": {
+      "sha256": "e804cd038dfedac1ad99a8b23a6b4bc23168f93e2ede26014c38c232f253ae05",
+      "hbs": false,
+      "py": false,
+      "bytes": 6524
+    },
+    "_doc/SkillAI/postmortem/2026-05-08-007-boomerang-redesign.md": {
+      "sha256": "7f2fe66176968e8335c9e40342962a660318bb06688dc1d879bea6a9f0db782f",
+      "hbs": false,
+      "py": false,
+      "bytes": 5796
+    },
+    "_doc/SkillAI/postmortem/2026-05-08-008-collision-template-params.md": {
+      "sha256": "51463b7fa312abeda77bfb1564b55816d56242f17df49d157e3131f3b551b5da",
+      "hbs": false,
+      "py": false,
+      "bytes": 5174
+    },
+    "_doc/SkillAI/postmortem/2026-05-08-009-trigger-vs-shape-enum.md": {
+      "sha256": "3a7c7940429255115a49f62d7b3b7cb817f056e166911b416d1f991768fa83f5",
+      "hbs": false,
+      "py": false,
+      "bytes": 5475
+    },
+    "_doc/SkillAI/postmortem/2026-05-08-010-distance-cutoff-bug.md": {
+      "sha256": "e42336e90af8519a0d9e9b818eeae2aaaa2aee8efa7ffd44759985c2cb7d2acd",
+      "hbs": false,
+      "py": false,
+      "bytes": 2480
+    },
+    "_doc/SkillAI/postmortem/2026-05-08-011-dual-collision-self-detect.md": {
+      "sha256": "e22dfb9960ce13edb288c2bb69298fa826b0ed36d9135d99b1bf79c631381a6b",
+      "hbs": false,
+      "py": false,
+      "bytes": 3254
+    },
+    "_doc/SkillAI/postmortem/2026-05-08-012-detection-cooldown-vs-startup-delay.md": {
+      "sha256": "69540e06f9e408dc88c7982ebbb34a16ab9a8275d69db5b59fd92f5fac8aad0f",
+      "hbs": false,
+      "py": false,
+      "bytes": 3824
+    },
+    "_doc/SkillAI/postmortem/2026-05-08-013-ir-v2.0-mvp-shipped.md": {
+      "sha256": "11be484aa18eed6df7ac3236fce31007446f9fc78b82eedfe0df0166d73c7232",
+      "hbs": false,
+      "py": false,
+      "bytes": 4409
+    },
+    "_doc/SkillAI/postmortem/2026-05-08-014-indicator-enum-fix.md": {
+      "sha256": "37a134a4f7551a7e4df10a75c3fc090b26c00cc23200614214fc8fe28a0a7bcf",
+      "hbs": false,
+      "py": false,
+      "bytes": 2932
+    },
+    "_doc/SkillAI/postmortem/2026-05-08-015-two-stage-real-mechanism.md": {
+      "sha256": "d260eb5d737246ac5f6fe367ac5e0b6dbca330641022cbfec262ab8d72add92a",
+      "hbs": false,
+      "py": false,
+      "bytes": 5728
+    },
+    "_doc/SkillAI/postmortem/2026-05-08-016-two-stage-v2.2-fixes.md": {
+      "sha256": "51deb7928580c6e8e965f59fd81877a656b9f8cdbd876cea2e57e9c6ad5eb643",
+      "hbs": false,
+      "py": false,
+      "bytes": 7001
+    },
+    "_doc/SkillAI/postmortem/2026-05-08-017-skill-tag-cross-skill.md": {
+      "sha256": "d20cf3109cb50914ca078af5abdbbe37aaf46619c702fc0f4b0c5cb3915fc31a",
+      "hbs": false,
+      "py": false,
+      "bytes": 7165
+    },
+    "_doc/SkillAI/postmortem/2026-05-08-018-int32-overflow.md": {
+      "sha256": "84fcfb9ebeb74369bcaaff385f829d1ad7f16d8a7d5ce98d83e62dd9710ac42b",
+      "hbs": false,
+      "py": false,
+      "bytes": 5307
+    },
+    "_doc/SkillAI/postmortem/2026-05-08-019-entity-level-tag.md": {
+      "sha256": "f301f96db5f9b445275fd99c803d8b3c2e1f860f7d13f974e86dbb78397eea04",
+      "hbs": false,
+      "py": false,
+      "bytes": 5607
+    },
+    "_doc/SkillAI/postmortem/2026-05-08-020-tag-third-pattern-and-indicator7.md": {
+      "sha256": "535152606df86fe7e43ec32fc29f4cb53ef81e85e34f408c07fae0eb6a74916c",
+      "hbs": false,
+      "py": false,
+      "bytes": 6283
+    },
+    "_doc/SkillAI/postmortem/2026-05-08-021-global-id-uniqueness.md": {
+      "sha256": "025315c2184f517d1cd8b8b9a9402bfac3228a90dcbf36821a038f201990a33c",
+      "hbs": false,
+      "py": false,
+      "bytes": 5555
+    },
+    "_doc/SkillAI/postmortem/2026-05-09-022-dynamic-port-edge-lint.md": {
+      "sha256": "da7d26f45a07333104e4b78f2a2d32c536c7ff51671c6a34cd1f65e846e2ac9a",
+      "hbs": false,
+      "py": false,
+      "bytes": 9315
+    },
+    "_doc/SkillAI/postmortem/2026-05-09-023-tco-operator-mismatch-and-e021.md": {
+      "sha256": "883a25a01ac493787ae4d167c8f3ff690485bc2eb6af576ed6e0dcbe9567c43a",
+      "hbs": false,
+      "py": false,
+      "bytes": 9332
+    },
+    "_doc/SkillAI/postmortem/2026-05-09-024-double-root-template-anti-pattern.md": {
+      "sha256": "c681bf713e2e6129978cc7646e6742fbbcac366d2b4c76804a05e1fa4cff9a96",
+      "hbs": false,
+      "py": false,
+      "bytes": 9164
+    },
+    "_doc/SkillAI/postmortem/2026-05-09-025-gate05-bullet-engine-limits.md": {
+      "sha256": "9aaa6b88d0636c7b7695b6e93daff6455d5c8d92e04a9be5a3190077ae27ddd6",
+      "hbs": false,
+      "py": false,
+      "bytes": 7952
+    },
+    "_doc/SkillAI/postmortem/2026-05-09-026-repeat-execute-c++-cap-runtime-error.md": {
+      "sha256": "a740581251e91abc6112284c64857e50ed56d051a6dee5aad2d25f7e655e0190",
+      "hbs": false,
+      "py": false,
+      "bytes": 5682
+    },
+    "_doc/SkillAI/postmortem/2026-05-11-030-ai-self-produced-template-trap.md": {
+      "sha256": "c6b973a686aeaef781497b7a62a6afaad87351f7934ce33a3652fed97768b892",
+      "hbs": false,
+      "py": false,
+      "bytes": 20324
+    },
+    "_doc/SkillAI/postmortem/2026-05-11-031-30212017-rotating-bullet-ring-7-mvp-iterations.md": {
+      "sha256": "dbb245866821fa48189215dcbda90eb6209d489c4283a732039660f30e4ea333",
+      "hbs": false,
+      "py": false,
+      "bytes": 9389
+    },
+    "_doc/SkillAI/postmortem/2026-05-11-032-bulletconfig-afterborn-semantics-and-onTick-repeat.md": {
+      "sha256": "37e46adf75898b6ee9d4188c1f129c0366c05d737a06c9ddff579d7367a97c4a",
+      "hbs": false,
+      "py": false,
+      "bytes": 4718
+    },
+    "_doc/SkillAI/postmortem/2026-05-12-033-skilleditor-unique-parent-rule.md": {
+      "sha256": "ae8e5d67e636ad082a32dcf4482726cfec8c97e840c7f1dd21025085fbe2b673",
+      "hbs": false,
+      "py": false,
+      "bytes": 4762
+    },
+    "_doc/SkillAI/postmortem/2026-05-12-034-dynamic-vs-fixed-port-skilleditor.md": {
+      "sha256": "38692a28909f5dffe74721c127816e3f589691e5fc7291f630346a5b3935c823",
+      "hbs": false,
+      "py": false,
+      "bytes": 3896
+    },
+    "_doc/SkillAI/postmortem/2026-05-12-035-bulletconfig-modelconfig-id-dup.md": {
+      "sha256": "8f65d6c42f68b5c555fd1fc8ecfc2136cac3b1b06efc7bec4187dd6ec066de7f",
+      "hbs": false,
+      "py": false,
+      "bytes": 9390
+    },
+    "_doc/SkillAI/postmortem/2026-05-12-036-collision-template-default-values.md": {
+      "sha256": "b58ad0ec4160e31402dfe8f685fa374e743963d20fdbbcaacd719121c9b932e3",
+      "hbs": false,
+      "py": false,
+      "bytes": 9229
+    },
+    "_doc/SkillAI/postmortem/2026-05-13-037-skilleditor-json-dual-array.md": {
+      "sha256": "deda9a982ed3603ca9c67bb58afddd5e53f0100fea16a3f0c9d2df808ddc5b80",
+      "hbs": false,
+      "py": false,
+      "bytes": 3359
+    },
+    "_doc/SkillAI/postmortem/2026-05-13-038-nested-skilleffect-main-entity-trap.md": {
+      "sha256": "b019d72221f9876ae406cb8ddd0cb9c61bc5530c2b9bb8629d2ab5564994f32b",
+      "hbs": false,
+      "py": false,
+      "bytes": 5783
+    },
+    "_doc/SkillAI/postmortem/2026-05-13-038-relay-message-assertion-unverified.md": {
+      "sha256": "2ebc1b4653d7a5afbcc751814cd8ace66250f2fde3c1462aea14971783467904",
+      "hbs": false,
+      "py": false,
+      "bytes": 6300
+    },
+    "_doc/SkillAI/postmortem/2026-05-13-039-create-bullet-refconfig.md": {
+      "sha256": "4c0f1d9a1c1d08f79d388b71a079dbfbe20ab520d99588ee5b08ff7a505138c3",
+      "hbs": false,
+      "py": false,
+      "bytes": 6186
+    },
+    "_doc/SkillAI/postmortem/2026-05-13-040-empty-bullet-model.md": {
+      "sha256": "31cbb9268a8022659de441f96aa5cb61d7ed278ad8698ca857163988b81caaab",
+      "hbs": false,
+      "py": false,
+      "bytes": 4818
+    },
+    "_doc/SkillAI/postmortem/README.md": {
+      "sha256": "781ed4c471962c35adb0760b08ecb3a499ed805de527ceb9822aec5b63be8d85",
+      "hbs": false,
+      "py": false,
+      "bytes": 17510
+    },
+    "_doc/SkillAI/README.md.hbs": {
+      "sha256": "0099b1e307b57079145e7d647c909a40eea5abe5bea525a359aa2380f4c2a5e4",
+      "hbs": true,
+      "py": false,
+      "bytes": 15208
+    },
+    "_doc/SkillAI/samples/ir/30214005_烈焰直射.skill.yaml": {
+      "sha256": "9c0e048f17b431c67b36186bf58aabd6a1325fe6c532eaaeff247d56baa9fcd8",
+      "hbs": false,
+      "py": false,
+      "bytes": 3895
+    },
+    "_doc/SkillAI/samples/ir/30224009_魔影迷踪.skill.yaml": {
+      "sha256": "a36257569cd3644c5177f62d1c353a48ac11c937bba9f112ba265547469615f5",
+      "hbs": false,
+      "py": false,
+      "bytes": 4577
+    },
+    "_doc/SkillAI/samples/ir/SkillGraph_30122900_PoC测试-直线子弹.json": {
+      "sha256": "4b93de329f2318972c11cf0c76c5f9ea6752366fc4790a9c4eb6b262f26d308c",
+      "hbs": false,
+      "py": false,
+      "bytes": 73477
+    },
+    "_doc/SkillAI/samples/ir/SkillGraph_30214005_烈焰直射.json": {
+      "sha256": "2cb540a5e34bd8b92f119e6d9bde14f0976a711d859c5ed2ba6e47959f6aebbd",
+      "hbs": false,
+      "py": false,
+      "bytes": 73515
+    },
+    "_doc/SkillAI/samples/ir/SkillGraph_30224009_魔影迷踪.json": {
+      "sha256": "0121335127ffa4de720bfafe4d918bb442b4c0d53fd116fc70767c2a5d3b3bb5",
+      "hbs": false,
+      "py": false,
+      "bytes": 126037
+    },
+    "_doc/SkillAI/samples/ir/SkillGraph_30224010_魔影迷踪_回传.json": {
+      "sha256": "01a80dbbe481906c9e573f9b248a56a8dd5161a8ee20ea99db67d855d3d82f53",
+      "hbs": false,
+      "py": false,
+      "bytes": 23052
+    },
+    "_doc/SkillAI/samples/json/SkillGraph_30212009_BACKUP_v1.json": {
+      "sha256": "0316132963b1645b756dbd0e174c845c6780bf6d86e9878656cd4b445f66e837",
+      "hbs": false,
+      "py": false,
+      "bytes": 295779
+    },
+    "_doc/SkillAI/samples/json/SkillGraph_30212010_BACKUP_pre_desc_20260511_100100.json": {
+      "sha256": "57eeee79079c6f9cec65ab6e98af823ba8d4caced7cacf894aa6f59b7cc538de",
+      "hbs": false,
+      "py": false,
+      "bytes": 479950
+    },
+    "_doc/SkillAI/samples/json/_archive_v08_failed/SkillGraph_30212016_v1_failed_template_route_BACKUP_2026-05-11.json": {
+      "sha256": "f0fd9268d880c1fec2a1ecbdd3c90af39e68d4f654714f17fe779c7227ac01b1",
+      "hbs": false,
+      "py": false,
+      "bytes": 25567
+    },
+    "_doc/SkillAI/samples/json/_cos_real.txt": {
+      "sha256": "181ab3271d33ebeb70a848ce9954d24b805fd073d9e8353ced8f22569d74720d",
+      "hbs": false,
+      "py": false,
+      "bytes": 880
+    },
+    "_doc/SkillAI/samples/json/_id1006_search.txt": {
+      "sha256": "d206075cef3d7245f66e45d562d7e3f4da53fa5e607e31ac71c2af8bb3492e04",
+      "hbs": false,
+      "py": false,
+      "bytes": 649
+    },
+    "_doc/SkillAI/samples/json/_log_creates.txt": {
+      "sha256": "4b1ed0d992b84414a32761010272849597e229a51f9e7f211f9beaf5b9a55fc2",
+      "hbs": false,
+      "py": false,
+      "bytes": 7156
+    },
+    "_doc/SkillAI/samples/markdown/demo_30122001.md": {
+      "sha256": "4ca4cab0e43c399cc998110edcc32cbb5dfa939fada46166ba5cf5563b436f63",
+      "hbs": false,
+      "py": false,
+      "bytes": 9931
+    },
+    "_doc/SkillAI/samples/markdown/demo_30122900_compiled.md": {
+      "sha256": "ec146627fcac6c47990c165d1065c6326acde590d47aa82329b5bad533428d08",
+      "hbs": false,
+      "py": false,
+      "bytes": 3119
+    },
+    "_doc/SkillAI/samples/markdown/demo_30122900_v2.md": {
+      "sha256": "c13a82e3c6dfd2dfd82d3783703ff98f84714be227ff2d6eef5268f6f5a18de0",
+      "hbs": false,
+      "py": false,
+      "bytes": 6875
+    },
+    "_doc/SkillAI/samples/markdown/demo_30222005.md": {
+      "sha256": "eb026b55ec9084451a06b2c2141fc1836fc46f00c4713621ce76cd2ed1003da4",
+      "hbs": false,
+      "py": false,
+      "bytes": 33202
+    },
+    "_doc/SkillAI/tools/builders/audit_fan_template_tp8.py": {
+      "sha256": "d0942ad2f24fa27f31502cf9148cb782a3bd9186b71ecd96f08c9ec443fda2a4",
+      "hbs": false,
+      "py": true,
+      "bytes": 8195
+    },
+    "_doc/SkillAI/tools/builders/build_30212017_mvp1_single_bullet_x_move.py": {
+      "sha256": "ae72610a8b65400e3e182cee5895d04fa4fa6cf0ee0d956b3f31d179d8369792",
+      "hbs": false,
+      "py": true,
+      "bytes": 27978
+    },
+    "_doc/SkillAI/tools/builders/build_30212018_yesan_fengxing_poc.py": {
+      "sha256": "af8afe4c0157648e27e4d35dc8b486cf1133c1af5be7dce3e0b806b4202e6c54",
+      "hbs": false,
+      "py": true,
+      "bytes": 18694
+    },
+    "_doc/SkillAI/tools/builders/build_fan_layered_template.py": {
+      "sha256": "02528ddd6bcad52aa3806b6db26191824e1b6e0caac113777aab45f8180e6183",
+      "hbs": false,
+      "py": true,
+      "bytes": 47901
+    },
+    "_doc/SkillAI/tools/builders/fill_desc_30212009.py": {
+      "sha256": "2eb241ac53fbde0e37ba57b9f9ea59d2d9174fc3de19d5133b91b1604c56d03f",
+      "hbs": false,
+      "py": true,
+      "bytes": 5208
+    },
+    "_doc/SkillAI/tools/builders/patch_30112001_pierce_count_destroy.py": {
+      "sha256": "d5d3d9262cba7b99f10c23e66fa4dfeb83fed0f955938badf4e2b8fb85f8acaf",
+      "hbs": false,
+      "py": true,
+      "bytes": 24001
+    },
+    "_doc/SkillAI/tools/builders/patch_30212009_anchor_bullet.py": {
+      "sha256": "47564fe52fe6b3c92a7ac0bd507ef0e6ac1ae4e1d68aaac580e146dbea167670",
+      "hbs": false,
+      "py": true,
+      "bytes": 8368
+    },
+    "_doc/SkillAI/tools/builders/patch_30212009_displace_tag.py": {
+      "sha256": "dd9da936b85c80bd7407354c6fc9468d6ecebd77659e72f5e9690c2d11b6f306",
+      "hbs": false,
+      "py": true,
+      "bytes": 6383
+    },
+    "_doc/SkillAI/tools/builders/patch_30212009_indicator_n_tag.py": {
+      "sha256": "715d9f34d087e7fd5d25321406fd605a1e418421121e27f6ec48d2b4c1e7f333",
+      "hbs": false,
+      "py": true,
+      "bytes": 7974
+    },
+    "_doc/SkillAI/tools/builders/patch_30212010_install_windmill.py": {
+      "sha256": "abc53253beb34e44c7003491c17d418df3652d526ae506f7ba45039394d5db4b",
+      "hbs": false,
+      "py": true,
+      "bytes": 27088
+    },
+    "_doc/SkillAI/tools/builders/patch_30212017_add_reset.py": {
+      "sha256": "8c23b334bd79b4e5a55f7c9250e01ef6b8d4a49bd658456f79cacb58fa4ac7df",
+      "hbs": false,
+      "py": true,
+      "bytes": 6508
+    },
+    "_doc/SkillAI/tools/builders/patch_30212017_change_position.py": {
+      "sha256": "c843b81b67c987d1df71fe9274bec3dbabde15a0c4f8233d0654fd2115448eac",
+      "hbs": false,
+      "py": true,
+      "bytes": 5087
+    },
+    "_doc/SkillAI/tools/builders/patch_30212017_mvp10_initial_radius.py": {
+      "sha256": "0e131444e5d90342eadd908cd206ea0ad97cabbad05de138db7ed7027ff232d1",
+      "hbs": false,
+      "py": true,
+      "bytes": 5087
+    },
+    "_doc/SkillAI/tools/builders/patch_30212017_mvp11_rewrite_docs.py": {
+      "sha256": "504ad192a79cadcf1ffa42f79c036bd64eaefe25fea3143364d19f816409872c",
+      "hbs": false,
+      "py": true,
+      "bytes": 8193
+    },
+    "_doc/SkillAI/tools/builders/patch_30212017_mvp12_decouple_radius_speed.py": {
+      "sha256": "70ca129d5535cc2731dea70cc3766a9c1811371e71bd52e7c1880caf64b9ddce",
+      "hbs": false,
+      "py": true,
+      "bytes": 14006
+    },
+    "_doc/SkillAI/tools/builders/patch_30212017_mvp13_rewrite_desc_v2.py": {
+      "sha256": "af1ad7efbef794039fc73964aeee18da550b7ba187d6bb6f7cb8ffb203a17b49",
+      "hbs": false,
+      "py": true,
+      "bytes": 8691
+    },
+    "_doc/SkillAI/tools/builders/patch_30212017_mvp14_windmill_model.py": {
+      "sha256": "be1472b868cd88b51f2eec14fdcd0f21e1c2dcd8d4eb2fb54f5ebc479f121183",
+      "hbs": false,
+      "py": true,
+      "bytes": 14834
+    },
+    "_doc/SkillAI/tools/builders/patch_30212017_mvp15_tip_tilt.py": {
+      "sha256": "3a3fe8cadb97fdc64e231d1e3c08ad19927beb1bd3bdf270e2ca965b4abe7dec",
+      "hbs": false,
+      "py": true,
+      "bytes": 8372
+    },
+    "_doc/SkillAI/tools/builders/patch_30212017_mvp16_dynamic_n.py": {
+      "sha256": "26153f75a709ccf639116b19e668dcdc31926fdd451944abc885ac10f50d8edd",
+      "hbs": false,
+      "py": true,
+      "bytes": 16337
+    },
+    "_doc/SkillAI/tools/builders/patch_30212017_mvp1_fix_repeat_and_modify.py": {
+      "sha256": "8dbd37cb8f0a7f61bf312902ef5f85a763b2072147492ac82cd7e92e1d337dde",
+      "hbs": false,
+      "py": true,
+      "bytes": 9595
+    },
+    "_doc/SkillAI/tools/builders/patch_30212017_mvp2a_cos_skilltag.py": {
+      "sha256": "398c075c522b5f3cf3674ab3d40c9e0031092d73166b2ecb54fcc42c4fb73520",
+      "hbs": false,
+      "py": true,
+      "bytes": 8797
+    },
+    "_doc/SkillAI/tools/builders/patch_30212017_mvp2a_split_numcalc.py": {
+      "sha256": "7f43d9b8a4fa467094686663676b714a1ba0dee60945d2d332ae73b42d3f875d",
+      "hbs": false,
+      "py": true,
+      "bytes": 5555
+    },
+    "_doc/SkillAI/tools/builders/patch_30212017_mvp2b_fix_slot.py": {
+      "sha256": "e3fa2b741cb183a629a88be9fe9e6db32a3c5177ca6874c69d1fb27d2569a28f",
+      "hbs": false,
+      "py": true,
+      "bytes": 4595
+    },
+    "_doc/SkillAI/tools/builders/patch_30212017_mvp2b_t_accumulator.py": {
+      "sha256": "7417942dca16001596addf9fcd73c916e4ed4870371b13f63dd11cf094c3d912",
+      "hbs": false,
+      "py": true,
+      "bytes": 6468
+    },
+    "_doc/SkillAI/tools/builders/patch_30212017_mvp2b_v2_skilltag_proper.py": {
+      "sha256": "e59a15cb75ddaee600fad8de1c5df7073b045c5251cf99e405000e111c6a3693",
+      "hbs": false,
+      "py": true,
+      "bytes": 9925
+    },
+    "_doc/SkillAI/tools/builders/patch_30212017_mvp2b_wire_4_new_nodes.py": {
+      "sha256": "e2b4b94c7b5ba2b7b5e7c599338a02332ac0daf1710be3fa6b04f7f1c0bde03e",
+      "hbs": false,
+      "py": true,
+      "bytes": 8800
+    },
+    "_doc/SkillAI/tools/builders/patch_30212017_mvp3_vR_acceleration.py": {
+      "sha256": "13acf3eede1795ff1f64560275eb494de99643f4a0da3c3dc1cd4367cb9fc111",
+      "hbs": false,
+      "py": true,
+      "bytes": 9049
+    },
+    "_doc/SkillAI/tools/builders/patch_30212017_mvp5a_n2.py": {
+      "sha256": "d30803a0b7012b6ae19aae1d67e42833b5c6b2213d70d11e46a5cdc5ceb51167",
+      "hbs": false,
+      "py": true,
+      "bytes": 5128
+    },
+    "_doc/SkillAI/tools/builders/patch_30212017_mvp5b_diff_facing.py": {
+      "sha256": "15159775625dde3cda0fe4606f18ea1d326a9848348857fa15d26d8ae0596e45",
+      "hbs": false,
+      "py": true,
+      "bytes": 3063
+    },
+    "_doc/SkillAI/tools/builders/patch_30212017_mvp5c_facing_drive.py": {
+      "sha256": "e7f0f3acba53889c802154d7c87cb29ede4c64a14d5fec34104fdb96533e76a2",
+      "hbs": false,
+      "py": true,
+      "bytes": 8839
+    },
+    "_doc/SkillAI/tools/builders/patch_30212017_mvp5d_relative_facing.py": {
+      "sha256": "6fa01393d32a1341f951cc0d994f2d51a1237a5c789b22f86fbc065711eb2b08",
+      "hbs": false,
+      "py": true,
+      "bytes": 7033
+    },
+    "_doc/SkillAI/tools/builders/patch_30212017_mvp5e_n8_circle.py": {
+      "sha256": "5fdee451afd3ea1a22fc83cdcb48a6c5cd130911fb1f11cc1bff25175559145c",
+      "hbs": false,
+      "py": true,
+      "bytes": 7149
+    },
+    "_doc/SkillAI/tools/builders/patch_30212017_mvp6a_attr91_spin.py": {
+      "sha256": "39d4c9a2f3541f2b2014da1bf9430e5fa9836c5687f236d1dd08d56a1c3c7b9b",
+      "hbs": false,
+      "py": true,
+      "bytes": 7774
+    },
+    "_doc/SkillAI/tools/builders/patch_30212017_mvp6a_fix_visual_orient.py": {
+      "sha256": "3ec698a29404cd65cd05a085d402c61a7b905b1b0545abc6ce641b18c2cf8dd1",
+      "hbs": false,
+      "py": true,
+      "bytes": 6412
+    },
+    "_doc/SkillAI/tools/builders/patch_30212017_mvp6a_flip_sign.py": {
+      "sha256": "5da201f154490ba9a34c36465d411f24c4f5f6d8da86540b76e4be37783050a3",
+      "hbs": false,
+      "py": true,
+      "bytes": 1989
+    },
+    "_doc/SkillAI/tools/builders/patch_30212017_mvp6a_self_spin.py": {
+      "sha256": "946643741e90cd5af7456285c3446ec4b4aacdb0024897d678800d30af91f35f",
+      "hbs": false,
+      "py": true,
+      "bytes": 6246
+    },
+    "_doc/SkillAI/tools/builders/patch_30212017_mvp7_damage.py": {
+      "sha256": "1e96c1784061ed0ff8d14cb09e90bc10519b06bea97f2bb270278bce4ae221ab",
+      "hbs": false,
+      "py": true,
+      "bytes": 8183
+    },
+    "_doc/SkillAI/tools/builders/patch_30212017_mvp8_extract_skilltags.py": {
+      "sha256": "f995f9ef591d4f243085dc77bc298640989bae80cdc9c231905025e95b139b99",
+      "hbs": false,
+      "py": true,
+      "bytes": 4184
+    },
+    "_doc/SkillAI/tools/builders/patch_30212017_mvp9_speed_scale.py": {
+      "sha256": "b2dd123b842ac1a6ffdf970d397213ca6fd85f3d0f473177ff52becb6c927896",
+      "hbs": false,
+      "py": true,
+      "bytes": 3008
+    },
+    "_doc/SkillAI/tools/builders/patch_30212017_realloc_conflicting_skilltags.py": {
+      "sha256": "ef8eb32c6a936e7236fee4316e5376a3a5da8ad8bb6f07e82d342b3c12db0601",
+      "hbs": false,
+      "py": true,
+      "bytes": 3157
+    },
+    "_doc/SkillAI/tools/builders/patch_30212018_copy_anim_sfx_unlock.py": {
+      "sha256": "e352cb32a52d51ca2549f4a4258bc597dcaba8e13074383a60f798a090ef4f90",
+      "hbs": false,
+      "py": true,
+      "bytes": 8425
+    },
+    "_doc/SkillAI/tools/builders/patch_30212018_copy_collision_chain.py": {
+      "sha256": "d45a6c041f1e788d15b2f69b3c9f53755279d8623b480c0bd29139fa4de17a89",
+      "hbs": false,
+      "py": true,
+      "bytes": 9597
+    },
+    "_doc/SkillAI/tools/builders/patch_30212018_fix_unique_parent_and_member_edges.py": {
+      "sha256": "1e79ddc3ef010d0fcd1b8bced45ff0360fe7ee9d1ea3e5d32d7d1ae51881fa51",
+      "hbs": false,
+      "py": true,
+      "bytes": 8133
+    },
+    "_doc/SkillAI/tools/builders/patch_30212018_rename_to_30212010_aigen.py": {
+      "sha256": "60b9f2aa959efe5f5eca445e43a24a112852258234c27a5fa7853f310ff7ebb4",
+      "hbs": false,
+      "py": true,
+      "bytes": 4655
+    },
+    "_doc/SkillAI/tools/builders/patch_30212018_rename_v2_simple.py": {
+      "sha256": "ff2c1835f272c17f5da4117ac96623c279b2a0bee25bf5e1f1f9b4e3c7149faf",
+      "hbs": false,
+      "py": true,
+      "bytes": 3201
+    },
+    "_doc/SkillAI/tools/builders/patch_fan_template_tp8_buff_gate.py": {
+      "sha256": "84a2842b098cac3ac30433b15fbe689f0ac1e98e713d1a7b88d9794da516b9e9",
+      "hbs": false,
+      "py": true,
+      "bytes": 14289
+    },
+    "_doc/SkillAI/tools/builders/rewrite_30212009.py": {
+      "sha256": "8770745b76d1e77dfe5cd50ece45d98b5c8bf0165ccdb75813bd0cb1d48c1dc9",
+      "hbs": false,
+      "py": true,
+      "bytes": 30197
+    },
+    "_doc/SkillAI/tools/builders/rewrite_30212009_v2.py": {
+      "sha256": "63977894f54f6267d43b668ad428f80ba58f9545304f04d96656630987c14127",
+      "hbs": false,
+      "py": true,
+      "bytes": 21878
+    },
+    "_doc/SkillAI/tools/builders/_archive/30212016_v08_failed_route/build_30212016_PoC_rotating_circle.py": {
+      "sha256": "c925bfaaea192d184d4cad6c4bbffddc7c1f0a5dcb4898ef823edefa3caa6145",
+      "hbs": false,
+      "py": true,
+      "bytes": 25472
+    },
+    "_doc/SkillAI/tools/builders/_archive/30212016_v08_failed_route/build_30212016_v2_anchor_bullet.py": {
+      "sha256": "8cd85c48747ed4d5ab5a921326700cb395980c2ab559a28fe1729ae3d6f85ffb",
+      "hbs": false,
+      "py": true,
+      "bytes": 27427
+    },
+    "_doc/SkillAI/tools/builders/_archive/30212016_v08_failed_route/build_rotating_expand_bullet_ring_template.py": {
+      "sha256": "c2d763ffcfc83e0c56a63384bac590f5266b2c933b47a716d1cd358c6b9c642b",
+      "hbs": false,
+      "py": true,
+      "bytes": 58633
+    },
+    "_doc/SkillAI/tools/builders/_archive/30212016_v08_failed_route/build_rotating_expand_bullet_ring_template_v05.py": {
+      "sha256": "85712ed02b9a036c99e48578af538566375e35c240a9a1716ccf397eb69e5671",
+      "hbs": false,
+      "py": true,
+      "bytes": 50883
+    },
+    "_doc/SkillAI/tools/builders/_archive/30212016_v08_failed_route/build_rotating_expand_bullet_ring_template_v07.py": {
+      "sha256": "81281e5c2db7dec9c35cffd3029988fd98fd6b4bf825b3e2c7f556fec07538fe",
+      "hbs": false,
+      "py": true,
+      "bytes": 53043
+    },
+    "_doc/SkillAI/tools/builders/_archive/30212016_v08_failed_route/build_rotating_expand_bullet_ring_template_v08.py": {
+      "sha256": "904e4a969d1934c2012021e58cd590ce14a297f649a7ecf4e9e1b7b188e89a62",
+      "hbs": false,
+      "py": true,
+      "bytes": 42532
+    },
+    "_doc/SkillAI/tools/builders/_archive/30212016_v08_failed_route/patch_30212016_fix_repeat.py": {
+      "sha256": "883d6fdaf8d0dcab1be7ea38d4453f191cde532a13fe2d57a893626f3219074f",
+      "hbs": false,
+      "py": true,
+      "bytes": 2023
+    },
+    "_doc/SkillAI/tools/builders/_archive/30212016_v08_failed_route/SkillGraph_30212016【木宗门】奇术_人阶_PoC_旋转扩张圈.json": {
+      "sha256": "4b117fee6dbd4745d9a704aa7f6362d9bd86481ef7880d76c6b4f342a4067aa9",
+      "hbs": false,
+      "py": false,
+      "bytes": 210520
+    },
+    "_doc/SkillAI/tools/builders/_archive/30212016_v08_failed_route/SkillGraph_30212016【木宗门】奇术_人阶_PoC_旋转扩张圈.json.meta": {
+      "sha256": "532e41a9d49519538272df55787bb52999063b8aba0e9fed2fb6b8d7234d65a8",
+      "hbs": false,
+      "py": false,
+      "bytes": 158
+    },
+    "_doc/SkillAI/tools/builders/_archive/30212016_v08_failed_route/spec.md": {
+      "sha256": "669adbcf1e561f7c0c49f03cc94ac1803d05af34be231c3ddd3094da318e2d53",
+      "hbs": false,
+      "py": false,
+      "bytes": 6994
+    },
+    "_doc/SkillAI/tools/builders/_archive/30212017_mvp1_v1_repeat_bug/SkillGraph_30212017_BACKUP.json": {
+      "sha256": "cb25399b9367a00bd72715670baf31f7fe4fae2f14d26ab0757e770d9c4345b2",
+      "hbs": false,
+      "py": false,
+      "bytes": 26367
+    },
+    "_doc/SkillAI/tools/builders/_archive/patch_30212010_desc_and_sticky.py": {
+      "sha256": "7de458868bbb33ee8e3917e1446678d6af1c3ee5980c65cc2c838f4f7d544717",
+      "hbs": false,
+      "py": true,
+      "bytes": 6248
+    },
+    "_doc/SkillAI/tools/check_mental_model_links.py": {
+      "sha256": "33737df0df52c642600c3d587513ebb7c0ef9cb8ab457b723051f15815a4d74d",
+      "hbs": false,
+      "py": true,
+      "bytes": 5835
+    },
+    "_doc/SkillAI/tools/id_allocator.py": {
+      "sha256": "2930c496e95a0f1dc5fa9ae7880b2b3c6e333d53ab918ba2bab31f744521fe26",
+      "hbs": false,
+      "py": true,
+      "bytes": 6736
+    },
+    "_doc/SkillAI/tools/ir/ir_schema.json": {
+      "sha256": "7b548ba530cb457c0af149f0802bff082470b9a97fef853ae654f828fe0c628c",
+      "hbs": false,
+      "py": false,
+      "bytes": 27562
+    },
+    "_doc/SkillAI/tools/picker_v2.py": {
+      "sha256": "20d9ee2a7a7c548460a5de2c1c52ff99e47890fbfc779012f435dab5dc5b573b",
+      "hbs": false,
+      "py": true,
+      "bytes": 31560
+    },
+    "_doc/SkillAI/tools/README.md": {
+      "sha256": "83a19c2e20b971dac4c06132291999a9cf33e39f98ff760a784056b5f13868b8",
+      "hbs": false,
+      "py": false,
+      "bytes": 6135
+    },
+    "_doc/SkillAI/tools/README_user_config.md": {
+      "sha256": "48632b68b061ba10c7ec7fc9c69831190487b0fbe743984b9342ae2ab352411c",
+      "hbs": false,
+      "py": false,
+      "bytes": 5196
+    },
+    "_doc/SkillAI/tools/reallocate_node_ids.py": {
+      "sha256": "9a09eb2e4fe75b2bb4ea4bdc2c9f562236946d1bc1d0e2da8dd179ecd5941074",
+      "hbs": false,
+      "py": true,
+      "bytes": 5139
+    },
+    "_doc/SkillAI/tools/skill_compiler.py": {
+      "sha256": "464c34877226cf8fc25081ade842cc71e5dcf427f5dbd46eabc00d60e0134b06",
+      "hbs": false,
+      "py": true,
+      "bytes": 160951
+    },
+    "_doc/SkillAI/tools/skill_decompiler.py": {
+      "sha256": "06e752d15e4805fb8e5fd730ff1778a66f6511ee7c64084bb0e439492263a7bb",
+      "hbs": false,
+      "py": true,
+      "bytes": 29625
+    },
+    "_doc/SkillAI/tools/skill_editor_enums.json": {
+      "sha256": "cc120b14399ffb37c7006c70654c9f41db730054beab3025ee558bbc7f848113",
+      "hbs": false,
+      "py": false,
+      "bytes": 831605
+    },
+    "_doc/SkillAI/tools/skill_graph_to_mermaid.py": {
+      "sha256": "4d67c79d87bc56c2c25d0ad55f1eeb2a861708d421dcba94f42e7c066667f3e2",
+      "hbs": false,
+      "py": true,
+      "bytes": 28968
+    },
+    "_doc/SkillAI/tools/skill_lint.py": {
+      "sha256": "14c55acc704f25dddb5d6d1b4efad25a3f7f559fc6a7cf4d10cda1c0c1dc3de2",
+      "hbs": false,
+      "py": true,
+      "bytes": 47964
+    },
+    "_doc/SkillAI/tools/sync_postmortem_to_easy_pitfalls.py": {
+      "sha256": "def7c568cd87aed0bc3dd19f430bf4132c2bf5f7e099882a5550d2d70e0d9f87",
+      "hbs": false,
+      "py": true,
+      "bytes": 14623
+    },
+    "_doc/SkillAI/tools/user_config.json": {
+      "sha256": "b7affd839a8ae91c785123d819eede04f1c21a10ab212be88f990e436d95132a",
+      "hbs": false,
+      "py": false,
+      "bytes": 1403
+    },
+    "_doc/SkillAI/tools/verify_e022_fault_injection.py": {
+      "sha256": "ca11966e1e8a900527f21a65975456ec73bf43ec0bed25a11a8d99a32563ffa6",
+      "hbs": false,
+      "py": true,
+      "bytes": 3694
+    },
+    "_doc/SkillAI/tools/verify_homogeneity.py": {
+      "sha256": "a49e93e2549d28e8d4e4cbfe329bf8b4c24df3c1e54cddc1744aaa2643502bbe",
+      "hbs": false,
+      "py": true,
+      "bytes": 11284
+    },
+    "_doc/SkillAI/tools/verify_v05_single_root.py": {
+      "sha256": "e26466bb875435b4dbfcf961c6e628ed42555a5ac5175c98c28ff7f11b53ab12",
+      "hbs": false,
+      "py": true,
+      "bytes": 4565
+    },
+    "_doc/SkillAI/tools/_extract_enums.py": {
+      "sha256": "ebe82462997c4e3a3a0c464839c590c2bcc681f13a5778b46a3c4e9a308ae56d",
+      "hbs": false,
+      "py": true,
+      "bytes": 3471
+    },
+    "_doc/SkillAI/进度.md.hbs": {
+      "sha256": "d55c6ea1a1a2ac7a61e8842cbdd1cc229c9166161eb038ad81e7a286083403d1",
+      "hbs": true,
+      "py": false,
+      "bytes": 151339
+    },
+    "_root/CLAUDE.md.hbs": {
+      "sha256": "297ddabfd86b93ac0fcf4059dd40ab7c02825d98f0096b6a07fd39428f7620ba",
+      "hbs": true,
+      "py": false,
+      "bytes": 52743
+    }
+  }
+}

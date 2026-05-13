@@ -1,0 +1,105 @@
+sample_id: 30532001
+batch: B-004
+date: 2026-05-09
+role_in_batch: pick1_701_event_rich
+mental_model_version_used: v0.4
+
+# === SkillConfig 5 硬信号（已读，B-001 D-6 强制）===
+skill_config_metadata_seen:
+  SkillNameEditor: "青藤之力"
+  SkillSubType: 701
+  Icon: "Skill/Pugong/PuGong_jin"
+  EnhanceSkillBuffConfigID: 0
+  SkillEffectExecuteInfo_root_ID: 0   # Active 0
+  SkillEffectPassiveExecuteInfo_root_ID: 0  # Passive 0（regex 可能误读，需 READ 验证）
+  CdType: 0
+  CdTime: 0
+  notes: |
+    名字"青藤之力" + Icon=PuGong_jin 强暗示是【金宗门-木普攻强化心法】。
+    但文件名前缀【木宗门】矛盾——可能是文案错位 / 文件名是分类目录。
+    SubType=701 是 v0.4 字典外的新值（B-003_actionable.md §N-3 高优先级）。
+    EnhanceID=0 + Active=0 + Passive=0 → 不是心法增强型，但 Active/Passive 双 0 + CdType=0 + CdTime=0 = "双 0 入口"。
+    按 v0.4 SkillEntry 系统页 §4 类入口模式："双 0" 类，即 flow 内全靠 SkillEvent callback 驱动，
+    无显式 root（ROOT 由 RegisterSkillEvent 触发的 callback 担当）。
+    callback 驱动 → 必然有大量 REGISTER_SKILL_EVENT — corpus_scan top_classes 显示 8 个 REG，匹配。
+    SubType=701 + 双 0 + 8 REG → 强力新型："被动响应型心法"（攻击事件钩子触发 buff/heal/伤害修正）。
+
+# === Corpus 元数据（闭卷允许）===
+corpus_metadata:
+  node_count_actual: 121
+  top_classes:
+    TSCT_VALUE_COMPARE: 24
+    TSET_GET_ENTITY_ATTR_VALUE: 14
+    TSCT_AND: 13
+    TSET_NUM_CALCULATE: 10
+    TSET_ORDER_EXECUTE: 9
+    TSET_REGISTER_SKILL_EVENT: 8
+    TSET_CONDITION_EXECUTE: 7
+    TSET_REMOVE_BUFF: 7
+  flags:
+    has_register_event: true
+    has_skill_event_callback: true
+    has_get_buff_layer: false
+    has_buff_apply: false（推测，scan 字段未列）
+    has_displacement: false
+    bullet_count: 0
+
+# === PREDICTION ===
+prediction:
+  estimated_node_count: 121  # 已知 corpus 数
+  topology_sketch: |
+    没有 Active root → 推测：每个 REGISTER_SKILL_EVENT 节点都被 SkillConfigNode 顶层引用为 callback 入口
+    （但没明确 root=ORDER）。或者 Active/Passive root 隐藏在 8 个 ORDER_EXECUTE 中某个。
+    更可能：每个 REG_EVENT.Param[1] 各指向一个 ORDER_EXECUTE → callback chain。
+
+    伪 mermaid：
+    ```
+    ROOT_callback_1 (REG_EVENT_15?) → ORDER_EXECUTE → CONDITION_EXECUTE × N → ATTR/Tag 修正
+    ROOT_callback_2 (REG_EVENT_4?) → ...
+    ROOT_callback_3 (REG_EVENT_11?) → ...
+    ... × 8
+    每个 callback 都是"取属性 → 比较 → 数值计算 → buff 修正"流水线
+    ```
+
+    13 个 TSCT_AND + 24 个 TSCT_VALUE_COMPARE = "复杂条件门"，可能是【条件叠加判定】（满足血量+元素+时机 等多重条件才生效）
+
+  expected_event_ids:
+    likely:
+      - 1   # OnSkillCast
+      - 4   # OnDamage（攻击命中触发）
+      - 11  # OnDamageReceived（受击触发）
+      - 12  # OnDeath / OnEntityDie
+      - 15  # 高频未知 ID — N-1 命中候选！
+    confidence: 中
+    note: |
+      8 个 REG → 至少触碰 5+ 种 event。Event ID 15 (148 hits 总语料 top miss) 极可能在此样本现身。
+
+  expected_templates:
+    likely_segments:
+      - "146xxx (持续施法)"  # 心法常用，但 D-305 边界 = 仅 0.31% 用 146003779，此样本 8/3571 不一定中
+      - "175xxx (子弹通用命中模板)"
+      - "190xxx (新段位，1995 调用，待证)"
+    estimated_template_count: 3-6  # corpus 没显示 RUN_TEMPL 高频
+
+  touched_subsystems:
+    - SkillEvent 系统          # 8 REG 必然
+    - 控制流子系统              # 7 CONDITION + 9 ORDER
+    - SkillEntry 系统          # SubType=701（字典扩补主战场）
+    - Buff 系统                # 7 REMOVE_BUFF（无 ADD_BUFF？反直觉 → 可能是 callback 内移除已存在 buff）
+    - SkillTag 系统            # 14 GET_ENTITY_ATTR + 10 NUM_CALCULATE = 数值修正逻辑
+    - 条件系统（暂存档）         # TSCT × 37 — 极可能此批触发新建子系统页
+
+# === 待验证主张 / 风险点 ===
+risk_points:
+  - "REMOVE_BUFF=7 但 ADD_BUFF=0 — 反直觉。可能是：buff 由其它 effect 添加，本技能负责 callback 时机移除。"
+  - "callback 双 0 入口 — 是否真的没有 Active/Passive？regex 可能漏读，或确实是新型 Entry 模式。"
+  - "SubType=701 是否对应'被动钩子型心法'？v0.4 字典需扩。"
+  - "8 个 ORDER_EXECUTE 是不是和 8 个 REG_EVENT 1:1 映射？这是 callback 范式的强信号。"
+
+# === Confidence 自评 ===
+self_confidence: 中
+reasoning: |
+  SubType=701 + 双 0 + 8 REG + 0 ADD_BUFF + 7 REMOVE_BUFF — 这是组合性新模式，v0.4 没见过。
+  拓扑预测准度可能 0.5（callback 链结构是猜的）；
+  Event ID 字典扩补必命中（N-1）；
+  SubType=701 字典扩补必命中（N-3a）。

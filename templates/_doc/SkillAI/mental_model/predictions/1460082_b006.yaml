@@ -1,0 +1,55 @@
+sample_id: 1460082
+batch: B-006
+sample_name: 【BD标签】木-连击-连毒
+predict_date: 2026-05-10
+mode_hardconfirmed: E_dual_zero_fallback
+
+skill_config_metadata_seen:
+  SkillID: 1460082
+  SkillSubType: 0
+  CdType: 0
+  EnhanceID: 0
+  ActiveRoot: 0
+  PassiveRoot: 0
+  SkillEffectFlowList_len: 0
+  IndicatorType: 0
+  refs_count: 1
+  filename_hint: "宗门技能/BD标签 / 'BD标签-木-连击-连毒' / SubType=0"
+
+mental_model_in_state:
+  关于_BD标签类:
+    本质理解: "BD 标签是被动效果标签 — 玩家堆叠/触发某些条件时附加的元素属性效果（连击 + 连毒 = 累计连击触发额外毒伤）。"
+    猜测: "BD 标签可能是 SkillTag 系统的占位 ID — 通过其他主技能 SkillTagsConfigNode 引用 1460082，效果在主技能内通过 GetSkillTagValue + ModifyTag 实现。"
+  对照: "1460082 refs=1 + SubType=0 + BD标签 — 与 30512002（心法）/ 1460095（物品）形态相似，都是 'refs=1 空壳'。"
+
+prediction:
+  node_count_estimate:
+    range: [1, 2]
+    rationale: "refs_count=1 极小 — 几乎只有 SkillConfigNode。"
+  topology_shape: "empty_marker_for_skill_tag_registration — 文件作为 SkillID 占位符 + 在 Excel 表（SkillTagsConfig.xlsx 或类似）注册标签元数据，被其他主技能引用。"
+  真实入口机制_RQ1猜测:
+    候选优先级: "1. 外部召唤入口（最可能 90%）— SkillTagsConfig.xlsx 注册标签 + 其他主技能（如某连击系木技能）引用此 ID 通过 GetSkillTagValue 触发效果；2. 完全无入口（10%）— 仅作为元数据占位，实际效果在其他文件实现。"
+  4子类_RQ2立场: "v0.4-v0.6 4 子类不含 'BD 标签' / '心法标签 ID 占位' 类。'空壳标签' 是 Mode E 真技能的另一个子类。"
+  涉及子系统:
+    - SkillEntry 系统（核心 — Mode E 真技能空壳子类）
+    - SkillTag 系统（外部驱动来源）
+  闭卷预测_RQ3立场: 不适用（非心法）
+  闭卷预测_RQ4立场: 不适用（非 1101/1001）
+
+self_assessment_pre_open:
+  conviction_level: 高（88%）
+  最大不确定: "BD 标签 SkillID（1460082）和 SkillTag ID（在 SkillTagsConfig.xlsx 内）是同一个 ID 还是不同 ID？这影响入口机制具体路径。"
+  核心赌注: "refs=1 → 空壳 → 依赖外部驱动 — 同 30512002 / 1460095 范式。"
+
+整体预测_汇总:
+  全 6 样本_4子类_RQ2_最终预测:
+    立场: "v0.4-v0.6 Mode E 4 子类（法宝/装备型被动 / 法宝召唤激发 / 被动响应型心法 / 主动型长 CD 大招）作为概念框架**不完整 + 描述维度错位**。"
+    新假设_按文件结构维度: "Mode E 真技能至少含以下子类（按 refs_count 量级 + 形态）：A) **空壳标识型**（refs ≤ 5）— 心法 / 物品 / BD 标签 / Buff 简单类；B) **小型辅助型**（refs 5-30）— BUFF 中型；C) **大型内嵌型**（refs ≥ 50）— 法宝完整内部 flow（如 301102）。原 4 子类描述的是触发条件，不是文件结构。"
+    新假设_按入口机制维度: "Mode E 真技能入口至少 3 类来源：1) Excel 表驱动（心法/物品/BD 标签）；2) SkillEvent callback（BUFF 类 / 部分大型）；3) SerializedNodes 内嵌 self-entry（法宝完整内嵌）。"
+
+  全 6 样本_RQ1_最终预测:
+    最可能候选: "外部召唤/表驱动（占 5/6 = 83%，仅 301102 法宝可能不同）+ SerializedNodes 内嵌 self-entry（仅 301102 法宝大型可能用此）"
+    最不可能: "SkillEvent callback 上游驱动 — 在 6 样本中可能仅 1750087 BUFF 类用，但优先级低于表驱动"
+
+  全 6 样本_RQ3_最终预测:
+    心法 Mode C vs E 切换条件: "**Mode C 心法 = SkillGraph 内画完整 Passive 自定义逻辑**（refs_count ≥ 10）；**Mode E 心法 = 仅作为 SkillID 占位 + 依赖 SkillXinfaConfig.xlsx 表驱动通用效果**（refs_count ≤ 5）。切换条件：策划是否需要在编辑器内画自定义流程。"

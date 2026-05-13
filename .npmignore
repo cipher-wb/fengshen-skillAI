@@ -1,0 +1,50 @@
+# 开发产物 / 不进 npm 包
+test/
+docs/
+scripts/build.js
+scripts/extract-from-source.js
+scripts/prepare-release-tarball.js
+.github/
+.eslintrc*
+.prettierrc*
+.editorconfig
+.nvmrc
+
+# 完整学习痕迹走 GitHub Release / 不进 npm 包
+# 仅保留 _seed (4 关键样本) 排除完整 batch_buffer
+templates/_doc/SkillAI/mental_model/batch_buffer/B-[0-9]*.yaml
+templates/_doc/SkillAI/mental_model/batch_buffer/B-[0-9]*.json
+templates/_doc/SkillAI/mental_model/batch_buffer/B-[0-9]*.py
+templates/_doc/SkillAI/mental_model/batch_buffer/B-[0-9]*_actionable.md
+templates/_doc/SkillAI/mental_model/batch_buffer/B-[0-9]*_picks*
+templates/_doc/SkillAI/mental_model/batch_buffer/B-[0-9]*_read*
+templates/_doc/SkillAI/mental_model/batch_buffer/B-[0-9]*_predict*
+templates/_doc/SkillAI/mental_model/batch_buffer/B-[0-9]*_diff*
+templates/_doc/SkillAI/mental_model/batch_buffer/B-[0-9]*_auditor_verdict*
+templates/_doc/SkillAI/mental_model/batch_buffer/B-[0-9]*_homogeneity*
+templates/_doc/SkillAI/mental_model/batch_buffer/B-[0-9]*_picker*
+templates/_doc/SkillAI/mental_model/batch_buffer/B-[0-9]*_pool*
+templates/_doc/SkillAI/mental_model/batch_buffer/v[0-9]*_actionable.md
+templates/_doc/SkillAI/mental_model/batch_buffer/_archived/
+
+# 巨型 samples 走 GitHub Release
+templates/_doc/SkillAI/samples/json/_archive_v08_failed/
+templates/_doc/SkillAI/samples/ir/_archive*/
+
+# CI 临时
+*.tgz
+coverage/
+.release-staging/
+fengshen-learning-history-*.tar.gz
+fengshen-learning-history-*.sha256
+
+# Source map / Python cache
+*.map
+__pycache__/
+*.pyc
+
+# Editor + OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

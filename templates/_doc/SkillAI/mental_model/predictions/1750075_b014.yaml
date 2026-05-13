@@ -1,0 +1,87 @@
+---
+sample_id: "1750075"
+batch: B-014
+phase: PREDICT_close_book
+predicted_at: 2026-05-10
+mental_model_version_in: v0.12
+bucket: 17xxx_7d
+filename: "SkillGraph_1750075【模板】伤害流程_移除状态标识.json"
+
+# ============================================================================
+# 闭卷输入（仅看技能名 + category metadata）
+# ============================================================================
+
+close_book_inputs:
+  filename_label: "【模板】伤害流程_移除状态标识"
+  category_dir: "技能模板"
+  sub_category: "伤害"
+  semantic_hint: |
+    "【模板】" 标签 = 模板本体（v0.6 §SkillEditor 文件三分类 / IsTemplate=True 顶层）；
+    "伤害流程_移除状态标识" = 伤害流程的子模板 / 移除某个状态标识（一个 SkillTag/状态位）；
+    17xxx_7d / 175xxx 同前缀（v0.12 D-1301 R1 175xxx_7d 命名归纳部分支持 BULLET 命中）/
+    1750xxx 应同源（与 B-013 1750080 模板伤害爆发-法宝吸血 同源）。
+
+# ============================================================================
+# 5 SkillConfig 硬信号预测
+# ============================================================================
+
+predicted_skill_config_5_hard_signals:
+  SkillNameEditor: "【模板】伤害流程_移除状态标识（推断）"
+  SkillSubType_guess: 0  # 模板本体 SubType=0
+  Icon: "未知"
+  EnhanceSkillBuffConfigID_guess: 0
+  SkillEffectPassiveExecuteInfo_guess: 0  # 模板本体顶层 IsTemplate=True / 不走 SkillEntry 5 入口
+
+# ============================================================================
+# 拓扑预测（按"模板本体 / 伤害流程子模板"范式）
+# ============================================================================
+
+predicted_topology:
+  predicted_node_count: 8  # 估算：模板本体小型 / SkillConfig + ORDER + MODIFY_SKILL_TAG_VALUE × 2-3 ≈ 8
+  predicted_mode: "template_top_IsTemplate_True"  # v0.6 §SkillEditor 文件三分类 / 类别 2 模板本体
+  predicted_topology_keys:
+    - "SkillConfigNode"          # 顶层 IsTemplate=True
+    - "ORDER_EXECUTE"
+    - "MODIFY_SKILL_TAG_VALUE"   # 移除状态 = 修改 SkillTag 值
+    - "GET_SKILL_TAG_VALUE"      # 读取 SkillTag
+
+predicted_subsystems:
+  - "模板系统"
+  - "SkillTag"
+  - "控制流"
+
+# ============================================================================
+# 段位字典命名归纳预测（17xxx_7d 同前缀 175 系兄弟桶）
+# ============================================================================
+
+predicted_segment_naming_dict_check:
+  bucket: 17xxx_7d
+  hypothesis_keywords: ["BULLET", "HIT", "DAMAGE"]  # 与 175xxx 同前缀沿用
+  predicted_naming_keyword_hits_in_segment_top_16: "uncertain"  # 不确定 / 17xxx 大段位 ≠ 175xxx 子段位 / 命名归纳可能不同
+  predicted_naming_keyword_hits_in_segment_top_32: "uncertain"
+  rationale: |
+    17xxx_7d 段位 41 文件 / 与 175xxx_7d 同前缀但 17 vs 175 是不同子命名空间 /
+    本样本 1750075 名字含"伤害流程" → 与 175xxx 子命名空间假说 BULLET/HIT/DAMAGE 对齐 /
+    但段位整体（17xxx_7d 含 17xxxx ≠ 175xxxx）可能命名归纳更通用 /
+    待 v2 双窗口数据验证
+
+# ============================================================================
+# 当前认知（GATE-MENTAL-IN）
+# ============================================================================
+
+mental_model_understanding:
+  involved_subsystems:
+    模板系统:
+      current_understanding: "模板本体顶层 IsTemplate=True / 类别 2 / D-1304 R1 框架：段位整体不主张语义命名 + 段位内特定模板保留 / 175xxx_7d v0.12 hedge 'BULLET 命中部分支持'"
+      uncertain: "17xxx_7d 段位整体（不含 175xxx 子段位部分）的命名归纳是否同源"
+    SkillTag:
+      current_understanding: "SkillTag 是数值/状态标识容器 / GET/MODIFY/ADD/MOVE 操作组合"
+      uncertain: "本模板移除哪个状态标识 / SkillTag ID"
+    控制流:
+      current_understanding: "ORDER_EXECUTE 主导拼接业务 / DELAY/REPEAT/CONDITION 视情况加"
+      uncertain: "本模板是否有 DELAY"
+
+uncertainty_sources:
+  - "未读 SkillConfig 实际值 / SubType 推断 0 但模板顶层可能也 = 0"
+  - "未读 SkillTag 操作的具体 Tag ID 与值"
+  - "17xxx_7d 段位整体（41 文件）vs 175xxx_7d 子段位（45 文件）的关系是否独立"

@@ -1,0 +1,114 @@
+sample_id: 30073901
+date: 2026-05-10
+batch: holdout-v0.5
+sample_role: 验证 v0.5 SkillEntry 模式 E 第三子类（法宝召唤激发 SubType=303）二阶印证 + has_add_force 法宝拉拽 + Event ID 字典扩补区 + 法宝范式（D-406 方案 C 并入 SkillEntry）
+
+# === GATE-MENTAL-IN: SkillConfig 5 硬信号 ===
+skill_config_metadata_seen:
+  source: "corpus_scan flags + filename only — 严格闭卷"
+  SkillNameEditor: "未直接看，文件名为【法宝技】石珠-护主"
+  SkillSubType: 303  # corpus_scan 已给
+  Icon: "未直接看"
+  EnhanceSkillBuffConfigID: "未直接看（推测：法宝技能 SubType=303 + 308072 同型 EnhanceID=0 → 倾向 = 0）"
+  SkillEffectPassiveExecuteInfo_nonzero: "未直接看（推测：法宝召唤激发型 = Mode E 双 0 入口或 Mode C 纯 Passive；308072 同型同 SubType=303 是 Mode E 双 0；本样本 has_register_event=True + has_skill_event_callback=True 强烈对应 Mode E）"
+  notes: |
+    硬信号闭卷推测：
+    - "法宝技/石珠-护主"= 法宝召唤激发型（D-406 方案 C，已并入 SkillEntry §1 不变量模式 E 子类 3）
+    - 路径在"法宝/"目录（与 308072 在同目录完全镜像）
+    - SubType=303 = v0.5 D-403 新增 SubType 字典之一（B-004 308072 同 SubType 唯一观察样本，是 Mode E 双 0 入口）
+    - corpus_scan flags：has_register_event=True + has_skill_event_callback=True + class_counts has TSET_REGISTER_SKILL_EVENT × 2
+    → 强烈对应 v0.5 D-404 SkillEvent 字典扩 15/6/9 + UNREG 反复模式（虽然 corpus_scan 无 UNREG class，但 EvCb=True 暗示有 callback 体系）
+    - 1 BuffConfigNode + 1 ADD_BUFF：单 buff 时间轴自驱
+    - 3 SkillTagsConfigNode + 3 GET_SKILL_TAG_VALUE：法宝配 SkillTag 三 tag（buff_layer 候选 / 触发条件 / 数值条件）
+    - 1 RUN_TEMPL：仅 1 模板调度（轻量法宝技）
+    - 1 ADD_FORCE + 1 CREATE_EFFECT + 2 GAME_SPEED_CHANGE + 2 CAMERA_SHAKE：
+      * ADD_FORCE = 法宝拉拽敌人（D-302 4 类位移模式第 3 类"拉拽敌人"）
+      * GAME_SPEED_CHANGE × 2 + CAMERA_SHAKE × 2：演出反馈强（"护主"暗示防御反击型）
+    - 0 has_set_coll：拉拽敌人不需要关本体碰撞（D-302 第 3 类位移特征）
+    - 1 NUM_CALCULATE + 2 DELAY_EXECUTE：少量计算 + 时间轴控制
+
+prediction:
+  estimated_node_count: 25  # corpus_scan 已给
+  estimated_node_count_band:
+    low: 22
+    high: 30
+    rationale: "corpus_scan 已给"
+
+  topology_sketch: |
+    SkillEffectExecuteInfo: ID=0 （推测，模式 E 双 0 入口子类 3：法宝召唤激发）
+    SkillEffectPassiveExecuteInfo: ID=非 0
+    根 = TSET_ORDER_EXECUTE (Passive root, ID 推测在 22xxx / 175xxx 段位)
+      ├─ TSET_REGISTER_SKILL_EVENT (event_id=??, callback effect ID=??)
+      │     ├─ event_id 候选 1: 11 (受击) → "护主"语义吻合
+      │     └─ event_id 候选 2: 4 (敌人靠近?) / 6 (??)
+      ├─ TSET_REGISTER_SKILL_EVENT (event_id=??)
+      └─ 2 SkillTagsConfigNode + 3 GET_SKILL_TAG_VALUE
+    内嵌 SerializedNodes 含 callback effect：
+      callback 体（被动响应：受击或敌人靠近时触发）
+        ├─ TSCT_VALUE_COMPARE (条件检查：CD/层数/距离)
+        ├─ TSET_ADD_FORCE (拉拽敌人 — 法宝技"护主"反击效果)
+        ├─ TSET_GAME_SPEED_CHANGE (慢动作演出)
+        ├─ TSET_GAME_SPEED_CHANGE (恢复)
+        ├─ TSET_CAMERA_SHAKE × 2
+        ├─ TSET_DELAY_EXECUTE × 2 (时间轴隔)
+        ├─ TSET_RUN_SKILL_EFFECT_TEMPLATE (单次命中模板)
+        ├─ TSET_ADD_BUFF (给敌人加控制 buff?)
+        ├─ TSET_NUM_CALCULATE (伤害计算)
+        └─ TSET_CREATE_EFFECT (特效)
+
+  topology_keywords:
+    - "Mode E 双 0 入口子类 3：法宝召唤激发（v0.5 D-403/406/407）"
+    - "REGISTER × 2 → callback 内含 ADD_FORCE 拉拽 + GAME_SPEED + CAMERA_SHAKE 演出"
+    - "v0.4 D-302 4 类位移模式第 3 类：拉拽敌人（无 SET_COLL，仅 ADD_FORCE）"
+    - "法宝范式（D-406 方案 C 并入 SkillEntry §1 模式 E）"
+    - "法宝 SkillTag × 3：buff_layer / 受击次数 / 距离条件 候选"
+
+  expected_templates:
+    - id_segment: "22xxx"
+      reason: "法宝/buff 段位常用，308072 同型期望"
+      confidence: 中偏高
+    - id_segment: "175xxx"
+      reason: "通用单次命中模板（仅 1 RUN_TEMPL，单调用最配 175xxx）"
+      confidence: 中偏高
+    - id_segment: "44xxx"
+      reason: "callback effect ID 或法宝/通用 buff（D-410 v0.5 字典）"
+      confidence: 中
+    - id_segment: "32xxx"
+      reason: "callback effect ID 通用段"
+      confidence: 中
+    - id_segment: "190xxx 三联包"
+      reason: "1 RUN_TEMPL 单调用，三联包不完整概率高（不是命中模板核心场景）"
+      confidence: 低
+
+  touched_subsystems:
+    - SkillEntry系统  # ⭐ Mode E 子类 3 二阶印证（v0.5 D-403/406/407 关键验证点）
+    - SkillEvent系统  # ⭐ REGISTER × 2 + Event ID 字典扩补区
+    - Buff系统  # 1 ADD_BUFF + 1 BuffConfig
+    - SkillTag系统  # ⭐ 3 SkillTagsConfigNode + 3 GET（法宝特征）
+    - 实体碰撞与可见性  # ⭐ has_add_force=True + has_set_coll=False = 4 类位移模式第 3 类拉拽敌人（v0.4 D-302 子模式印证）
+    - 控制流子系统  # ORDER + DELAY × 2 + 条件
+    - 模板系统  # 1 RUN_TEMPL 弱信号
+
+  expected_subsystem_signals:
+    SkillEntry系统: "强信号——Mode E 双 0 入口子类 3 法宝召唤激发二阶印证（v0.5 关键验证点）"
+    SkillEvent系统: "中信号——2 REG + Event ID 字典命中（15/6/9 之一概率）"
+    Buff系统: "中信号——1 ADD_BUFF + 1 BuffConfig 配对"
+    SkillTag系统: "强信号——法宝技专用 3 tag 范式"
+    实体碰撞与可见性: "中信号——4 类位移第 3 类拉拽敌人模式（v0.4 D-302 子模式印证）"
+    控制流子系统: "中信号——ORDER + DELAY × 2"
+    模板系统: "弱信号——仅 1 RUN_TEMPL"
+
+  predicted_pitfalls:
+    - "v0.5 D-403/406/407 模式 E 子类 3：root_id=0 双 0 入口（与 308072 镜像）"
+    - "v0.5 D-404 Event ID：'护主' = 受击触发（event_id=11 受击）期望命中"
+    - "v0.4 D-302 4 类位移模式第 3 类：1 ADD_FORCE + 0 SET_COLL = 拉拽敌人模式（非自身位移）"
+    - "v0.5 D-410 callback effect ID 段位约定：法宝技 callback 是否在 440xxx 法宝/通用 buff 段"
+    - "GAME_SPEED_CHANGE × 2 是 v0.5 字典外（控制流子系统 §A 5 控制原语未含），新发现候选"
+
+self_assessment:
+  confidence: 中偏高
+  rationale: |
+    法宝目录 + SubType=303 + corpus_scan 信号 ~镜像 308072（B-004 已学），
+    模式 E 子类 3 期望强烈，关键验证点：(1) root_id=0 二阶印证 (2) Event ID 命中 (3) 4 类位移第 3 类
+    最大不确定：GAME_SPEED_CHANGE × 2 是新原语候选，可能触发新 delta（控制流字典扩或新增"演出反馈"子段）
+    其次不确定：1 RUN_TEMPL 用 175xxx 还是 22xxx

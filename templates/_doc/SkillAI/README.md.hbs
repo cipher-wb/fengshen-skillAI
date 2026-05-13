@@ -1,0 +1,289 @@
+---
+type: 主题页
+summary: 自然语言生成 / 修改 / 审核 SkillEditor 蓝图的 AI 系统 — 入口与导航（IR v2.3.2）
+date: 2026-05-08
+tags: [SkillAI, 入口, 战斗策划]
+---
+
+# SkillAI — 战斗策划用 AI 配技能
+
+> **是什么**：把"自然语言描述"或"已有 JSON"喂给 AI，产出 / 修改 / 审核 SkillEditor 的蓝图（`Saves/Jsons/**/SkillGraph_*.json`）的一套工具链。
+>
+> **不是什么**：不是替代 SkillEditor，不做创意层技能设计，不动数值精调（数值仍由策划在 Unity 里实测）。
+>
+> **当前阶段**：IR v2.3.2 — 已支持 MOBA 大招级技能（位移/召唤/两段式按键/跨技能 SkillTag/AOE）。
+
+---
+
+## ⭐ Mental Model 认知中枢
+
+**[mental_model/](mental_model/README.md) 是 AI 对 SkillEditor 的"活的理解"**——区别于 [postmortem/](postmortem/README.md) 的"错题本"，它沉淀的是不变量、反直觉点、子系统因果关系，而不是已经踩过的坑。任何 SkillAI 任务（设计/审核/修改）开工前都必须先读 [mental_model/README.md](mental_model/README.md) 总览（证据 6 档等级 + 工作守则 + 子系统索引），然后扫 [mental_model/learning_log.md](mental_model/learning_log.md) 看当前心智版本、收敛度量与漂移检测。
+
+---
+
+## 你是谁？看哪一段
+
+| 角色 | 第一站 | 备注 |
+|------|--------|------|
+| **第一次接触** | §"5 分钟跑通第一个技能"（下面） | 装环境 → 跑测试 → 看产物 |
+| **战斗策划要配新技能** | 跟主 Claude 说"配一个 XX 技能"，触发 `skill-designer` agent（红） | 自动走 IR → 编译 → Lint 流程 |
+| **战斗策划要审已有** | 跟主 Claude 说"审一下 XX"，触发 `skill-reviewer` agent（绿） | 4 层审核报告 |
+| **战斗策划要改已有** | 同上，描述修改需求 | AI 走 JSON→IR→改→JSON 流程 |
+| **新 AI 接手开发** | [../../CLAUDE.md](../../CLAUDE.md) §"⚡新 AI Boot 段" | 30 秒入门链路 |
+| **维护工具开发** | [tools/README.md](tools/README.md) | 编译/Lint/反查的命令行用法 |
+| **审错 / 排查** | [docs/易错点速查.md](docs/易错点速查.md) + [postmortem/README.md](postmortem/README.md) | 19+ 条已踩过的坑 |
+
+---
+
+## 5 分钟跑通第一个技能
+
+### 1) 装依赖
+
+```powershell
+# Python 3.10+ 必备
+pip install pyyaml jsonschema openpyxl
+```
+
+### 2) 跑测试样本（直线子弹）
+
+```powershell
+cd {{PROJECT_ROOT_WIN}}
+
+# IR → JSON
+python doc/SkillAI/tools/skill_compiler.py `
+  doc/SkillAI/samples/ir/test_minimal_bullet.skill.yaml -v --overwrite
+
+# 期望: ✓ 编译成功 → ~11 节点 / 10 边
+```
+
+### 3) 静态校验
+
+```powershell
+python doc/SkillAI/tools/skill_lint.py `
+  doc/SkillAI/samples/json/SkillGraph_30122900_PoC测试-直线子弹.json
+
+# 期望: Summary: E=0
+```
+
+### 4) 反向看图（JSON → mermaid）
+
+```powershell
+python doc/SkillAI/tools/skill_graph_to_mermaid.py `
+  doc/SkillAI/samples/json/SkillGraph_30122900_PoC测试-直线子弹.json
+```
+
+### 5) 拷进 Unity
+
+把 `SkillGraph_xxx.json` 拷到 `{{SKILLGRAPH_JSONS_ROOT}}宗门技能/AIGen/`，**Ctrl+R 刷新 + SkillEditor 打开 + 同步数据**（详见 §"Unity 实测三件套"）。
+
+---
+
+## 工程方案（一图看懂）
+
+```
+                    ┌──────────────────────────┐
+                    │  自然语言 / 修改需求      │
+                    └────────────┬─────────────┘
+                                 │
+            ┌────────────────────▼────────────────────┐
+            │  GATE-0.5：先验研究（必做）              │
+            │  - 找 3 个相似真实样本                    │
+            │  - 三层枚举校对（TemplateParam→RefType→ │
+            │    common.nothotfix.cs）                  │
+            │  - grep PostMortem 标题（19 条）          │
+            └────────────────────┬────────────────────┘
+                                 │
+            ┌────────────────────▼────────────────────┐
+            │  GATE-1：mermaid 蓝图给用户审            │
+            │  （ID 类字段必须用 A0.5 真实推荐值）     │
+            └────────────────────┬────────────────────┘
+                                 │
+            ┌────────────────────▼────────────────────┐
+            │  GATE-2：IR YAML（schema 校验）           │
+            └────────────────────┬────────────────────┘
+                                 │
+            ┌────────────────────▼────────────────────┐
+            │  GATE-3：编译                              │
+            │  skill_compiler.py 输出 SkillGraph JSON  │
+            │  + StickyNote (v2.4) 自动加              │
+            │  + ID 冲突检查 (v2.4)                     │
+            │  + int32 溢出防御 (v2.3.1)                │
+            └────────────────────┬────────────────────┘
+                                 │
+            ┌────────────────────▼────────────────────┐
+            │  GATE-3.5：AI 自审 4 项                   │
+            │  - 占位 ID 残留 / 时长 4 规则 /           │
+            │    指示器自洽 / 拓扑 diff                 │
+            └────────────────────┬────────────────────┘
+                                 │
+            ┌────────────────────▼────────────────────┐
+            │  GATE-4：Lint 跑通（E=0）                  │
+            └────────────────────┬────────────────────┘
+                                 │
+            ┌────────────────────▼────────────────────┐
+            │  GATE-5：用户在 Unity 实测                │
+            │  Ctrl+R → SkillEditor 同步数据 → 战斗     │
+            └────────────────────┬────────────────────┘
+                                 │
+            ┌────────────────────▼────────────────────┐
+            │  GATE-6：PostMortem 提案（如踩了新坑）   │
+            └─────────────────────────────────────────┘
+```
+
+---
+
+## 目录结构
+
+```
+doc/SkillAI/
+├── README.md                ← 本文件（入口导航）
+├── PRD.md                   ← 工程总蓝图（17 章 v1.0；部分章节 v2.x 已迭代）
+├── 进度.md                  ← 当前进度快照（持续滚动）
+├── docs/                    ← 知识库（团队级）
+│   ├── 编辑器架构.md          SkillGraph 拓扑、求值方向、5 大主节点
+│   ├── 节点字典.md            50+ TSET / 22 TSKILLSELECT / 4 TSCT 字段语义
+│   ├── 模板库.md              11 个原型 mermaid 蓝图
+│   └── 易错点速查.md          ⭐ 已踩过的坑（团队公开版，自动同步自 postmortem）
+├── tools/                   ← 工具脚本
+│   ├── README.md              工具命令行速查
+│   ├── skill_compiler.py      IR YAML → SkillGraph JSON（核心 ~2700 行）
+│   ├── skill_decompiler.py    JSON → IR YAML（修改时反编译）
+│   ├── skill_lint.py          JSON 静态合法性校验（24+ 条规则）
+│   ├── skill_graph_to_mermaid.py JSON → mermaid 反向解读
+│   ├── sync_postmortem_to_easy_pitfalls.py  ⭐ v2.4 自动同步工具
+│   ├── _extract_enums.py      从 C# 源码提取 30 个枚举字典
+│   ├── skill_editor_enums.json  生成的枚举字典（2.5 MB）
+│   └── ir/
+│       └── ir_schema.json     IR 的 JSON Schema（v2.3.2 当前版）
+├── samples/                 ← 样本库
+│   ├── ir/                    IR YAML 文件
+│   ├── json/                  对应的 SkillGraph JSON 编译产物
+│   └── markdown/              mermaid 解读 / 调试笔记
+└── postmortem/              ← 自动反思记录（19+ 条，按日期归档）
+    └── README.md              ← 索引页（按时间倒序）
+```
+
+---
+
+## IR 现支持的原语（v2.3.2 当前版）
+
+### 基础 step
+- `cast_anim` — 角色动作
+- `cast_effect` — 特效（ModelConfig）
+- `delay` — 延迟执行（支持嵌套 `then`）
+- `bullet` — 子弹（pattern: 直线子弹 / 回旋飞回）
+- `play_sound` — 音效
+- `camera_shake` — 镜头抖动
+- `apply_buff` / `remove_buff` — Buff 操作
+- `modify_tag` — 修改 SkillTag
+
+### v2.0 MOBA 大招原语
+- `displacement` — 高速位移（调 175_0023 模板）
+- `summon_clone` — 召唤残影（调 146004117 模板，含 active_pattern PoC 周期发弹）
+- `two_stage_skill` — 两段式按键（v2.1 改 44014633 切槽位真机制）
+- `return_to_clone` — 飞回（调 175_0024 模板）
+- `aoe_circle` — 圆形 AOE（PoC，v2.4 待真 AOE 筛选）
+
+### v2.3.2 关键能力
+- **多 SkillConfig 输出**：一个 IR yaml → 主 + 第二段独立 JSON
+- **实体级 SkillTag**：`Param[1]=0/PT=0` 跨技能透明读写
+- **动态槽位**：44014633 切槽位用 `TSET_GET_SKILL_SLOT_TYPE` 取 caster 当前槽
+- **位置记录**：`record_position_to_tag: N` 自动 X→tag N / Y→tag N+1
+- **int32 防御**：所有 ID 编译期检查 ≤ 2,147,483,647
+- **ID 冲突防御**：编译期扫所有 SkillGraph_*.json，禁重复（除非 `--overwrite`）
+
+### 兜底
+- `raw_node` — 直接指定一个 TSET_*/TSCT_*/TSKILLSELECT_* 节点 + Params
+
+详细 schema 见 [tools/ir/ir_schema.json](tools/ir/ir_schema.json)。
+
+---
+
+## 核心理念
+
+1. **IR 中转**：策划想法 → IR YAML → 编译器 → JSON。**不让 AI 直接生成 JSON**，因为复杂度太高、错了不可逆。
+2. **三档降级修改**：
+   - 数值级（CD / 系数）→ 直接 edit JSON
+   - 结构级（加段 / 换形态）→ 走 IR：JSON → 反编译 IR → 改 IR → 重编译
+   - IR 表达不了 → 用 `raw_node` 兜底 OR 扩 IR Schema + 加 expander
+3. **4 层审核**：结构合法 → 业务规则 → 语义合理 → 实现最优
+4. **自成长**：每次踩坑由 AI 自动反思 + 提案 → 用户拍板 → 入库 → 自动同步到易错点速查 → 下次不再犯
+5. **零 Python 知识可用**：日常用 `skill-designer` `skill-reviewer` agent，CLI 是高级用法
+
+---
+
+## Unity 实测三件套
+
+每次 AI 生成新 / 改过的 SkillGraph JSON，**用户必做**：
+
+1. **Ctrl+R 刷新 AssetDatabase**（让 Unity 识别新文件）
+2. **SkillEditor 打开 → 同步数据**（把 SkillConfig 推到 C++/C# 运行时表）
+   - 两段式技能：主 + 第二段两个 JSON 都要打开 + 同步
+   - 位置：菜单 / 工具栏（与项目其他技能同步操作一致）
+3. **进战斗实测**
+
+不做第 2 步会报 `[SkillDataManager]->CreateSkillBindData Cannot Find Skill Config`（C++ 表里没注册）。
+
+---
+
+## 给团队其他策划
+
+如果你是第一次看到这套工具：
+
+1. 跟战斗策划要一份**已经配通的简单技能样本**作为参考
+2. 跑上面 §"5 分钟跑通第一个技能" 验证环境
+3. 触发 `skill-designer` agent，描述你想要的技能
+4. **编译失败 / 不符预期时，别自己改 JSON**——把错误信息发给战斗策划/AI，由系统迭代
+
+> **重要原则**：你的反馈本身就是系统改进的输入。每次卡住都说出来，AI 会把它沉淀到 [docs/易错点速查.md](docs/易错点速查.md)，下次别人不会再卡同一个地方。
+
+---
+
+## 进度路线（v2.3.2 当前 → v3.0）
+
+| 优先级 | 功能 | 状态 |
+|--------|------|------|
+| ✅ DONE | IR v2.3.2 多 SkillConfig 输出 + 实体级 tag + 动态槽位 | 已上线 |
+| ✅ DONE | StickyNote 自动注入 + ID 冲突检查 + int32 防御 | 已上线 (v2.4) |
+| ✅ DONE | 19 条 PostMortem 历史归档 | [postmortem/README.md](postmortem/README.md) |
+| ✅ DONE | skill-designer (红) / skill-reviewer (绿) sub-agents | [.claude/agents/](../../.claude/agents/) |
+| ⏳ TODO | aoe_circle 真 AOE 筛选（替换 PoC 单目标） | v2.4 |
+| ⏳ TODO | clone_active_pattern 真"搜敌+发弹"（替换 PoC REPEAT） | v2.4 |
+| ⏳ TODO | IR 加 loop/if/calc 原语 | v3.0 |
+| ⏳ TODO | Unity Editor C# 一键导入 + 自动 SyncConfigData | v3.0 |
+| ⏳ TODO | CI 跑 OnSaveCheck 回归 | v3.0 |
+
+---
+
+## 维护规范
+
+### PostMortem 入库流程
+
+每次踩了新坑，AI 出 [PostMortem 提案](postmortem/README.md) → 用户审 → 入库：
+
+1. 写 `postmortem/YYYY-MM-DD-NNN-<slug>.md`
+2. 更新 `postmortem/README.md` 索引表
+3. **运行 `python tools/sync_postmortem_to_easy_pitfalls.py`** ⭐
+   - 自动把 PostMortem 的关键规则汇总到 `docs/易错点速查.md`
+4. 如能机器化的规则，加到 `tools/skill_lint.py` 或 `validate_ir`
+
+### IR 版本号策略
+
+| 改动类型 | 版本号变化 |
+|---------|-----------|
+| Schema 加新字段（向后兼容） | minor: v2.3 → v2.4 |
+| 编译器修复 bug 不改 schema | patch: v2.3.2 → v2.3.3 |
+| Schema 不兼容变更（删字段） | major: v2.x → v3.0 |
+
+---
+
+## 交叉引用
+
+- [[../../CLAUDE.md]] §"⚡新 AI Boot 段" — 新 AI 入门链路
+- [[../../.claude/agents/skill-designer.md]] — 红队 agent 定义
+- [[../../.claude/agents/skill-reviewer.md]] — 绿队 agent 定义
+- [[../../.claude/skills/skill-design/SKILL.md]] — 核心流程 SKILL.md（GATE 0–6）
+- [[../../.claude/skills/skill-review/SKILL.md]] — 4 层审核 SKILL.md
+- [[../编辑器/xNode节点编辑器]] — xNode 框架本身（独立于本系统）
+- [[../热更新/热更新系统]] — Unity HybridCLR 热更（与本系统正交）
+- 全局索引：[[../index]]

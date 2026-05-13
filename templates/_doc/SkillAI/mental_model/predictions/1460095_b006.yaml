@@ -1,0 +1,42 @@
+sample_id: 1460095
+batch: B-006
+sample_name: 【消耗品】搜打撤-隐身符
+predict_date: 2026-05-10
+mode_hardconfirmed: E_dual_zero_fallback
+
+skill_config_metadata_seen:
+  SkillID: 1460095
+  SkillSubType: 0
+  CdType: 0
+  EnhanceID: 0
+  ActiveRoot: 0
+  PassiveRoot: 0
+  SkillEffectFlowList_len: 0
+  IndicatorType: 0
+  refs_count: 1
+  filename_hint: "交互效果/搜打撤/消耗品 / '搜打撤-隐身符' / SubType=0"
+
+mental_model_in_state:
+  关于物品类:
+    本质理解: "物品/消耗品类是玩法功能 — 战斗外触发的功能（如搜打撤玩法的隐身符）。技能本体在 SkillEditor 内可能仅作为占位符，真实效果由消耗品系统 / 玩法系统驱动。"
+    与 30512002 对比: "1460095 refs=1 + SubType=0 + 物品 — 与 30512002 心法 refs=1 + SubType=701 形态相似但用途不同。两者都是 '空壳' 但驱动来源不同。"
+
+prediction:
+  node_count_estimate:
+    range: [1, 2]
+    rationale: "refs_count=1 极小 — 几乎只有 SkillConfigNode。"
+  topology_shape: "empty_marker_for_item_system — 文件作为 SkillID 占位符给消耗品系统识别。无任何内部 flow。"
+  真实入口机制_RQ1猜测:
+    候选优先级: "1. 外部召唤入口（最可能 95%）— 消耗品玩法系统（搜打撤模块）通过 ItemConfigID 关联此 SkillID 触发隐身效果。可能对应 ConsumableConfig.xlsx + 玩法代码硬编码。"
+    与心法空壳的差异: "心法空壳（30512002）入口可能在 SkillXinfaConfig.xlsx；物品空壳入口在 ConsumableConfig 表。**入口表来源不同 = 这两个虽都是空壳但属于不同子类**。"
+  4子类_RQ2立场: "v0.4-v0.6 4 子类完全不含'物品/消耗品'类 — 进一步印证 4 子类框架不完整。新归纳应至少包括：1) 空壳心法（表驱动）；2) 空壳物品（表驱动）；3) 空壳标签（占位）；4) 大型内嵌（法宝级）；5) BUFF 中型；6) 长 CD 大招型（如有）。"
+  涉及子系统:
+    - SkillEntry 系统（核心 — Mode E 真技能空壳子类）
+    - 物品/消耗品系统（外部驱动来源）
+  闭卷预测_RQ3立场: 不适用（非心法）
+  闭卷预测_RQ4立场: 不适用（非 1101/1001）
+
+self_assessment_pre_open:
+  conviction_level: 高（90%）
+  最大不确定: "物品类是否真的就是'空壳'？还是消耗品也有自己的 flow 在文件内？refs=1 强烈暗示空壳。"
+  核心赌注: "refs=1 → 必然空壳 → 必然依赖外部驱动 — RQ1 候选 1（SerializedNodes 内嵌）的强反证（同 30512002 / 1460082）。"

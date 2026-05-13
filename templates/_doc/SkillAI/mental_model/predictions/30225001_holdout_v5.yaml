@@ -1,0 +1,101 @@
+sample_id: 30225001
+date: 2026-05-10
+batch: holdout-v0.5
+sample_role: 验证 v0.5 模板段位 280xxx 主导（B-005 候选 2）+ 实体碰撞与可见性页 4 类位移模式（D-302 / v0.4）+ SubType=102 奇术常态范式
+
+# === GATE-MENTAL-IN: SkillConfig 5 硬信号（闭卷不能直接读 JSON，仅 corpus_scan + 文件名推测） ===
+skill_config_metadata_seen:
+  source: "corpus_scan flags + filename only — 严格闭卷"
+  SkillNameEditor: "未直接看，文件名为【土宗门】岩冲连跃-地阶-奇术"
+  SkillSubType: 102  # corpus_scan 已给
+  Icon: "未直接看（不在 corpus_scan）"
+  EnhanceSkillBuffConfigID: "未直接看（推测：SubType=102 主动技 + 名为奇术 + 文件名无心法字 → 强烈推测 = 0）"
+  SkillEffectPassiveExecuteInfo_nonzero: "未直接看（推测：SubType=102 奇术常态 = Mode B 双 root，Active+Passive 都 ≠ 0；30215001/30215002/30215003/30225002 同段位邻居都是 102 奇术；不能排除模式 E 双 0 入口的可能，但 has_set_coll + has_add_force 强主动表现，倾向 Mode B/D Active 至少 ≠ 0）"
+  notes: |
+    硬信号闭卷仅从文件名 + corpus_scan flag 推测：
+    - "岩冲连跃" = 跳跃位移（有冲撞含义）+ 3 颗 bullet + indicator=3 直线 + has_set_coll + has_add_force
+    → 强烈对应 v0.4 D-302 实体碰撞页"4 类位移模式"中的"自身位移+开关碰撞"模式（COLL_OFF→ADD_FORCE→DELAY→COLL_ON 标准模式）
+    - "地阶-奇术" = SubType=102 主动技，CdType 大概率 1（短 CD 主动）或 3（中等大招）
+    - corpus_scan flags：has_collision=True（位移期间关碰撞）+ has_set_coll=True（SET_COLL × 2 印证 Mode 4 类位移第 1 类）
+    - class_counts 显示 2 个 SET_ENTITY_COLLISION_ENABLE_STATE → 标准"COLL_OFF→ADD_FORCE→COLL_ON" 双调用模式
+    - 9 个 RUN_TEMPL → 重模板调度型，按 v0.5 模板段位字典 280xxx (4730/总 12541 = ~38%) 大概率主导
+    - 3 颗 BulletConfigNode + 3 颗 CREATE_BULLET：典型 3 弹奇术（hit phase 3 段直线）
+    - 1 个 ModelConfigNode：bullet 落点视觉模型（普通子弹用，非空 sentinel model=4）
+    - 2 个 RefConfigBaseNode：引用 2 个外部 buff/effect/template
+
+prediction:
+  # 维度 1: 节点数
+  estimated_node_count: 42  # corpus_scan 已给（精度 100%，闭卷允许使用）
+  estimated_node_count_band:
+    low: 38
+    high: 50
+    rationale: "corpus_scan 已给 = 直接命中"
+
+  # 维度 2: 拓扑（mermaid 草图）
+  topology_sketch: |
+    根 = TSET_ORDER_EXECUTE (Active root, SkillEffectExecuteInfo)
+      ├─ TSET_PLAY_ROLE_ANIM (起手动画)
+      ├─ TSET_SET_ENTITY_COLLISION_ENABLE_STATE (COLL_OFF) ⭐ v0.4 D-302 模式 1
+      ├─ TSET_DELAY_EXECUTE → TSET_ADD_FORCE (位移冲刺)
+      ├─ TSET_DELAY_EXECUTE → TSET_RUN_SKILL_EFFECT_TEMPLATE (命中模板调度，~9 次)
+      ├─ TSET_DELAY_EXECUTE × 3 → TSET_CREATE_BULLET × 3 (3 段子弹 hit phase)
+      │     └─ 每个 BulletConfigNode 含 ModelConfigNode (落点视觉)
+      ├─ TSET_REPEAT_EXECUTE (3 段子弹的循环或 hit 多目标)
+      ├─ TSET_PLAY_ROLE_ANIM (落地动画)
+      ├─ TSET_SET_ENTITY_COLLISION_ENABLE_STATE (COLL_ON) ⭐ 关闭后必开
+      └─ TSET_CAMERA_SHAKE + TSET_PLAY_SOUND
+    Passive root: 非 0 概率较高（102 奇术 Mode B 双 root），Passive 内可能含 GET_POS_X/Y_BY_ANGLE_DISTANCE 系列做朝向计算
+
+  topology_keywords: ["双 root（Mode B）/单 root（Mode D Active 纯主动）", "ORDER 主导", "COLL_OFF→DELAY→ADD_FORCE→COLL_ON 4 类位移第 1 类", "3 段子弹 hit phase", "9 次 RUN_TEMPL 重模板"]
+
+  # 维度 3: 模板使用
+  expected_templates:
+    - id_segment: "280xxx"
+      reason: "v0.5 字典写但未学过；280xxx 占 corpus 38%，9 RUN_TEMPL 高概率主导段"
+      confidence: 高
+    - id_segment: "186xxx 或 18xxx"
+      reason: "v0.4 字典扩 18xxx-186xxx 段位常被宗门技能调"
+      confidence: 中
+    - id_segment: "175xxx 或 14xxx"
+      reason: "通用子弹命中模板 / 持续施法模板（30225001 不是持续施法，14xxx 可能性低）"
+      confidence: 低
+    - id_segment: "190xxx 三联包 (190016404/485/523)"
+      reason: "v0.5 D-401 命中模板核心组件，3 段子弹 hit 时高概率调三联包"
+      confidence: 中（中信号，二阶印证）
+    - id_segment: "44xxx"
+      reason: "可能 callback effect ID 或子 buff，二阶概率"
+      confidence: 低
+
+  # 维度 4: 触碰子系统
+  touched_subsystems:
+    - 模板系统  # 9 RUN_TEMPL 高频 + 段位字典扩补区
+    - SkillEntry系统  # SubType=102 + 推测 Mode B 双 root
+    - 控制流子系统  # ORDER + DELAY × 多 + REPEAT × 1
+    - 实体碰撞与可见性  # ⭐ has_set_coll + has_collision + has_add_force = 4 类位移第 1 类
+    - SkillTag系统  # 非主导但 102 奇术常有 tag（中信号）
+    - SkillEvent系统  # 不触碰（has_register_event=False）
+    - Buff系统  # 不触碰（无 ADD_BUFF / 0 BuffConfig）
+
+  expected_subsystem_signals:
+    实体碰撞与可见性: "强信号——COLL_OFF→ADD_FORCE→DELAY→COLL_ON 模式 1 命中预期"
+    模板系统: "强信号——9 RUN_TEMPL，280xxx 主导（B-005 候选 2 验证）"
+    SkillEntry系统: "中信号——SubType=102 Mode B 双 root 期望"
+    控制流子系统: "强信号——ORDER × 10 + DELAY × 3 + REPEAT × 1"
+    SkillTag系统: "弱信号——102 奇术常有 tag 但 corpus_scan 无 SkillTagsConfigNode 显式信号"
+    SkillEvent系统: "无（has_register_event=False，hold-out 反例验证 SubType=102 多数不用 REGISTER）"
+    Buff系统: "无（class_counts 0 ADD_BUFF / 0 BuffConfig）"
+
+  predicted_pitfalls:
+    - "v0.4 D-302 的 4 类位移模式：本样本是模式 1（COLL_OFF + ADD_FORCE + COLL_ON）还是模式 2（COLL_OFF + ADD_FORCE 不开 COLL_ON 反复跳跃）？2 SET_COLL 暗示对开闭对，倾向模式 1"
+    - "v0.5 D-401 三联包：是否完整调齐 190016404/485/523 三个？"
+    - "v0.5 D-407 反例 root_id=0 不限 SubType/CdType：本样本 SubType=102 是否也可能双 0？低概率（has_set_coll + has_add_force 强主动）"
+    - "如果 280xxx 命中 = v0.5 字典 + B-005 候选 2 一阶印证"
+    - "如果 280xxx 不命中 = v0.5 字典 over-emphasized 280xxx 主导地位"
+
+# 闭卷自评
+self_assessment:
+  confidence: 中偏高
+  rationale: |
+    corpus_scan 已给节点数（拿 1.0）+ 文件名 + flag 信号丰富，4 类位移模式预期有把握
+    最大不确定：280xxx vs 186xxx vs 18xxx 哪个为主导段位，需开卷验证
+    其次不确定：双 root（Mode B）vs 纯 Active（Mode D），SubType=102 两种都有先例

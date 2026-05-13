@@ -1,0 +1,81 @@
+meta:
+  ir_version: '1.0'
+  skill_id: 30215001
+  skill_name: 土系奇术1
+  author: decompiled
+skill:
+  element: 土
+  main_type: 功法技
+  sub_type: 奇术
+  damage_type: 直接伤害
+  cd_type: 普通
+  cd_frames: 300
+  range: 750
+  ai_range: 750
+  cast_frame: 10
+  buffer_frame: 15
+  base_duration: 30
+  xinfa_energy: 100
+  skill_name_text: 土系奇术1
+flow:
+- modify_tag:
+    tag_id: 440961
+    value: 0
+    op_type: 1
+- cast_anim:
+    anim_id: 429
+    blend_ms: 200
+    speed_pct: 100
+    rapid_affect: true
+- delay:
+    frames: entity:初始技能攻击触发帧
+    then:
+    - bullet:
+        pattern: 直线子弹
+        bullet_id: 440448
+        offset_forward: 100
+        is_projectile: false
+        rapid_affect: true
+    - raw_node:
+        cls: TSET_RUN_SKILL_EFFECT_TEMPLATE
+        params:
+        - entity:主体
+        - entity:目标
+        - 38000236
+        - 1500
+        - effect_return:44017817
+        - effect_return:44017818
+        - 1
+        - 0
+        - 0
+        - 44016757
+        - 44016033
+        - 44016033
+        - 442201
+        - 0
+        desc: 'SkillGraph_175_0024【模板】位移_按速度目标点.json
+
+          -----------------------模板说明-----------------------
+
+          注意：目前内部会在位移完后，重新开启与“角色”的碰撞。
+
+          外部使用的时候注意一下。
+
+          '
+- raw_node:
+    cls: TSET_RUN_SKILL_EFFECT_TEMPLATE
+    params:
+    - entity:主体
+    - entity:目标
+    - 186004942
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    desc: '[186004942]  (1860131【模板】施法状态)'
+tags:
+- id: 440941
+  desc: 土宗门奇术子弹ID
+- id: 440961
+  desc: 土宗门奇术1终止位移参数

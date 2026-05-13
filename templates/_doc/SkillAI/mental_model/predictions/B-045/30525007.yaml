@@ -1,0 +1,25 @@
+sample_id: 30525007
+filename: SkillGraph_30525007【土宗门】墟反术_地阶.json
+subcat: 宗门心法 / 土宗门心法
+nodes: 30
+role: holdout
+segment_guess: 30525_5d_土心法_墟反术_地阶
+closed_book_inferences:
+  - master_flag: 0 (心法)
+  - structure: 30 nodes 中等 / 土心法 / 推断 SCN + PR + BUFF 被动触发
+  - SubClass: SCN + 心法 PR (D-1904 土心法专属完整三联 hedge_保留状态 / 本批可能加固)
+  - SC=True / NSC=False
+  - ConfigJson.ElementType: 5 (土 / D-3801 5=土 5/5 实证)
+  - 段位号系 (PR): 推断 220xxxxxxx 9d (D-5601-B 心法 PR 14 例已实证 220 族 / 30525007 土心法可能 220)
+  - 关键不确定: 30525xxx 土心法段位号系是 220 还是 225 ? D-1904 hedge_保留 / 0 土心法样本曾学过 → 本批本样本是 D-1904 + D-5601-B + D-3801 5/5 实证三联首例
+  - filename_pattern: 【土宗门】墟反术_地阶 → 中文宗门 + 名称 + 段位
+deltas_touched_predicted:
+  - D-2401 (master flag): expect 0
+  - D-2501 (225 段位): possible (PR 可能 225 / 待验)
+  - D-3801 (ET 完整枚举): expect ET=5 (土) / 已实证 / 不增枚举
+  - D-4001 (44 段位): N/A
+  - D-4002 (A) (30512xxx 木心法 ConfigJson 标量全零 → 30525xxx 土心法 cousin): 跨元素心法 cousin candidate / +1 例待 fs 真扫
+  - D-4006 (path ≠ ET): expect path=土 + ET=5 一致
+  - D-1904 (土心法专属完整三联 hedge_保留): 本批首例土心法 / 强加固或推翻 hedge_保留 / 重大候选
+  - D-5601-B (9d 220xxxxxxx 心法 PR 14 例): possible cousin / +1 例加固
+predicted_sample_score_self: 0.65 (holdout / 土心法首例 / D-1904 hedge_保留状态 / 多个不确定点)

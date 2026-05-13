@@ -1,0 +1,52 @@
+sample_id: 175_0001-T
+date: 2026-05-09
+batch: B-002
+
+template_metadata_seen:
+  filename: "SkillGraph_175_0001【模板】子弹通用命中效果.json"
+  category_dir: "技能模板"
+  sub_category: "子弹"
+  node_count: 129
+  segment_id_prefix: "175_0xxx"
+  notes: |
+    175 段位是 hold-out F-2 推测的"连招/通用工具集"段。其中 175_0001 是"子弹通用命中效果"——
+    可能是所有子弹命中后跑的标准流程模板。
+    class_counts 含 TSCT_VALUE_COMPARE × 28 + CONDITION × 17 + AND × 10 + NOT × 8 + ENTITY_TYPE × 9（TSCT 类爆表）
+    → 这个模板的"工作量"集中在条件判断而非控制流。
+    has_collision=True 暗示用 GET_ENTITY_COLLISION_POS 计算碰撞坐标。
+
+prediction:
+  estimated_root_class: "TSET_ORDER_EXECUTE"  # 基于教训 1，所有模板入口 root = ORDER + IsTemplate=True
+  reasoning_root: |
+    citing 教训 1（B-002 sample 1）：模板本体 root = ORDER 已确立。本样本 ORDER × 2（仅 2 个）说明
+    模板顶层 ORDER 数量低，但配合 CONDITION × 17 + AND × 10，主结构应该是
+    "1 个 root ORDER → 多个 CONDITION 分支（按命中目标类型/状态分发）"
+
+  estimated_node_count: 129
+  topology_sketch: |
+    flowchart LR
+      ROOT[TSET_ORDER_EXECUTE rid=1000 IsTemplate=True] --> COND_TYPE[CONDITION_EXECUTE × 17 按命中类型]
+      COND_TYPE --> CHECK_TYPE[ENTITY_TYPE × 9]
+      COND_TYPE --> CHECK_STATE[ENTITY_STATE × 7]
+      COND_TYPE --> AND_OR[AND/OR 复合条件 × 14]
+      ROOT --> CREATE_FX[CREATE_EFFECT × 3 命中特效]
+      ROOT --> ANIM[PLAY_ROLE_ANIM × 3]
+      ROOT --> SHAKE[CAMERA_SHAKE × 3 + MODEL_SHAKE × 1]
+      ROOT --> SCREEN[APPLY_SCREEN_EFFECT × 2]
+      ROOT --> DESTROY[DESTROY_ENTITY × 2 子弹销毁]
+      ROOT --> COLL[GET_ENTITY_COLLISION_POS_X/Y 取碰撞点]
+
+  expected_subsystems_touched:
+    - 控制流子系统 (CONDITION × 17 + ORDER × 2)
+    - 模板系统 (本身是模板入口)
+    - 条件系统 (TSCT_AND/OR/NOT/VALUE_COMPARE 共 50 次 — 主要工作量)
+    - SkillTag 系统 (GET_TAG × 8 + MOD_TAG × 3 + SkillTagsConfigNode × 1)
+    - 实体属性子系统 (ENTITY_TYPE × 9 + ENTITY_STATE × 7 + GET_ENTITY_ATTR × 3 + GET_ENTITY_COLLISION_POS × 2)
+    - SkillEvent 系统 (REG × 1 + UNREG × 1)
+    - 表现系统 (CAMERA_SHAKE × 3 + MODEL_SHAKE × 1 + SCREEN_EFFECT × 2 + ROLE_ANIM × 3)
+
+  expected_reusable_pattern: |
+    "子弹通用命中效果"模板应该是**所有子弹命中后调用的标准入口**——
+    每个 BulletConfigNode 在 die_effect / hit_effect 字段挂这个模板，
+    模板内部按"命中实体类型/状态"分发到不同效果。
+    若验证成立，F-2 段位字典中"175 段 = 通用工具集"得证实。

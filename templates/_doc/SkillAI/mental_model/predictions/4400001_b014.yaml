@@ -1,0 +1,87 @@
+---
+sample_id: "4400001"
+batch: B-014
+phase: PREDICT_close_book
+predicted_at: 2026-05-10
+mental_model_version_in: v0.12
+bucket: 44xxx_7d
+filename: "SkillGraph_4400001【BUFF】挑战妖王异化buff.json"
+
+# ============================================================================
+# 闭卷输入（仅看技能名 + category metadata）
+# ============================================================================
+
+close_book_inputs:
+  filename_label: "【BUFF】挑战妖王异化buff"
+  category_dir: "BUFF"
+  sub_category: ""
+  semantic_hint: |
+    "【BUFF】" 标签 = 项目 BUFF 配置文件（非战斗主流程技能）；
+    "挑战妖王异化buff" = 关卡/Boss 玩法专属 BUFF / 妖王异化 = 形态变化或属性强化型 buff。
+
+# ============================================================================
+# 5 SkillConfig 硬信号预测
+# ============================================================================
+
+predicted_skill_config_5_hard_signals:
+  SkillNameEditor: "【BUFF】挑战妖王异化buff（推断）"
+  SkillSubType_guess: 0  # BUFF 配置文件 SubType 通常 = 0（v0.6 §SkillEditor 文件三分类 / Mode E 双 0 入口）
+  Icon: "未知"
+  EnhanceSkillBuffConfigID_guess: 0
+  SkillEffectPassiveExecuteInfo_guess: "可能 = 0"  # 纯 BUFF 配置型容器 / 双 0 fallback Mode E
+
+# ============================================================================
+# 拓扑预测（按 v0.6/v0.7/v0.8 BUFF Mode E 入口范式：BuffConfig 字段入口 vs REGISTER_SKILL_EVENT 入口）
+# ============================================================================
+
+predicted_topology:
+  predicted_node_count: 60  # 估算：BuffConfig × 多个（异化形态多种）+ 触发条件 × 多 + Damage / Add_Buff 组合 ≈ 60
+  predicted_mode: "E_dual_zero_fallback"  # Mode E 双 0（v0.7 D-605 BUFF type3 Mode E 入口子模式）
+  predicted_topology_keys:
+    - "ORDER_EXECUTE"
+    - "BuffConfigNode"        # 多个 BuffConfig（异化形态）
+    - "REGISTER_SKILL_EVENT"  # 事件触发（被攻击/挑战开始等）
+    - "VALUE_COMPARE"         # 形态切换条件
+    - "ADD_BUFF"              # 应用异化 buff
+    - "REMOVE_BUFF"           # 反向
+
+predicted_subsystems:
+  - "Buff"
+  - "SkillEvent"
+  - "SkillEntry"
+  - "控制流"
+
+# ============================================================================
+# 段位字典命名归纳预测
+# ============================================================================
+
+predicted_segment_naming_dict_check:
+  bucket: 44xxx_7d
+  hypothesis_keywords: ["BULLET", "DAMAGE"]
+  predicted_naming_keyword_hits_in_segment_top_16: "trivial"  # 仅 1 文件 / 段位字典命名归纳无意义
+  predicted_naming_keyword_hits_in_segment_top_32: "trivial"
+  rationale: |
+    44xxx_7d 段位仅 1 文件（4400001）/ 不构成段位字典命名归纳的统计基础 /
+    本样本预测主要服务于 BUFF Mode E 入口范式验证 + SubType=0 形态学加固 /
+    44xxx_7d 段位字典本身建议字典骨架不动 + B-014 R1 hedge "1 文件孤立"
+
+# ============================================================================
+# 当前认知（GATE-MENTAL-IN）
+# ============================================================================
+
+mental_model_understanding:
+  involved_subsystems:
+    Buff:
+      current_understanding: "BUFF Mode E 入口 2 子模式（v0.7 §6）= BuffConfig 字段入口 6/9 vs REGISTER_SKILL_EVENT 入口 3/9"
+      uncertain: "本样本属于哪个子模式 / 异化 BUFF 多形态需要多 BuffConfig 是否对应 type3 多类重叠（v0.8 D-702 软化为独立轴）"
+    SkillEvent:
+      current_understanding: "BUFF 类 REGISTER 入口 = 被动触发型 / N 对 REG/UNREG ≥ 5 = 法宝型范式（v0.6 D-505）"
+      uncertain: "妖王异化 BUFF 是否走 N 对 REG/UNREG 反复模式"
+    SkillEntry:
+      current_understanding: "Mode E 双 0 入口 = SubType=0 BUFF 配置型容器 / v0.6.1 + B-006 ~ B-008 R1 编码归纳 type1-5"
+      uncertain: "本样本属于 type1 纯空壳 / type2 SkillTag 注册 / type3 BUFF 内部 trigger 哪一类"
+
+uncertainty_sources:
+  - "未读 BuffConfig 实际数量 / 异化形态可能 ≥ 5 个"
+  - "未读 REGISTER_SKILL_EVENT 实际事件类型"
+  - "44xxx_7d 段位整体语义未在 v0.11 字典声明 / 1 文件不足以建字典"

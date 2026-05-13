@@ -1,0 +1,85 @@
+sample_id: '30531008'
+date: 2026-05-09
+batch: B-003
+predicted_with_mental_model_version: v0.3
+targeted_blindspot:
+  id: blindspot-5
+  description: |
+    模板系统反直觉 2 "146003779 持续施法标配蓄力技能"边界探测。
+    v0.3 反直觉点 2 写"看到蓄炎/蓄力/持续不要预测层数累加器+ORDER×N，多半是 RUN_TEMPL 调 146003779"，
+    但 hold-out 30214004（火多段蓄力）+ 30331000 + 30315001 3/3 均不调 146003779。
+    本样本 30531008【金宗门】标签效果-蓄势 名字含"蓄势"且 has_146003779=False，
+    第二次反直觉点 2 反例。
+    预期发现：v0.3 反直觉 2 应修订/弱化 — 146003779 不是"蓄力"通用标配，
+    可能仅适用于"明确短长按 UI 的特定子集"（如 30234006 火大招蓄炎流），
+    而"标签效果-蓄势"类心法/连招走另一套：自写 SkillTag 累加 + REGISTER 事件触发。
+
+skill_config_metadata_seen:
+  SkillNameEditor: '【金宗门】标签效果-蓄势'
+  SkillSubType: 0  # 标签效果型！
+  Icon: '（未读）'
+  EnhanceSkillBuffConfigID: '（未确认；标签效果型常 ≠ 0）'
+  SkillEffectPassiveExecuteInfo_nonzero: '（未确认；标签效果型 Passive 通常 ≠ 0）'
+  CdType: 0  # 标签型
+  CdTime: 0
+  notes: |
+    从 5 硬信号 + 元数据看：
+    - 名字"标签效果-蓄势" + 金宗门 + 在"宗门标签/金宗门标签/" 子目录 → 与 30534004 同类
+      （30534004【火宗门】标签效果_蓄炎，模式 C 纯 Passive，调 220005242 Passive）
+    - SubType=0 ⚠️ v0.3 字典已有"标签效果型"，与 30534004 同
+    - CdType=0 + CdTime=0 → 标签型/被动型（v0.3 字典已知）
+    - 节点 123 / bullet=1 / has_register_event=True / 5 REGISTER → 多事件订阅型
+    - top_classes 主导：16 GET_SKILL_TAG + 11 VALUE_COMPARE + 10 MOD_TAG + 9 ORDER + 8 SkillTagsConfigNode + 8 NUM_CALCULATE + 6 AND
+      → 极度 SkillTag 密集（蓄势 = SkillTag 累加层数），10 MOD_TAG 是核心
+    - 5 ADD_BUFF + 3 BuffConfig → flow 内 vs 外部表混合（盲点 4 二阶印证）
+    - 4 RUN_TEMPL（不调 146003779）→ 反直觉点 2 反例
+
+prediction:
+  estimated_node_count: 123
+  topology_sketch: |
+    SkillConfig (CdType=0, CdTime=0, SubType=0, Active=0?, Passive ≠ 0?)
+      └─ Passive root = ORDER（模式 C 纯 Passive，与 30534004 镜像）
+          ├─ SkillTagsConfigNode × 8（8 个本技能 SkillTag 声明）
+          ├─ REGISTER × 5（监听 5 个战场事件，蓄势触发条件）
+          │    ├─ Event A: 攻击命中（蓄势加层）
+          │    ├─ Event B: 受击（可能扣层）
+          │    ├─ Event C: 元素响应
+          │    ├─ Event D: 状态切换
+          │    └─ Event E: 释放/消耗
+          ├─ ORDER × N → MOD_TAG × 10（蓄势层数 +/-，10 次 modify）
+          ├─ ORDER → GET_SKILL_TAG × 16 + VALUE_COMPARE × 11 + AND × 6（重度条件树）
+          ├─ ORDER → NUM_CALCULATE × 8（数值合成 → 伤害加成 / 层数函数）
+          └─ ORDER → ADD_BUFF × 5 + BuffConfig × 3（5 个 buff，2 个引用外部表）
+
+    猜测：金宗门"标签效果-蓄势"心法，5 事件订阅（攻击/受击/响应/切换/释放）→ 通过 SkillTag 蓄势累加 →
+    满层后给自身/目标 5 个 buff 加成。SubType=0 标签效果型，CdType=0 引擎托管，
+    完全不调 146003779（持续施法）— 与 30234006 火大招蓄炎流"调 146"不同，
+    走自定义 SkillTag 累加 + REGISTER 触发的路线。
+
+    印证 v0.3 反直觉 2 边界：146003779 是 UI 短长按 + 持续施法时间轴专用，
+    "标签效果-蓄势"虽然名字含"蓄势"但走另一套（SkillTag 累加 + 事件驱动），
+    与 30534004 蓄炎心法同 SubType=0 范式。
+
+  expected_templates:
+    - '4 RUN_TEMPL（不调 146003779）— 可能调 175 工具模板 / 22xxx 单位模板'
+    - '与 30534004 镜像（同 SubType=0 标签效果型）'
+
+  touched_subsystems:
+    - 控制流子系统（9 ORDER + 2 DELAY + 2 REPEAT + 11 VALUE_COMPARE + 6 AND，重度条件树）
+    - SkillEntry 系统（模式 C 纯 Passive 推测，与 30534004 镜像）
+    - SkillTag 系统（16 GET + 10 MOD_TAG + 8 SkillTagsConfigNode，最重度 tag 系统样本）
+    - Buff 系统（5 ADD_BUFF + 3 BuffConfig — 不平衡，flow 内/外混合，盲点 4 二阶印证）
+    - SkillEvent 系统（5 REGISTER — 同时是盲点 3 验证：Event ID 数据点扩补）
+    - 模板系统（4 RUN_TEMPL，但不调 146003779 — 盲点 5 核心反例）
+
+  confidence: 高
+  rationale: |
+    元数据信号极强：
+    - SubType=0 + CdType=0 + 在"宗门标签"目录 = 标签效果型铁三角，与 30534004 完全镜像
+    - 5 REGISTER + 16 GET_TAG + 10 MOD_TAG = 蓄势心法的"事件 + 状态累加"标准范式
+    - 4 RUN_TEMPL 不调 146 = 反直觉 2 的强反例
+    主要不确定的点：
+    1. 5 REGISTER 的 Event ID 是否扩 v0.3 字典（与 pick3 共同验证盲点 3）
+    2. 5 ADD_BUFF + 3 BuffConfig 不平衡的语法实现（盲点 4 二阶印证）
+    3. SubType=0 的 v0.3 已知机制是否完全覆盖本样本（30534004 是 4 REG + 4 ADD_BUFF + 0 BuffConfig；
+       本样本是 5 REG + 5 ADD_BUFF + 3 BuffConfig — 模式相似但配置不同）

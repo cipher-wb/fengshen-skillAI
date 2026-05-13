@@ -1,0 +1,88 @@
+---
+sample_id: "2250030"
+batch: B-014
+phase: PREDICT_close_book
+predicted_at: 2026-05-10
+mental_model_version_in: v0.12
+bucket: 22xxx_7d
+filename: "SkillGraph_2250030【搜打撤】隐身符.json"
+
+# ============================================================================
+# 闭卷输入（仅看技能名 + category metadata / 不读 class_counts / RefIds）
+# ============================================================================
+
+close_book_inputs:
+  filename_label: "【搜打撤】隐身符"
+  category_dir: "特殊玩法"
+  sub_category: "搜打撤"
+  semantic_hint: |
+    "搜打撤" = 搜索+战斗+撤退一类玩法（roguelike 类副本玩法）；
+    "隐身符" = 道具型 / 使用后赋予隐身效果，与战斗/移动状态绑定。
+
+# ============================================================================
+# 5 SkillConfig 硬信号预测（基于技能名 + 段位先验 / 不读 SkillConfig 实际值）
+# ============================================================================
+
+predicted_skill_config_5_hard_signals:
+  SkillNameEditor: "【搜打撤】隐身符（推断）"
+  SkillSubType_guess: 401  # 道具/特殊玩法类，按 v0.4 D-407 增补字典 401=战斗道具/特殊玩法
+  Icon: "未知（隐身符相关图标）"
+  EnhanceSkillBuffConfigID_guess: 0  # 道具直接生效非心法增强型
+  SkillEffectPassiveExecuteInfo_guess: "可能 ≠ 0"  # 隐身=施身被动 / 注册事件解隐身
+
+# ============================================================================
+# 拓扑预测（基于"道具→施身被动→注册事件→撤销"范式）
+# ============================================================================
+
+predicted_topology:
+  predicted_node_count: 18  # 估算：1 SkillConfig + 1 BuffConfig + 2-3 ADD_BUFF/REMOVE_BUFF + 2 REGISTER/UNREGISTER + ORDER + Effect ≈ 18
+  predicted_mode: "C_pure_passive"  # 道具触发 = 被动入口（PassiveRoot ≠ 0）
+  predicted_topology_keys:
+    - "ORDER_EXECUTE"
+    - "ADD_BUFF"            # 隐身效果通过 Buff
+    - "BuffConfigNode"      # 隐身 Buff 定义
+    - "REGISTER_SKILL_EVENT" # 注册"被攻击/释放技能"事件以解隐
+    - "UNREGISTER_SKILL_EVENT" # 反向操作
+    - "REMOVE_BUFF"         # 解隐身
+    - "CREATE_EFFECT"       # 隐身视觉
+
+predicted_subsystems:
+  - "Buff"
+  - "SkillEvent"
+  - "SkillEntry"
+  - "控制流"
+
+# ============================================================================
+# 段位字典命名归纳预测（rule_6 v2.3 假说测试）
+# ============================================================================
+
+predicted_segment_naming_dict_check:
+  bucket: 22xxx_7d
+  hypothesis_keywords: ["BULLET", "EFFECT", "DAMAGE"]
+  predicted_naming_keyword_hits_in_segment_top_16: false  # 预测：22xxx_7d 段位整体语义不主张子弹/效果/伤害命名 / SBL-4 同源候选反例
+  predicted_naming_keyword_hits_in_segment_top_32: "uncertain"  # 不确定 / 待 v2 双窗口
+  rationale: |
+    22xxx_7d 仅 20 文件 / 预扫无明确语义命名规律 /
+    "搜打撤" 等特殊玩法可能跨业务 / 段位整体语义不应以 BULLET/EFFECT/DAMAGE 概括 /
+    若双窗口反例则进一步加固 SBL-4 同源候选
+
+# ============================================================================
+# 当前认知（GATE-MENTAL-IN）
+# ============================================================================
+
+mental_model_understanding:
+  involved_subsystems:
+    Buff:
+      current_understanding: "BUFF 系统支持 Add/Remove/层数化机制 / 跨 SubType 通用"
+      uncertain: "隐身符的 BUFF 字段实际配置（是否走 type3a/b 子模式）"
+    SkillEvent:
+      current_understanding: "REGISTER/UNREGISTER 成对管理事件订阅 / 法宝/装备/道具型被动核心范式"
+      uncertain: "隐身符是否单一 N 对 REG/UNREG 还是多对"
+    模板系统:
+      current_understanding: "段位字典 22xxx_7d 在 v0.11 字典未明确 / B-012 R1 已 micro-actionable 'corpus 23 文件'"
+      uncertain: "22xxx_7d 段位是否有统一语义（B-014 待验证 / SBL-4 同源候选）"
+
+uncertainty_sources:
+  - "未读 SkillConfig 实际值 / SubType 401 推断可能错"
+  - "未读 BulletConfig / 隐身符可能内嵌 Marker 子弹（道具特殊玩法多见）"
+  - "未读 RefIds 实际节点拓扑"

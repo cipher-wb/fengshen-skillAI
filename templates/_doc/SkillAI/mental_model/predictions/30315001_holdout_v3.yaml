@@ -1,0 +1,100 @@
+sample_id: 30315001
+predicted_with_mental_model_version: v0.3
+phase: holdout-v0.3
+date: 2026-05-09
+
+skill_config_metadata_seen:
+  SkillNameEditor: "土宗门神通"  # 提示：通用名，非具体技能名（30315001 = 土宗门-携岩坠地-地阶-神通，按文件名）
+  SkillSubType: 103
+  Icon: ""   # **空 Icon** —— 反直觉信号
+  EnhanceSkillBuffConfigID: 0
+  SkillEffectPassiveExecuteInfo_nonzero: false   # Passive=0 → 纯 Active 模式 A
+  CdType: 1   # B-002 字典 CdType=1 = "即用即冷却"（v0.3 推测语义"立即 CD"）
+  CdTime: 900
+  SkillIndicatorType: 4   # 扇形指示器（v0.3 未明确字典此值，但 v0.1 corpus 启发式中 indicator=4 = 扇形/散射）
+  SkillTagsList: "[]"   # 顶层 tag 完全为空
+  SkillDamageTagsList: "[]"
+  notes: |
+    硬信号综合解读：
+    - "携岩坠地" 神通 + Passive=0 → SkillEntry 模式 A 纯 Active（与 30215001 同模式：奇术 SubType=102 也是模式 A）
+    - SubType=103 与 30331000 共享，但 30331000 是双 root（模式 B）→ **同 SubType 跨模式**，再次印证"SubType 不映射机制"
+    - SkillIndicatorType=4 = 扇形 → 范围攻击（"携岩坠地"语义符合：扇形 AOE 落岩）
+    - SkillTagsList / SkillDamageTagsList 都空 → 顶层无声明，全部 tag（如果有）都从 flow 内 SkillTagsConfigNode 走 → **测试 v0.3 SkillTag 系统反直觉 4 "声明判定必须 OR 三源" 反例**
+    - CdType=1 v0.2/v0.3 推测"即用即冷却"，但 30215001（B-002 唯一 CdType=1 样本）也是奇术位移类。
+      30315001 是神通（不是奇术/身法）但也用 CdType=1 → **CdType=1 不限于奇术/位移类，可能是任意"立即 CD"型**
+    - has_register_event=True + has_add_force=True + bullet_count=1 → 单子弹位移神通
+
+prediction:
+  estimated_node_count: 100
+  reasoning_for_node_count: |
+    104 真实 / 估 100。
+    神通 + ADD_FORCE + REGISTER + 单子弹 → 与 30215001（土奇术-奔岩突进 56 节点）/ 30325002（土神通 109 节点）之间。
+    单子弹 + 扇形指示器 + 神通 → 节点数偏多（神通骨架 + 子弹释放 + 落地特效 + 实体碰撞控制）。
+
+  topology_sketch: |
+    ```mermaid
+    flowchart LR
+      A[SkillConfigNode<br>Active=44015995<br>Passive=0] --> B[**Active root<br>TSET_ORDER_EXECUTE**]
+      B --> C[施法前摇 + 指示器扇形]
+      C --> D[**RUN_TEMPL<br>146003779 持续施法?**<br>（神通=持续施法套）]
+      D --> E[**位移段**:<br>SET_COLL_OFF<br>+ ADD_FORCE<br>+ DELAY<br>+ SET_COLL_ON]
+      E --> F[落地段:<br>CREATE_BULLET 1<br>+ AOE 伤害]
+      F --> G[REGISTER_SKILL_EVENT<br>命中触发回调]
+      F --> H[ADD_BUFF: 自身/敌方]
+    ```
+    主线：神通典型"前摇 → 持续施法蓄力 → 位移落地 → 扇形 AOE → 命中事件回调"。
+
+  expected_templates:
+    - "146003779（持续施法）— 中等推测：神通+CdType=1，与 30325002 形态接近"
+    - "175_0001（子弹通用命中）— 强推测：CREATE_BULLET 1 段，命中走通用模板"
+    - "175_0024（位移按速度目标点）— 中推测：has_add_force=True 提示真位移"
+    - "RUN_TEMPL 总数: 8（corpus_scan 已知）"
+
+  touched_subsystems:
+    - "[控制流子系统.md] §A 5 控制原语 — ORDER（15 已知）+ DELAY 适中 + RUN_TEMPL 8 次"
+    - "[控制流子系统.md] §D CdType 字典 — CdType=1 第二样本（v0.2/v0.3 仅 30215001 一个 CdType=1 样本，本样本扩证）"
+    - "[模板系统.md] 不变量 2 段位字典 + 反直觉点 1（节点 ≥80 + RUN_TEMPL ≥5 = 强模板套用）"
+    - "[SkillEntry系统.md] 不变量 1 入口模式 A（纯 Active）+ §SubType 字典（103 新值，待补）"
+    - "[SkillEvent系统.md] 关键不变量 4（has_register_event=True，神通 Active root 下 REGISTER 命中回调）"
+    - "[实体碰撞与可见性.md] 关键不变量 3 标准位移模式 'COLL_OFF → ADD_FORCE → DELAY → COLL_ON'（has_add_force=True；但 has_set_coll=False 是 corpus_scan 漏检还是真没？）"
+    - "[Buff系统.md] 反直觉 3（SubType 不映射机制，103 是新 SubType；buff_apply=False 但 ADD_BUFF=6 from corpus_scan 提示 buff 串联）"
+    - "[SkillTag系统.md] 反直觉 4 三源协作（顶层 SkillTagsList/SkillDamageTagsList 都空 → 推测 flow 内 SkillTagsConfigNode 全声明，**测试 lint E019 是否漏检**）"
+
+  prediction_confidence: 中
+
+  reasoning: |
+    **强依赖 v0.3 子系统页推理**：
+
+    1. **[控制流子系统.md] §D CdType 字典** v0.3 写道："CdType=1 — 即用即冷却（推测：立即 CD）— 奇术位移类"。本样本 CdType=1 但是**神通**而非奇术。
+       → **挑战 v0.3 字典**：CdType=1 不限于奇术，神通也用。需修订字典语义为更通用的"立即 CD"型。
+
+    2. **[SkillEntry系统.md] 不变量 1 模式 A 纯 Active**：Passive=0 + 神通 → 模式 A。与 30215001（土奇术）/ 30234006（火大招）/ 30325002（土神通）同模式。
+       v0.3 已说"大招/神通/纯位移类可能没 Passive"——本样本符合。
+
+    3. **[实体碰撞与可见性.md] 关键不变量 3 标准位移模式**："COLL_OFF → 计算位移 → ADD_FORCE → DELAY → COLL_ON"。
+       本样本 has_add_force=True 但 has_set_coll=False（corpus_scan 显示）。
+       **挑战 v0.3 标准模式**：是否所有 ADD_FORCE 都伴随 SET_COLL？本样本可能是 ADD_FORCE 单独使用（仅推力无碰撞控制）→ v0.3 反直觉点 4"位移在编辑器里是 3+ 个原语的组合"可能不绝对。
+       或者 corpus_scan 漏检某种碰撞节点（如 collision_off / collision_on）。**待 READ 时验证**。
+
+    4. **[SkillEvent系统.md] 关键不变量 4**：has_register_event=True 但是 Passive=0（无 Passive root）→ 推测 REGISTER 在 Active root 下，与"REGISTER 典型在 Passive root 下"反直觉部分冲突。
+       v0.3 已说"Active 入口下也可能 REG（持续施法模板 146003779 在模板内部用 REG 实现短按/长按分支）"。
+       **预测**：本样本 Active root 下挂 1~2 个 REGISTER 监听命中事件触发回调。
+
+    5. **[模板系统.md] 反直觉点 1**：104 节点 + 8 RUN_TEMPL → 套核心模板。
+       Active=44015995 与 30215001（Active=44016009）/ 30433001（Active=44014223）/ 30325002（Active=44015621）都在 44xxx 段位（B-002 D-202 已识别"44xxxxxxx 宗门 effect 段"）。
+       Active 入口指向 44015995 → 该 effect 节点是 ORDER + IsTemplate=False，是宗门技能根而非模板。
+
+    6. **[SkillTag系统.md] 不变量 A 三声明源**：本样本顶层 SkillTagsList/SkillDamageTagsList 都空 → flow 内 tag 全部由 SkillTagsConfigNode 声明（声明源 1 单独工作）。
+       **测试反直觉 4 "声明判定必须 OR 三源"反例**：本样本可能挑战"必须三源全检"——本样本只有源 1 在用，源 2/3 完全空也可工作。
+       这与 v0.3 反直觉 4 不冲突（"OR 三源"指任一源声明即合法），但提供"源 1 单源"的极端反例。
+
+    7. **[Buff系统.md] §SubType 字典 + 反直觉 3**：SubType=103 是新值（v0.3 仅 0/102/901）。
+       与 30331000 共享 SubType=103 但模式不同（30331000 模式 B / 30315001 模式 A）→ 再次印证"SubType 跨模式跨机制"。
+       **预测：v0.3 SubType 字典需在 hold-out 后扩增 103 项**。
+
+    潜在挑战 v0.3 之处：
+    - CdType=1 字典语义需通用化（不限奇术/位移类）
+    - has_set_coll=False 但有 ADD_FORCE → 标准位移模式可能不绝对
+    - REGISTER 在 Active root 下（不在 Passive 下）
+    - SubType=103 是新字典项
+    - SkillTagsList 全空时声明源 1 单独工作

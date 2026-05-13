@@ -1,0 +1,110 @@
+# 30224009 魔影迷踪 — 火宗门地阶两段技能 / 复刻 LOL 诡术妖姬 W
+# 策划需求：
+#   位移到目标点 + 落点AOE → 在起始位置留下幻影 → 3秒内二段回传
+# 参考样本：30224004 飞星遁影（火宗位移）/ 30221000+30221002（两段真机制）
+# PostMortem #015 (#016): 两段式 = 44014633 切槽位 / v2.2 三修（CD/槽位/位置）
+# SkillTag: 2500001(起始X) / 2500002(起始Y)  全工程未占用 ✓
+
+meta:
+  ir_version: "2.2"
+  skill_id: 30224009
+  skill_name: "魔影迷踪"
+  description: "火宗门地阶两段技能 / 冲向目标点+落点AOE / 3秒内可闪回原位 / LeBlanc W 复刻"
+  author: "Claude (skill-designer)"
+  created: "2026-05-12"
+
+skill:
+  element: 火              # ElementType=4
+  main_type: 功法技
+  sub_type: 招式           # 102 地阶主动（与 30224004 一致）
+  damage_type: 物理        # DamageType=1（与火宗其他技能一致）
+  cd_type: 普通            # CdType=1
+  cd_frames: 360           # 12 秒（地阶奇术参考值）
+  range: 700               # 与 30224004 一致
+  ai_range: 700
+  cast_frame: 5
+  buffer_start_frame: 0
+  buffer_frame: 15
+  base_duration: 25        # 时长四规则: cast(5)≤bd(25)≤cd(360); cast(5)≤buffer_end(15)
+  xinfa_energy: 0
+  quality: 3               # 与 30224004 一致
+  icon: "Skill/GongFa/Huo/skill_huo_30224009"
+  skill_name_text: "魔影迷踪"
+  skill_desc_text: "化为流火冲向目标点，对落点周围敌人造成伤害，并在原位留下幻影。3秒内再次释放，可闪回原位。"
+  indicator:
+    type: 直线             # TIRT_LINE=3（与火宗位移 30224004 一致）
+    param: [200]           # 线型指示器宽度
+
+# SkillTag 声明（第一段写入，第二段跨技能透明读取）
+# 实体级 tag（P[1]=V=0/PT=0）：不绑技能，跨 SkillConfig 持久
+tags:
+  - id: 2500001
+    name: "魔影迷踪起始X"
+    default: 0
+  - id: 2500002
+    name: "魔影迷踪起始Y"
+    default: 0
+
+flow:
+  # ── 起手动作 ──
+  - cast_anim:
+      anim_id: 608
+      speed_pct: 100
+      blend_ms: 200
+      desc: "起手动作"
+
+  # ── 两段式核心 ──
+  - two_stage_skill:
+      second_stage_skill_id: 30224010
+      second_stage_skill_name: "魔影迷踪_回传"
+      second_stage_cd_frames: 25   # 二段快速 CD（不继承主 360 / PostMortem #016 fix #1）
+      auto_reset_frames: 90        # 3 秒内可回传（@30fps）
+      swap_slot: 动态              # 动态读取当前装备槽位（PostMortem #016 fix #2）
+
+      first_stage:
+        # 1. 在起始位置召唤幻影 + 记录坐标
+        #    compiler 自动: GET_ATTR(X=59)→tag2500001 / GET_ATTR(Y=60)→tag2500002
+        #    clone_unit_id 由 召唤魂影单位 模板内部决定，此处占位不读
+        - summon_clone:
+            clone_unit_id: 1             # 占位（编译器不读此字段）
+            duration_frames: 90          # 幻影存活 90 帧 = 3 秒，与回传窗口同步
+            position: 当前位置
+            record_position_to_tag: 2500001   # X→2500001 / Y→2500002
+            desc: "在起始位置召唤幻影并记录坐标"
+
+        # 2. 高速位移冲向指示器方向
+        - displacement:
+            direction: 朝向指示器
+            distance: 600
+            speed: 2000                  # 高速冲刺
+            invulnerable: true
+            desc: "朝指示器方向冲刺 600cm"
+
+        # 3. 落点圆形 AOE 伤害（子弹碰撞模式，多目标）
+        - bullet:
+            pattern: 圆形AOE
+            bullet_id: 2500002
+            offset_forward: 600          # 位移是非阻塞的，子弹创建时施法者还在起点，前移600cm=落点
+            is_projectile: true
+            desc: "落点圆形AOE子弹（R=500）"
+            hit:
+              collision_radius: 500
+              collision_height: 360
+              detect_interval: 1
+              detect_cooldown: 0         # 0 = 命中范围内所有目标
+              destroy_on_hit: false
+              hit_effect_model: 0
+              damage:
+                element: 随技能
+                type: 随技能
+                coef: 15000              # 威力 150%
+                extra: -1
+                subtype_flags: 16
+
+      second_stage:
+        # 二段：闪回至起始位置（读 tag2500001/2500002）
+        - return_to_clone:
+            target_position_tag: 2500001
+            speed: 80                   # 回传速度（稍快于冲刺）
+            invulnerable: true
+            desc: "闪回起始位置"

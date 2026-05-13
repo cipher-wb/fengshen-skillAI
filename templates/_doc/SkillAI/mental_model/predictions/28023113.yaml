@@ -1,0 +1,55 @@
+sample_id: "28023113"
+date: "2026-05-10"
+batch: B-005
+focus: "2A: 280xxx caller closed-book test (老盲点首次触碰)"
+
+skill_config_metadata_seen:
+  SkillNameEditor: "?"  # signal extractor 找不到 SkillConfigNode
+  SkillSubType: null  # ⚠️
+  Icon: null
+  EnhanceSkillBuffConfigID: null
+  SkillEffectExecuteInfo_root: null
+  SkillEffectPassiveExecuteInfo_root: null
+  SkillEffectFlowList_len: 0
+  IndicatorType: null
+  notes: |
+    ⚠️ **重大发现 #1**：B-005_signals.py 跑出全 null —— 这意味着该文件**没有 SkillConfigNode 节点**。
+    这与已学 21 个样本（B-001~B-004 + 3 hold-out + 3 hold-out v0.5）形成本质差异：
+    所有已学样本都至少有 1 个 SkillConfigNode（即使 Mode E 双 0 入口的 30221000/400001/308072 也有）。
+
+    **推论**：280xxx 段位的"战斗流程"目录文件**根本不是技能（Skill）**——
+    它们是**调度容器 / 流程编排单元**，不通过 SkillConfig 入口被调用，
+    而是被技能/上层逻辑直接 RUN_TEMPL 调用（28023113 的 ID 28023113 就是模板 ID 段）。
+    这正是 v0.5 280xxx 段位 4730 调用占模板调用 38% 的原因——
+    这一类文件**自身就是模板，被其他技能/流程引用**。
+
+  hypothesis_about_280xxx: |
+    280xxx 段位本质 = **流程编排模板段**（v0.5 段位字典扩展）：
+    - 用于剧情战斗 / 怪物 BOSS / 关卡触发器等"批量调度技能/事件"场景
+    - 没有 SkillConfigNode（不是 Active/Passive 入口模式范畴）
+    - 节点全是 RUN_TEMPL + ORDER + DELAY 编排其他模板
+    - 不通过 1SkillEditor.xlsx 出货为"技能"，可能通过其他表（剧情战斗表？）出货
+
+prediction:
+  estimated_node_count: 136  # corpus_scan 已知
+  topology_sketch: |
+    1 root ORDER → 大量 RUN_TEMPL × 52 (调用 280xxx 段位模板，构成战斗流程的"事件序列"）
+    可能伴随 DELAY 时间锚点（剧情战斗按时间触发不同事件）
+    无 SkillConfigNode + 无 Active/Passive 入口
+  expected_templates: [28018656, 28022710, 28017974, 28003147, 28005084]  # 已扫 top
+  expected_template_segments: ["280xxx × 51", "223xxx × 1"]  # 已扫确认
+  touched_subsystems:
+    - 模板系统  # 主战场 — 280xxx 段位首次触碰
+    - 控制流子系统  # ORDER + DELAY 编排
+    - "（无 SkillEntry / SkillEvent / Buff / SkillTag —— 这是关键差异）"
+
+  entry_mode_prediction: "Z (非技能：无 SkillConfigNode，超出 5 类入口模式范畴)"  # ⭐ 全新模式
+  entry_mode_rationale: |
+    280xxx 段位的"战斗流程"文件本质是模板而不是技能，需要在 SkillEntry 系统页**新增模式 Z**
+    （或独立写"模板段位语义"段澄清）。
+    候选证据：本文件 ID 28023113，与文件中调用的 28019786 等 280xxx 模板 ID 同段位——
+    这是一个**模板调用模板**的纯模板文件。
+
+  expected_quality:
+    sample_score_target: 0.70+  # 老盲点首次触碰，预期低
+    high_risk_dimensions: ["子系统列表（无 SkillEntry/SkillEvent 等典型子系统）", "拓扑（编排模式与技能不同）"]

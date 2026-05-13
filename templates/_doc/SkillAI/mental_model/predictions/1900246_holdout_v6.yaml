@@ -1,0 +1,103 @@
+sample_id: "1900246"
+date: 2026-05-10
+batch: holdout-v0.6
+hold_out_focus: "样本 3 - v0.6 综合压力测试：字典外 SubType=1301 + 字典外段位 1900xxx 双盲点叠加"
+
+# ===== 闭卷信源 =====
+skill_config_metadata_seen:
+  SkillNameEditor: "<闭卷不可见>"
+  SkillSubType: 1301   # ⚠️ v0.6 SubType 字典外（v0.6 9 SubType 字典：0/101/102/103/303/501/601/701/901，1301 未观察）
+  Icon: "<闭卷不可见>"
+  EnhanceSkillBuffConfigID: "<闭卷不可见>"
+  SkillEffectPassiveExecuteInfo_nonzero: "<闭卷不可见>"
+  notes: |
+    可见信号：
+    - 文件名（粗看）：SkillGraph_1900246_【剧情技能】春雪鹿群-木（"【剧情技能】"前缀 + "鹿群" 召唤生物名）
+    - 目录: 剧情技能（独立目录，非"宗门技能"/"法宝"/"心法通诀"等已观察分类）
+    - SubType=1301 ⭐⭐ **字典外**（49 个 corpus 候选最多的字典外 SubType）
+    - 段位: 1900xxxxx ⭐ 字典外（与 v0.5 D-401 1900164xx 三联包同段位族）
+    - skill_id=null（ID 字段抽不到，但 skill_sub_type 抽得到 = SkillConfigNode 存在的可能性高，仅 ID 字段命名不同）
+    - indicator_type=1（单体目标指示器）
+    - bullet_count=1
+    - node_count=60（中型）
+    - flags：has_set_coll/has_create_role/has_add_force/has_apply_skill_effect/has_apply_entity_effect/has_repeat_execute=True
+    - has_register_event=False（不是被动响应型）
+    - has_select_unit=False / has_skill_select=False（无玩家选目标交互）
+    - top_classes：9 ORDER / 6 DELAY / 5 PLAY_ROLE_ANIM / 4 REPEAT / 4 ModelConfig / 3 RUN_TEMPL / 3 MODIFY_SKILL_TAG / 3 CREATE_EFFECT
+    - 5 PLAY_ROLE_ANIM ⭐ —— 异常高的角色动作播放，剧情演出特征强
+
+# ===== 走 D-508 §0 决策树 =====
+predict_decision_tree:
+  step_1_has_SkillConfigNode: "是（推断）"
+  reasoning_step_1: |
+    skill_sub_type=1301 抽得到 = SkillConfigNode 顶层存在（即使 skill_id 字段命名不同 — 剧情技能可能有 _SkillID 别名等）
+    虽然剧情技能目录罕见，但仍是类别 1 技能。
+
+  step_2_subtype: 1301
+  step_2_active_passive_inference: |
+    ⚠️ 字典外 SubType — v0.6 字典 9 个未含 1301。但仍可走"先看 Active/Passive 再看 SubType"决策树：
+    - has_register_event=False —— 不是 Mode E 典型 fall-back
+    - 9 ORDER + 6 DELAY + 4 REPEAT —— 主流程控制原语 ORDER 高量，主入口非 0 概率高
+    - has_create_role=True + has_add_force=True + bullet=1 + 5 PLAY_ROLE_ANIM ⭐ —— 主动激发 + 演出
+    - 文件名"【剧情技能】" + indicator_type=1（单体指示器）—— 看起来像玩家释放的剧情技能（即使在剧情中也是主动模式）
+
+    Mode 推测：**Mode A 纯 Active 优先**（has_register_event=False + ORDER 高量主动激发）
+    Mode E 概率：**低**（5 PLAY_ROLE_ANIM 演出强 + 不像 fall-back 驱动）
+    Mode B 候选：**中低**（剧情技能可能有击中后续演出 Passive，但 has_register_event=False 削弱）
+
+  step_3_mode_prediction: "Mode A 纯 Active（高 confidence）"
+  mode_confidence: "中偏高"
+
+# ===== 4 维预测 =====
+prediction:
+  estimated_node_count: 60
+
+  topology_sketch: |
+    剧情技能 + 召唤+演出（推测 Mode A 纯 Active）：
+
+    SkillConfig.Active(非 0) → ORDER_EXECUTE root (9 个 ORDER 中的最高层)
+      → ModelConfig × 4 (4 召唤实体: 鹿 × N 或主角+鹿)
+      → PLAY_ROLE_ANIM × 5 (剧情演出动作)
+      → CreateRole (召唤鹿群实体)
+      → ADD_FORCE (主角/鹿位移)
+      → DELAY × 6 (剧情节奏锚点)
+      → CREATE_EFFECT × 3 (春雪/木属性特效)
+      → MODIFY_SKILL_TAG × 3 (剧情进度 tag 推进)
+      → CREATE_BULLET × 1 (鹿群冲击主攻击子弹)
+      → APPLY_SKILL_EFFECT (子弹命中后效果)
+      → APPLY_ENTITY_EFFECT (鹿群消失 / 命中演出)
+      → REPEAT_EXECUTE × 4 (鹿群多段连击)
+    SkillConfig.Passive=0 (推测无被动响应)
+
+  expected_templates:
+    - "175xxx 子弹通用命中模板（bullet=1 + apply_skill_effect 高频）— 候选高"
+    - "1900164xx 三联包（同 1900xxx 段位族 — 验证 D-503 跨剧情技能目录是否仍命中）"
+    - "44xxx callback effect 段"
+    - "其他段：18xxx 演出/特效模板"
+
+  touched_subsystems:
+    - "SkillEntry 系统（验证字典外 SubType=1301 / Mode A，扩补 §SubType 字典）"
+    - "模板系统（D-503 三联包跨"剧情技能"目录第 5 印证候选 / D-502 1900xxx 段位字典外检测）"
+    - "实体碰撞与可见性（has_set_coll + has_collision）"
+    - "子弹系统（bullet=1 + has_create_role 待建页候选）"
+    - "控制流子系统（9 ORDER + 6 DELAY + 4 REPEAT 标准）"
+    - "SkillTag 系统（3 MODIFY_SKILL_TAG 剧情进度推进）"
+    - "（不太涉及）：SkillEvent 系统 / Buff 系统 — flags 排除"
+
+# ===== 关键 KPI 标签 =====
+kpis:
+  d_501_mode_test:
+    target: "字典外 SubType=1301 内 Mode 预测"
+    prediction: "Mode A"
+    rationale: "5 类入口模式 + 决策树流程在字典外 SubType 上仍工作（关键泛化检测点）"
+  d_508_non_skill_test: 不适用（属类别 1 技能，但 SubType 字典外）
+
+  v0_6_subtype_dict_extension:
+    target: "v0.6 SubType 字典扩补 + §仍不确定 §3 留下的 1301 候选区间验证"
+    prediction: "SubType=1301 = 剧情技能（非战斗主动技），可能与 1xxx 区间形成"剧情类"专属族"
+
+# ===== 风险标记 =====
+risk_flags:
+  - "1301 字典外，没观察过同类样本，Mode 预测的 confidence 是"中偏高"非"高""
+  - "Mode B 双 root 候选不能完全排除（剧情技能可能依赖 Passive 触发后续剧情演出节点）"
+  - "1900xxx 段位 v0.5 D-401 三联包是 1900164xx，是否在 1900246 这种小 ID 段位也调用？开卷检验"

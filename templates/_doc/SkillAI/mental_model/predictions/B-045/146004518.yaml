@@ -1,0 +1,22 @@
+sample_id: 146004518
+filename: SkillGraph_146004518_【子模板】伤害流程_计算玩法类型增伤乘区.json
+subcat: 模板-伤害 / 伤害加成
+nodes: 32
+segment_guess: 1460_7d_伤害子模板_玩法类型增伤乘区
+closed_book_inferences:
+  - master_flag: 1 (IsTemplate=True / filename 含【子模板】)
+  - structure: 32 nodes 中等 / 推断 SCN + 多 BUFF/计算节点 / 0 主动 AR (因 NSC 模板形态) / 0 PR
+  - SubClass: NSC-style (D-2801 独立平行路径 / NSC dual_NULL = D-4004)
+  - SC=True / NSC=True (D-2706 + D-4004 dual_NULL+NSC+全 NULL 形态)
+  - ConfigJson 全标量字段=0 (D-4002 (A) 30512xxx 木心法外的 cousin 候选)
+  - filename_pattern: 子模板 + 伤害流程 + 计算 X 乘区 → 伤害加成子模板典型形态
+  - 段位号系 ref: 0 (子模板独立 / 无跨段位 ref)
+deltas_touched_predicted:
+  - D-2401 (master flag): expect 1 (filename 含【子模板】)
+  - D-2706 (模板第 3 形态 IsTemplate 开放矩阵 + dual_zero 主形态): expect True (32 nodes 子模板 / IsTemplate=True)
+  - D-2801 (NSC 独立平行路径): expect True (子模板 NSC 形态)
+  - D-4002 (A) (30512xxx 木心法标量全零 → 模板邻居族扩展): cousin candidate / 期待 ConfigJson 全 0
+  - D-4004 (模板 NSC dual_NULL): expect True
+  - D-4006 (path ≠ ElementType 解耦): expect ET=None (模板)
+  - 元发现新候选: 子模板伤害流程命名规则 "计算 X 乘区" 形态可能 ≥3 例 / 续累积候选
+predicted_sample_score_self: 0.80 (子模板 32 nodes 中等复杂度 / NSC 模板形态 80%+ 确定)

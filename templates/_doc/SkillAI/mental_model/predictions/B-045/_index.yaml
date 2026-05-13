@@ -1,0 +1,33 @@
+batch: B-045
+mental_model_version_at_predict: v0.16.24
+predictor: skill-knowledge-curator (Mode A PROPOSE / B-045 closed-book)
+date: 2026-05-12
+closed_book_evidence: 仅 filename + corpus 元 (path / node_count / subcat) / 0 JSON open
+fast_path_run_no: 第 40 次
+samples_in_at_predict: 302
+picker_v2_meta:
+  version: v2.3
+  实战批: 第 13
+  picks_count: 10
+  in_scope_pass: 10/10
+  blacklist_reject_nested_废弃: 0 (ok)
+  blacklist_reject_nested_弃用: 0 (ok)
+  learned_set_size_before_B045: 281
+  pool_total_in_scope_unlearned: 75
+  bucket_dist:
+    模板-伤害: 2
+    宗门心法: 2 (木/土)
+    宗门主动: 4 (金/火/木/水)  # 注: 30531001 是金标签实际 / 30121100 金 / 30334002 火 / 30212007 木 / 30522004 木心法
+    宗门标签: 2 (BD水 / 宗门金)
+  五宗门覆盖: 木×3 + 火×1 + 金×2 + 水×1 + 土×1 + 模板×2 + 0 模板 NSC 强约束
+picks:
+  - {sid: '30522004', role: train, subcat: 宗门心法, nodes: 1, segment_guess: 305_6d_老心法形态}
+  - {sid: '146004518', role: train, subcat: 模板-伤害, nodes: 32, segment_guess: 1460_7d_伤害子模板}
+  - {sid: '30121100', role: train, subcat: 宗门-金, nodes: 38, segment_guess: 301211_6d_地阶招式}
+  - {sid: '30334002', role: train, subcat: 宗门-火, nodes: 44, segment_guess: 303340_8d_天阶蓄炎}
+  - {sid: '740040', role: train, subcat: 模板-技能, nodes: 12, segment_guess: 740_6d_移动模板}
+  - {sid: '30531001', role: train, subcat: 宗门标签-宗门, nodes: 39, segment_guess: 305310_6d_金宗门标签}
+  - {sid: '1460085', role: train, subcat: 宗门标签-BD, nodes: 1, segment_guess: 1460_7d_BD标签 NSC}
+  - {sid: '146004519', role: train, subcat: 模板-伤害, nodes: 4, segment_guess: 1460_7d_伤害子模板}
+  - {sid: '30212007', role: holdout, subcat: 宗门-木, nodes: 81, segment_guess: 302120_8d_木地阶_缚灵}
+  - {sid: '30525007', role: holdout, subcat: 宗门心法, nodes: 30, segment_guess: 305250_8d_土心法_墟反}

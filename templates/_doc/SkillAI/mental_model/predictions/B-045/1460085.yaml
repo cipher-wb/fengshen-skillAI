@@ -1,0 +1,23 @@
+sample_id: 1460085
+filename: SkillGraph_1460085_【BD标签】水-连击-连击.json
+subcat: 宗门标签-BD
+nodes: 1
+segment_guess: 1460_7d_BD标签_水_连击_连击
+closed_book_inferences:
+  - master_flag: 0 (BD标签 / 非【模板】filename)
+  - structure: 1 node / 极简 / 推断 SCN-only / 标签纯占位形态
+  - SubClass: NSC-only (D-2801 独立平行路径 / 标签 nodes=1 特殊形态)
+  - SC=True (但 SCN 可能不在 / NSC dual_NULL 主形态)
+  - ConfigJson 全标量字段=0 (D-4002 (A) cousin candidate / BD标签 dual_NULL+NSC+全 NULL 形态)
+  - ConfigJson.ElementType: 0 (水) ? 不确定 / BD标签可能 ET=None / 也可能 ET=0 (水)
+  - 段位号系 ref: 0 (BD标签独立 / 无段位)
+  - filename_pattern: 【BD标签】水-连击-连击 → BD标签 + 元素 + 标签名 (重复"连击"表示分类标签 + 实际标签名)
+deltas_touched_predicted:
+  - D-2401 (master flag): expect 0 (非【模板】)
+  - D-2706 (模板第 3 形态): N/A (BD标签非模板)
+  - D-2801 (NSC 独立平行路径): expect True (单节点 BD标签 NSC 形态 / 类比 1460xxx 历史 BD标签族)
+  - D-4002 (A) (30512xxx 木心法 ConfigJson 标量全零 → BD标签 1460 族 cousin): cousin family 候选 / +1 例待 fs 真扫
+  - D-4004 (模板 NSC dual_NULL): cousin (非模板但 NSC dual_NULL 同源形态)
+  - D-4006 (path ≠ ET 解耦): expect ET=None or ET=0 / path=水 / 待验
+  - 元发现 #65 (BD标签命名族): "水-连击-连击" 三段式可能 ≥3 例 BD标签命名族 / 续累积候选
+predicted_sample_score_self: 0.85 (BD标签 1 nodes 极简形态 / NSC dual_NULL 主形态 95%+ 确定)

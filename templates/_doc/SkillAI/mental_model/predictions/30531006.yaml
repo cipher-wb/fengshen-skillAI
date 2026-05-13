@@ -1,0 +1,92 @@
+sample_id: 30531006
+predicted_at: 2026-05-09T12:00:00+08:00
+predicted_with_mental_model_version: v0.2
+phase: holdout
+
+skill_config_metadata_seen:
+  SkillNameEditor: "金系连击"
+  SkillSubType: 0   # 与 B-001 5 个样本（101/102/...）不同 = 标签效果型
+  Icon: "Skill/Pugong/PuGong_jin"   # 普攻金系图标
+  EnhanceSkillBuffConfigID: 0   # 非心法替换型
+  SkillEffectPassiveExecuteInfo_nonzero: true   # Passive=225002926 非 0
+  CdType: 0   # 新值 0！B-001 只见 3/4/5
+  SkillIndicatorType: 0
+  # 关键：Active=0 / Passive=225002926
+  SkillEffectExecuteInfo_nonzero: false   # ⚠️ Active=0
+  SkillTagsList_size: 1   # tag 3 / value 20000
+  SkillDamageTagsList_size: 0
+  notes: |
+    硬信号交叉解读（基于 v0.2 mental_model）：
+    - **Active=0 + Passive=225002926** ← [SkillEntry系统.md] 不变量 1 关键反例：
+      "Active 入口必填" 这条不变量在本样本被违反——Active=0 + 仅 Passive！
+      路径目录"宗门标签"提示这是"标签效果型"技能（非主动施放，被动触发）。
+      → 这是一个 v0.2 [SkillEntry系统.md] 必须修正的认知！
+    - SkillSubType=0 + CdType=0 = 新枚举值 → 标签型/被动型可能都是 0。
+    - Icon 路径 "Pugong/PuGong_jin" 提示是普攻金系，但 SkillNameEditor="金系连击"
+      暗示这是"普攻命中第 N 段时触发的连击效果"（被动派生技能）。
+    - 顶层 SkillTagsList:[{Tag:3, Value:20000}] → tag 3 顶层声明，值 20000 = 200% 威力系数
+      但 SkillDamageTagsList 空 → 不是子弹伤害对子的常规配法。
+      [SkillTag系统.md] 提示"威力系数 + 额外伤害成对"，本样本只半对，可能因为是
+      "增益型"标签而非伤害型标签？
+    - has_switch=True 是新flag！B-001 5 个样本都没出现。
+      class_counts 含 TSET_SWITCH_EXECUTE=1 + TSCT_OR=1 + TSCT_AND=3 = 多分支条件树。
+      推测：根据某条件（连击段数？）switch 到不同效果。
+
+prediction:
+  node_count: 90   # corpus_scan = 85
+  topology_mermaid: |
+    graph LR
+      Passive[Passive root: SkillEffectPassiveExecuteInfo<br/>SkillEffectConfigID=225002926] --> SubType_Check{ENTITY_SUB_TYPE 检查<br/>3 次（多类型分支）}
+      SubType_Check --> CONDITION_BD[CONDITION_EXECUTE<br/>+ IS_SKILL_CONTAIN_BD_LABEL<br/>检查触发器是不是连击普攻]
+      CONDITION_BD --> SKILL_TAG_FETCH[GET_SKILL_TAG x7<br/>读连击段数/cd 缩减系数等]
+      SKILL_TAG_FETCH --> COMP[VALUE_COMPARE x5<br/>+ NUM_CALCULATE x10]
+      COMP --> SWITCH[TSET_SWITCH_EXECUTE]
+      SWITCH --> Branch1[分支 1: ADD_BUFF<br/>+ MOD_TAG 累加段数]
+      SWITCH --> Branch2[分支 2: REMOVE_BUFF<br/>+ SET_SKILLCD_REDUCE 缩 CD]
+      SWITCH --> Branch3[分支 3: 子弹/伤害<br/>+ CREATE_BULLET]
+      style Passive fill:#fff
+  templates_used:
+    - "**14xxxxxxx 段位的可能性低**（这不是持续施法/神通骨架）"
+    - "**38xxxxxxx 段位也不太对**（不是常规连招）"
+    - "RUN_TEMPL=4（相对少）+ 节点散开 → 推测**不套大模板**，主要靠 flow 内自写逻辑"
+    - "可能含一些小工具模板（damage 触发器之类）"
+  subsystems_touched:
+    - SkillEntry 系统 # ⚠️ Active=0 + Passive only = 反例
+    - 控制流子系统  # ORDER=5 + CONDITION=3 + SWITCH=1 + AND=3 + OR=1 + VALUE_COMPARE=5
+    - SkillTag 系统  # 6 MOD_TAG + 7 GET_TAG + 5 SkillTagsConfigNode（tag 是核心状态）
+    - Buff 系统    # 2 ADD_BUFF + 2 BuffConfig + 1 REMOVE_BUFF + 1 HAS_BUFF
+    - 模板系统    # RUN_TEMPL=4 但小规模（vs B-001 单 root + 大模板范式不同）
+  prediction_confidence: 中
+  reasoning: |
+    显式 cite v0.2 子系统页：
+
+    1. **[SkillEntry系统.md] 不变量 1 反例**：Active=0 + Passive=225002926。
+       v0.2 写"Active 入口必填"，本样本是反例 → **认知修正信号**：
+       "标签效果型/触发型技能可能没有 Active 入口"。
+       hold-out 通过 → 修订不变量 1 为"Active 通常必填，但'宗门标签'类技能可单 Passive"。
+
+    2. **[控制流子系统.md] 不变量 D（CdType 三语义）**：CdType=0 是新值。
+       B-001 只见 3/4/5，CdType=0 + Active=0 → 推测"无 CD 标签型，仅 Passive 响应"。
+       这是 v0.2 [仍不确定 2] 已 flag 的"CdType 是否还有其他值" 的真实证据。
+
+    3. **[SkillTag系统.md] 核心特征**：
+       - 6 MOD_TAG + 7 GET_TAG + 5 SkillTagsConfigNode 是本样本的"运算核心"。
+       - 加上 5 VALUE_COMPARE + 10 NUM_CALCULATE，**tag 是连击段数累加器**。
+       - 顶层 tag 3 / value 20000（200% 威力系数）→ 推测连击命中后增加该威力系数。
+
+    4. **[模板系统.md] 反例**：v0.2 强观察是"RUN_TEMPL ≥ 5 → 单 root 高阶模板"。
+       本样本 RUN_TEMPL=4 < 5，且 Active=0（无 root），反而**不套大模板**。
+       这是模板系统的"非套模板范式"：标签触发型用 flow 内手写逻辑。
+       → 修订 v0.2 [模板系统.md] 不变量 1，"RUN_TEMPL ≥ 5 阈值"可能要降到 ≥ 8。
+
+    5. **Buff 系统轻量用法**：2 ADD_BUFF + 1 REMOVE_BUFF = 连击段数靠 buff 维护？
+       或 buff = "我已被这个标签效果触发过的标志"？
+
+    **关键预测**：
+    - 拓扑：单 Passive root → ENTITY_SUB_TYPE 分类 → BD_LABEL 检查 → tag 累加 → switch 多分支
+    - 触发型机制（命中事件触发，无主动 root）
+    - tag 是核心状态机（不是 buff_layer 计层）
+
+    **风险点**：
+    - 节点 85 + RUN_TEMPL=4 与 v0.2 [模板系统.md] 范式不符是确认信号。
+    - **本样本是 hold-out 中最有"修正 v0.2 认知"潜力的**（SkillEntry 不变量 1 + 模板系统阈值）。

@@ -1,0 +1,60 @@
+sample_id: 30225003
+date: 2026-05-10
+batch: B-012
+mode: closed_book
+
+skill_config_metadata_seen:
+  SkillNameEditor: "土宗门地阶奇术3"
+  SkillSubType: 102
+  Icon: ""
+  EnhanceSkillBuffConfigID: 0
+  SkillEffectPassiveExecuteInfo_nonzero: false
+  Mode: A_pure_active
+  IsTemplate: false
+  CdType: 1
+  CdTime: 300
+  SkillIndicatorType: 3
+  notes: |
+    硬信号判读：
+    - SkillNameEditor="土宗门地阶奇术3" 但文件名是"撼山重拳-地阶-核心技" → **名字不一致警示**（B-001 D-6 教训：名字 ≠ 机制）
+    - SkillSubType=102 = 奇术（与 SubType 命名一致）
+    - 文件名却写"核心技" → 文件名/SkillNameEditor 错位，按 SubType=102 = 奇术为准
+    - Mode=A_pure_active
+    - CdType=1 + CdTime=300 = 3 秒长 CD（典型奇术）
+    - SkillIndicatorType=3 = 直线指示器
+    - Icon="" 空 → 内部测试或开发中
+    - 名字"撼山重拳" 暗示拳系近战 + 强爆发
+
+prediction:
+  estimated_node_count: 50
+  estimated_node_count_range: [30, 75]
+  topology_sketch: |
+    SkillConfigNode → SkillTagsConfigNode (土宗门 tag)
+        ↓
+    ActiveRoot → ORDER_EXECUTE
+        ↓
+    ┌── PLAY_ROLE_ANIM (撼山重拳动作 — 推测较长)
+    │     ↓ DELAY_EXECUTE
+    │   CREATE_BULLET (近战拳气弹？或直接判定盒)
+    │     ↓ ModelConfigNode (土系特效)
+    │     ↓ BulletConfigNode (直线 / 矩形判定)
+    └── RUN_SKILL_EFFECT_TEMPLATE → 175xxx 重伤模板（推测高伤害模板）
+        ↓
+    （可能附带破甲/击退）→ ADD_BUFF
+  expected_templates:
+    - "175xxx 高伤害模板"
+    - "14xxx 击退/破甲效果模板？"
+  touched_subsystems:
+    - "技能入口与生命周期"
+    - "子弹系统 / 命中判定（近战拳气）"
+    - "时间轴系统"
+    - "模板调用"
+    - "SkillTag 系统 (土宗门 tag)"
+    - "Buff 系统（破甲/击退候选）"
+
+confidence_self_assess: 0.5
+rationale: |
+  名字"撼山重拳-核心技"+ SubType=102 奇术 → 命名错位（B-001 D-6）。
+  按 SubType 为准 = 奇术形态（直线/矩形单弹判定）。
+  最大不确定：是否带 Buff 附加效果（"重拳"暗示破甲/击退）。
+  土系奇术与火系/木系是否有形态差异？是 RQ-B12-2 的核心验证目标。

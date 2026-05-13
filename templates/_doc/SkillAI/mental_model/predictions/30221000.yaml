@@ -1,0 +1,101 @@
+sample_id: 30221000
+batch: B-004
+date: 2026-05-09
+role_in_batch: pick3_buff_layer
+mental_model_version_used: v0.4
+
+# === SkillConfig 5 硬信号 ===
+skill_config_metadata_seen:
+  SkillNameEditor: null  # regex 没读到（可能字段在嵌套 SerializedNode 里）
+  SkillSubType: 102
+  Icon: "Skill/GongFa/Jin/skill_jin_301102"
+  EnhanceSkillBuffConfigID: 0
+  SkillEffectExecuteInfo_root_ID: 0  # regex 读到 0（可能误读次级嵌套 ID）
+  SkillEffectPassiveExecuteInfo_root_ID: 0
+  CdType: 1
+  CdTime: 210  # 21 秒（标准大招级别）
+  notes: |
+    Icon "skill_jin_301102" + 文件 ID 30221000 = 水宗门技能（302 段位是水）但 Icon 路径写的是金（jin）— Icon 路径模板复用，
+    或字段错位。先按 file_id 逻辑：30221000 → 水宗门-地阶大招类（CdType=1 + CdTime=210 = 长 CD 大招）。
+    SubType=102 是 v0.4 字典内值（普攻/通用主动技），但配 CdType=1 长 CD = "主动型大招 + SubType=102"。
+    EnhanceID=0 + 双 0 入口（regex 读到的）— 可能 regex 误读，CdType=1 + 长 CD 必有 Active root。
+
+# === Corpus 元数据 ===
+corpus_metadata:
+  node_count_actual: 130
+  top_classes:
+    TSET_NUM_CALCULATE: 14
+    TSET_ORDER_EXECUTE: 11
+    TSET_MODIFY_SKILL_TAG_VALUE: 8
+    ModelConfigNode: 7
+    TSET_ADD_BUFF: 6
+    SkillTagsConfigNode: 6
+    TSET_RUN_SKILL_EFFECT_TEMPLATE: 5
+    BuffConfigNode: 5
+  flags:
+    has_register_event: true
+    has_skill_event_callback: true
+    has_get_buff_layer: true   # N-5 命中！
+    has_displacement: false
+    has_set_coll: true         # 实体碰撞操作
+    bullet_count: 3            # 多弹
+    has_add_force: false
+
+# === PREDICTION ===
+prediction:
+  estimated_node_count: 130
+  topology_sketch: |
+    SubType=102 + CdType=1 + bullet=3 + has_set_coll + has_get_buff_layer + has_register_event = 复合型大招
+
+    伪 mermaid：
+    ```
+    SkillEffectExecuteInfo (Active root) → ORDER_EXECUTE
+        → 出招准备：SET_COLL=0（关碰撞，无敌帧）
+        → 创建 3 子弹 (CREATE_BULLET × 3) + ModelConfig × 7 (各类视觉锚点)
+        → 子弹延迟命中 → DAMAGE 通过 RUN_TEMPL 175xxx 通用命中模板
+        → callback (REG_EVENT) 触发 buff_layer 计层 / 修改 SkillTag
+        → ADD_BUFF × 6 (各种 debuff 给敌人 + 增益给自己)
+        → SET_COLL=1（结束无敌）
+    ```
+
+    14 NUM_CALCULATE = 数值复杂；8 MODIFY_TAG = SkillTag 状态机驱动；6 SkillTagsConfig = 6 种 tag 声明源。
+
+  expected_event_ids:
+    likely:
+      - 4   # OnDamage
+      - 11  # OnDamageReceived
+      - 15  # 高频未知 ID — N-1 候选
+      - 38  # 之前在 30325001 见过
+    confidence: 中
+    note: "callback + buff_layer 强相关，event_id 15 / 6 / 28 都有可能"
+
+  expected_templates:
+    likely_segments:
+      - "175xxx (子弹命中模板，5 RUN_TEMPL 在多弹技能很常见)"
+      - "280xxx (N-2 主导段位，必至少出现一次)"
+      - "186xxx (B-002 见过的高阶通用模板)"
+    estimated_template_count: 5  # corpus 显示
+
+  touched_subsystems:
+    - 子弹系统                 # bullet=3 + 7 ModelConfig
+    - 控制流子系统              # 11 ORDER
+    - 实体碰撞与可见性         # has_set_coll
+    - SkillTag 系统           # 8 MODIFY_TAG + 6 SkillTagsConfig
+    - Buff 系统               # 6 ADD_BUFF + 5 BuffConfig + has_get_buff_layer
+    - SkillEvent 系统         # has_register_event
+    - 模板系统                 # 5 RUN_TEMPL
+    - SkillEntry 系统         # SubType=102 已知
+
+# === 待验证主张 ===
+risk_points:
+  - "buff_layer (N-5) + bullet=3 + set_coll = 这是带蓄势/计层机制的 102 主动技。需验 buff_layer 是【蓄炎系】还是其它。"
+  - "5 RUN_TEMPL 中是否有 280xxx (N-2 验证主战场)？"
+  - "Active root ID = 0 应该是 regex 误读 — CdType=1 长 CD 必然有 Active root。"
+  - "GET_BUFF_LAYER + bullet=3 = 是否是【按 buff 层数动态决定子弹数量】？"
+
+# === Confidence 自评 ===
+self_confidence: 中偏高
+reasoning: |
+  这是"复合大招"标准范式（B-001/B-002/B-003 见过多个），节点数 / 拓扑 / 子系统列对预计高分。
+  风险：buff_layer 操作的具体语义（按 v0.4 是【心法计层】，但此样本是主动 102 技 — 可能是新用法）。
+  若 buff_layer 在 102 大招里也用 → 推翻 v0.4 "buff_layer 仅心法用" 假设。

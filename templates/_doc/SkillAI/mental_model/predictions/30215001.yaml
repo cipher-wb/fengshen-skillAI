@@ -1,0 +1,65 @@
+sample_id: 30215001
+date: 2026-05-09
+batch: B-002
+
+skill_config_metadata_seen:
+  SkillNameEditor: "奇系奇术1"
+  SkillSubType: 102
+  Icon: "(空)"
+  EnhanceSkillBuffConfigID: 0
+  SkillEffectPassiveExecuteInfo_nonzero: false
+  CdType: 1
+  notes: |
+    SkillSubType=102 是"奇术"——与 30431000（金宗门枪影阻敌-身法-天阶 SubType=102）+
+    30222002（hold-out 木宗门落木遁形 SubType=102）同一子类型。
+    EnhanceSkillBuffConfigID=0 → 不是心法。
+    Active=44016009 / Passive=0 → 纯 Active 无 Passive，与 F-3 hold-out 30531006（纯 Passive）镜像反例。
+    **CdType=1** 是 v0.2 控制流子系统未识别的新 CdType 值（3/4/5 之外）。
+    Icon=空可能特殊，需验证。
+
+prediction:
+  reasoning_summary: |
+    citing [模板系统.md] 教训 1（B-002 sample 1+2）：root 是 ORDER + IsTemplate=False（宗门技能 not 模板）
+    citing [Buff系统.md] 反直觉 3 hold-out F-4 修正："奇术机制因技能而异"
+      → 30431000 (102) = buff 串联；30222002 (102) = 实体碰撞/可见性
+      → 30215001 (102) 既然有 SET_ENTITY_COLLISION × 2 + ADD_FORCE × 1 + ADD_BUFF × 2，**预测：buff + 实体碰撞 + ADD_FORCE 三者混用**
+
+  estimated_root_class: TSET_ORDER_EXECUTE
+  estimated_node_count: 56
+  topology_sketch: |
+    flowchart LR
+      ROOT[ORDER root] --> ANIM[PLAY_ROLE_ANIM 突进起手动作]
+      ROOT --> COLL_OFF[SET_ENTITY_COLLISION_ENABLE_STATE=false 关闭碰撞]
+      ROOT --> CALC[GET_POS_X/Y_BY_ANGLE_DISTANCE 计算目标点]
+      CALC --> FORCE[ADD_FORCE 推动主角到目标点]
+      FORCE --> DELAY[DELAY 突进时间]
+      DELAY --> COLL_ON[SET_ENTITY_COLLISION_ENABLE_STATE=true 恢复]
+      DELAY --> CREATE[CREATE_BULLET 突进结束生成扇形 AOE 子弹]
+      DELAY --> ADD_BUFF[ADD_BUFF × 2 突进结束控制效果]
+      DELAY --> REMOVE_BUFF[REMOVE_BUFF × 2 清理]
+      ROOT --> RUN_TEMPL[RUN_SKILL_EFFECT_TEMPLATE × 5 公共流程]
+
+  expected_subsystems_touched:
+    - 控制流子系统 (ORDER × 8 + DELAY × 1 + REPEAT × 1 + CONDITION 隐式)
+    - 模板系统 (RUN_TEMPL × 5 调用其他模板)
+    - SkillTag 系统 (GET × 3 + MOD × 3 + ConfigNode × 2)
+    - Buff 系统 (ADD × 2 + REMOVE × 2 + ConfigNode × 2)
+    - 实体碰撞与可见性子系统 (SET_ENTITY_COLLISION × 2)
+    - 位移/物理子系统 (ADD_FORCE × 1 + GET_POS_BY_ANGLE_DISTANCE × 2)
+    - SkillEvent 系统 (REGISTER × 1)
+    - 子弹/触发器子系统 (CREATE_BULLET × 1 + BulletConfig × 1 + ADD_RANGE_TRIGGER × 1 + SECTOR × 1)
+
+  expected_F4_verdict: |
+    F-4 修正不变量准确：奇术因技能而异——本样本同时使用 buff 串联（控制效果）+ 实体碰撞控制（位移期间）+
+    ADD_FORCE（真位移）。三者并存说明 [Buff系统.md] 反直觉 3 在 hold-out 修订后的"因技能而异"是对的。
+
+  expected_F6_pattern: |
+    实体碰撞与可见性子系统的"突进式位移"模式：
+    - SET_ENTITY_COLLISION_ENABLE_STATE = false 开始（防止穿模/碰撞）
+    - ADD_FORCE 提供物理位移
+    - DELAY 等待位移完成
+    - SET_ENTITY_COLLISION_ENABLE_STATE = true 恢复
+
+  expected_new_finding_F7: |
+    CdType=1 是 v0.2 [控制流子系统.md] 未记录的第 4 种 CdType 值。需扩字典。
+    推测语义：CdType=1 可能是"立即 CD"或"无 CD"或"奇术专用 CD"

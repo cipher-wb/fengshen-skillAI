@@ -1,0 +1,79 @@
+# 30214005 烈焰直射 — 火宗门人阶主动技 / 直线子弹 / 单体伤害
+# 用户需求 (战斗策划 2026-05-12):
+#   元素: 火 (ElementType=4)
+#   指示器: 直线 (type=3)
+#   效果: 1 颗直线飞行子弹
+#   命中规则: 碰到敌人后消失 (单体, 非穿透, 单次命中即销毁)
+#   伤害: 命中时对敌人造成一次伤害
+#
+# 参考金标: 30214003【火宗门】长虹贯日_人阶 (单段切片对齐)
+# 参考拓扑: 30122900 PoC 测试-直线子弹 (同构)
+# 14 升正式不变量引用: D-1606 跨段位 ActiveRoot 30214xxx / D-3801 ET=4 火元素
+
+meta:
+  ir_version: "1.0"
+  skill_id: 30214005
+  skill_name: "烈焰直射"
+  description: "火宗门人阶主动技 / 直线子弹 / 单体单次命中伤害"
+  author: "Claude (skill-designer)"
+  created: "2026-05-12"
+
+skill:
+  element: 火
+  main_type: 功法技
+  sub_type: 招式            # 102 = 人阶主动 (与 30214003 一致 sub_type 编码由编译器映射)
+  damage_type: 物理         # 与 30214003 DamageType=1 一致
+  cd_type: 普通             # CdType=1
+  cd_frames: 300            # 5 秒 (60fps)
+  range: 700                # 与 30214003 一致
+  ai_range: 700
+  cast_frame: 5             # 起手 5 帧
+  buffer_start_frame: 0
+  buffer_frame: 12          # 缓冲 12 帧
+  base_duration: 25         # 总时长 25 帧
+  xinfa_energy: 0
+  quality: 2                # 与 30214003 一致
+  icon: "Skill/GongFa/Huo/skill_huo_30214005"
+  skill_name_text: "烈焰直射"
+  skill_desc_text: "释放一道火符直线穿出，命中敌人造成火属性伤害。"
+  indicator:
+    type: 直线              # TIRT_LINE = 3 (PostMortem #014: 直线=3 不是 2)
+    param: [250]            # 长度 250 (与 30214003 一致)
+
+flow:
+  # 1) 起手动作 (与 PoC 30122900 模板一致)
+  - cast_anim:
+      anim_id: 608
+      speed_pct: 100
+      blend_ms: 200
+      desc: "起手动作"
+
+  # 2) 延迟 5 帧后发射 (让前摇动作出帧)
+  - delay:
+      frames: 5
+      desc: "延迟5帧发射"
+      then:
+        - bullet:
+            pattern: 直线子弹
+            bullet_id: 2500001           # AI 专属 IP 段 250 / 全工程唯一 (PostMortem #035)
+            offset_forward: 200          # 出生在主体前方 200cm
+            is_projectile: true
+            desc: "发射1颗直线火符子弹"
+            hit:
+              # === 碰撞配置 (单体单次命中即销毁) ===
+              collision_radius: 400      # 碰撞半径 4m (与 PoC 一致, 单体规模)
+              collision_height: 360      # 高度 3.6m
+              # PostMortem #036 默认值修订: 侦测间隔=1 / 侦测冷却=10 (与碰撞模板自身默认一致 + 用户实战经验值)
+              # 旧默认 detect_interval=10 / 侦测冷却=0 是反向值 → 用户口头修订 2026-05-12
+              detect_interval: 1         # 侦测间隔 1 帧 (用户实战默认 / 模板默认值)
+              detect_cooldown: 10        # 侦测冷却 10 帧 (用户实战默认 / 模板默认值 / 同一目标两次成功侦测间冷却)
+              destroy_on_hit: true       # ⭐ 关键: 碰到敌人后消失 (单次命中即销毁)
+              # === 命中表现 ===
+              hit_effect_model: 25000001 # AI 专属 IP 段 250 / 全工程唯一 (PostMortem #035)
+              # === 伤害参数 (走 SkillDamageTagsList 1 号子弹配对 Tag 3+5) ===
+              damage:
+                element: 随技能          # 0=随技能 → 自动读 ElementType=4 (火)
+                type: 随技能             # 0=随技能 → 自动读 DamageType=1 (物理)
+                coef: 15000              # 威力系数 150% (Tag 3 槽位)
+                extra: -1                # -1=读参数 (Tag 5 槽位的额外伤害)
+                subtype_flags: 16        # 标准伤害子类型 flags

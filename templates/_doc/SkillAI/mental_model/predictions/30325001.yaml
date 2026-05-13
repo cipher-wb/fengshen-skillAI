@@ -1,0 +1,70 @@
+sample_id: '30325001'
+date: 2026-05-09
+batch: B-003
+predicted_with_mental_model_version: v0.3
+targeted_blindspot:
+  id: blindspot-2
+  description: |
+    位移子系统不变量 3（v0.3 写"标准位移模式 COLL_OFF → ADD_FORCE → DELAY → COLL_ON"，
+    但 30315001 已暴露 ADD_FORCE × 4 + SET_COLL=0 → SET_COLL 不是 ADD_FORCE 标配）。
+    本样本 30325001 也是 has_add_force=T + has_set_coll=F（6 ADD_FORCE + 0 SET_COLL）。
+    预期发现：第二次 hold-out 印证后，v0.3 不变量 3 应修订为"位移有 4 类模式：
+    SET_COLL+ADD_FORCE / 纯 ADD_FORCE / 纯 SET_COLL / 都没有"。
+
+skill_config_metadata_seen:
+  SkillNameEditor: '【土宗门】天坠石牢-地阶-神通'
+  SkillSubType: 103
+  Icon: '（未读）'
+  EnhanceSkillBuffConfigID: '（未确认）'
+  SkillEffectPassiveExecuteInfo_nonzero: '（未确认）'
+  CdType: 3  # 大招型
+  CdTime: 900
+  notes: |
+    从 5 硬信号 + 元数据看：
+    - 名字"天坠石牢"+ 神通 + 地阶 + 土宗门 → 召唤型大招（石牢牢笼 AOE 落地）
+    - SubType=103 与 30324002 同（v0.3 字典外新值，"神通"类共享）
+    - CdType=3 + CdTime=900（30 秒）→ 大招型时间轴
+    - 节点 145 / bullet=2 / RUN_TEMPL=6 / REPEAT=2 → 中等大招
+    - has_add_force=True + has_set_coll=False + has_register_event=True → 有位移机制但不关碰撞
+    - top_classes 含 21 ORDER + 7 VALUE_COMPARE + 6 CONDITION + 6 BuffConfig + 6 ADD_BUFF + 6 ADD_FORCE
+      → 标准大招骨架，重度条件分支
+
+prediction:
+  estimated_node_count: 145
+  topology_sketch: |
+    SkillConfig (CdType=3, CdTime=900, SubType=103)
+      └─ Active root = ORDER
+          ├─ DELAY × N（前摇）
+          ├─ ORDER → REGISTER × 1（事件触发）
+          ├─ ORDER → ADD_FORCE × 6（多次拉敌位移到牢笼中心？或自身位移到落点？）
+          ├─ ORDER → CREATE_BULLET × 2（石柱 / 牢笼弹）
+          ├─ ORDER → ADD_BUFF × 6 + BuffConfigNode × 6（控制 buff 串：禁锢、减速、易伤等）
+          ├─ ORDER → RUN_TEMPL × 6（子弹命中 / 通用工具）
+          ├─ CONDITION × 6 + VALUE_COMPARE × 7（多条件分支：是否击中目标 / 层数 / 距离）
+          └─ REPEAT × 2
+
+    猜测：石牢类落地大招，6 ADD_FORCE 用于"拉拽敌人入牢笼"（典型 Pull/Tractor），
+    无 SET_COLL 因为玩家自身不位移（ADD_FORCE 作用于敌人而非己方），所以不需要关碰撞。
+    这是位移子系统的"敌方拉拽"分支模式：ADD_FORCE 主语 ≠ 施法者。
+
+  expected_templates:
+    - '可能调 175 子弹通用命中流程（6 RUN_TEMPL）'
+    - '可能调 18xxx 大招特效模板'
+    - '不调 146003779（已确认 has_146003779=False）'
+
+  touched_subsystems:
+    - 模板系统（6 RUN_TEMPL，但不是 146 系列）
+    - 控制流子系统（21 ORDER + 6 DELAY + 2 REPEAT + 6 CONDITION + 7 VALUE_COMPARE 重度条件）
+    - SkillEntry 系统（模式 A 推测，CdType=3 大招）
+    - Buff 系统（6 ADD_BUFF + 6 BuffConfig 完美 flow 内配对，控制 buff 串）
+    - SkillTag 系统（12 GET + 4 MOD_TAG，中等密度）
+    - SkillEvent 系统（1 REGISTER，监听战场事件）
+    - 实体碰撞与可见性（ADD_FORCE × 6 但 SET_COLL=0 — 关键反例）
+
+  confidence: 中-高
+  rationale: |
+    主要不确定的点：
+    1. 6 ADD_FORCE 主语不明 — 是"自身位移"还是"拉拽敌人"？两种语义反例完全不同
+    2. SubType=103 第二次出现，可能是"神通-控制类"共享 SubType
+    3. CdType=3 大招但 SubType=103 ≠ 30325002 大招的 SubType（待对账）
+    4. 6 BuffConfig + 6 ADD_BUFF 完美配对 → flow 内全 buff，与 pick4（30134001 不平衡）形成对照

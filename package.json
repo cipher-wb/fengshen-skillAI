@@ -1,0 +1,73 @@
+{
+  "name": "fengshen-skillai",
+  "version": "1.0.0",
+  "description": "Claude Code SkillAI 系统 for Unity SkillEditor — 自然语言 → mermaid → IR YAML → JSON 全流程，含 v0.16.41 心智模型 (15 升正式不变量 + 7 道防线 + 4 agent peer review 闭环)",
+  "keywords": [
+    "claude-code",
+    "claude-code-plugin",
+    "skillai",
+    "unity",
+    "unity-editor",
+    "skill-editor",
+    "fengshen",
+    "moba",
+    "game-development",
+    "mental-model",
+    "harness-engineering",
+    "scaffold"
+  ],
+  "homepage": "https://github.com/cipher-wb/fengshen-skillAI#readme",
+  "bugs": {
+    "url": "https://github.com/cipher-wb/fengshen-skillAI/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cipher-wb/fengshen-skillAI.git"
+  },
+  "license": "MIT",
+  "author": "cipher-wb",
+  "type": "module",
+  "bin": {
+    "fengshen-skillai": "./bin/cli.js"
+  },
+  "main": "./lib/index.js",
+  "files": [
+    "bin/",
+    "lib/",
+    "templates/",
+    ".claude-plugin/",
+    "schemas/",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "test": "node --test test/unit/*.test.js",
+    "test:e2e": "node scripts/test-init.js",
+    "build:templates": "node scripts/extract-from-source.js",
+    "release:prepare": "node scripts/prepare-release-tarball.js",
+    "doctor": "node bin/cli.js doctor",
+    "format": "prettier --write \"lib/**/*.js\" \"bin/**/*.js\" \"scripts/**/*.js\"",
+    "lint": "eslint lib/ bin/ scripts/"
+  },
+  "dependencies": {
+    "commander": "^12.1.0",
+    "@inquirer/prompts": "^5.5.0",
+    "fs-extra": "^11.2.0",
+    "handlebars": "^4.7.8",
+    "chalk": "^5.3.0",
+    "ora": "^8.1.0",
+    "semver": "^7.6.3",
+    "tar": "^7.4.3"
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3",
+    "eslint": "^9.9.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "fengshenMentalModelVersion": "v0.16.41",
+  "fengshenLearningHistoryUrl": "https://github.com/cipher-wb/fengshen-skillAI/releases/download/v{cliVersion}/fengshen-learning-history-v{mentalModelVersion}.tar.gz",
+  "fengshenLearningHistorySha256": ""
+}

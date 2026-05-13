@@ -1,0 +1,45 @@
+---
+batch: B-013
+sample_id: "1900234"
+bucket: 19xxx
+role: train
+phase: predict_close_book
+predicted_at: 2026-05-10
+mental_model_version_used: v0.11
+---
+
+# 闭卷预测
+
+## 5 硬信号 + extractor
+
+- SkillNameEditor: 1900055（怪异 — 与 SkillID 1900234 不一致 / 可能是 alias）
+- SkillSubType: 0 → 怪物 / 通用
+- IsTemplate顶层: False
+- ActiveRoot=190018130 / PassiveRoot=0 → Mode A 纯主动
+- bullet=1, buff=0, template_run=True, register_event=False
+- corpus_scan top_classes: TSET_RUN_SKILL_EFFECT_TEMPLATE × 7 / TSET_DELAY_EXECUTE × 5 / TSET_ORDER_EXECUTE × 4 / RefConfigBaseNode × 4 / SkillInterruptConfigNode × 3 / TSCT_NOT × 3 / TSCT_ENTITY_STATE × 3 / TSET_MODIFY_ENTITY_ATTR_VALUE × 2
+
+## v0.11 mental_model 段位归纳预测
+
+- 19xxx 段位字典：三联包命中模板段（190016404/485/523 是命中前置/DAMAGE/命中后效果）
+- 1900234 filename 含"九尾boss/狂暴形态"+ category_dir=怪物 + SubType=0 + Mode A
+- ActiveRoot=190018130 → 真技能形态（不是模板本体）+ RUN_TEMPL × 7（含 RefConfigBaseNode × 4 = 引用子配置）
+- 推测：boss 大招型，含 SkillInterruptConfigNode × 3（中断保护）+ TSCT_ENTITY_STATE × 3（状态条件分支）
+- 拓扑：ActiveRoot → ORDER → DELAY × N → 多个 RUN_TEMPL 调命中模板 + Interrupt 保护
+
+## 触碰子系统
+
+- 模板系统（RUN_TEMPL × 7 中可能含三联包 190016404/485/523）
+- SkillEntry 系统（Mode A）
+- SkillTag 系统（与 RefConfigBaseNode 联动）
+- 中断系统（SkillInterruptConfigNode × 3）
+
+## 关键发现
+
+- mental_model 19xxx 段位字典关键词 DAMAGE/DAMAGE_QUICK 命中 0（segment top 8 = ORDER/DELAY/RUN_TEMPL/Model/REPEAT/CREATE_BULLET/PLAY_ANIM/NUM_CALCULATE）
+- 19xxx 不是"全段都是 DAMAGE"，而是 BOSS/怪物 + 模板大量调用混合形态段位
+- 1900234 是真技能（ActiveRoot != 0），段位 19xxx 同时含三联包模板 + 真技能宿主 = 命名空间混淆
+
+## confidence
+
+- 中：19xxx 段位字典 DAMAGE/DAMAGE_QUICK 关键词主张被反证；19xxx 段位实为"模板段（含三联包）+ boss 真技能"双命名空间

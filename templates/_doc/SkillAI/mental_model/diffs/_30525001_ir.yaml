@@ -1,0 +1,20 @@
+meta:
+  ir_version: '1.0'
+  skill_id: 30525001
+  skill_name: 砺岩经
+  author: decompiled
+skill:
+  element: 土
+  main_type: 心法
+  sub_type: 普通心法
+  damage_type: 直接伤害
+  quality: 3
+  skill_name_text: 砺岩经
+  skill_desc_text: 获得岩壁体后接下来的X次普攻均为重击（第三次普攻），且伤害+Y%，状态持续4秒。
+  cd_type: 普通
+flow: []
+tags:
+- id: 441022
+  desc: 砺岩经-持续时间
+- id: 441021
+  desc: 砺岩经-伤害加成比例

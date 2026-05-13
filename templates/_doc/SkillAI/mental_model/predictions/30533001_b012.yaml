@@ -1,0 +1,62 @@
+sample_id: 30533001
+date: 2026-05-10
+batch: B-012
+mode: closed_book
+role: holdout
+
+skill_config_metadata_seen:
+  SkillNameEditor: "引溟诀"
+  SkillSubType: 601
+  Icon: "Skill/GongFa/Shui/skill_shui_303101"
+  EnhanceSkillBuffConfigID: 0
+  SkillEffectPassiveExecuteInfo_nonzero: true
+  Mode: C_pure_passive
+  IsTemplate: false
+  CdType: 0
+  CdTime: 0
+  SkillIndicatorType: 0
+  notes: |
+    硬信号判读：
+    - SkillNameEditor="引溟诀" + 文件名"传承心法_天阶" → 心法系统形态
+    - SkillSubType=601 = 心法 SubType（与 SubType=701 标签效果不同段位）
+    - Mode=C_pure_passive
+    - PassiveExecuteInfo_nonzero=true → 被动驱动
+    - Icon=skill_shui_303101 → 引用 30310x 段位图标（**注意**：跨段位图标引用，水系基础招式图标，暗示心法可能 enhance 30310x 系列招式）
+    - CdType=0 + CdTime=0 + IndicatorType=0 → 心法常规
+    - 名字"引溟诀" 暗示水系增益型心法
+
+prediction:
+  estimated_node_count: 35
+  estimated_node_count_range: [15, 70]
+  topology_sketch: |
+    SkillConfigNode → SkillTagsConfigNode (水宗门 tag)
+        ↓
+    PassiveRoot OR SkillEffectFlowList[N] (Mode C 心法分支)
+        ↓ REGISTER_SKILL_EVENT (在某事件触发，如释放主动技能后)
+        ↓
+    （可能含多个被动 effect，每个 register 不同事件）
+        ↓
+    GET_SKILL_TAG_VALUE / GET_ENTITY_ATTR_VALUE
+        ↓ VALUE_COMPARE
+        ↓
+    MODIFY_SKILL_TAG_VALUE 或 MODIFY_ATTR (增益本体属性)
+        OR
+    RUN_SKILL_EFFECT_TEMPLATE → 175xxx 增益模板
+  expected_templates:
+    - "175xxx 增益模板"
+    - "14xxx 心法专属效果模板（候选）"
+  touched_subsystems:
+    - "技能入口与生命周期 (Mode C 心法)"
+    - "SkillTag 系统 (水宗门 tag)"
+    - "事件订阅 (REGISTER_SKILL_EVENT — 心法核心)"
+    - "数值修正 (MODIFY_SKILL_TAG_VALUE / MODIFY_ATTR)"
+    - "条件系统 (VALUE_COMPARE)"
+
+confidence_self_assess: 0.5
+rationale: |
+  Mode=C + SubType=601 + 文件名"传承心法" → 心法形态可信。
+  名字"引溟诀"+ Icon 引用 303101 → 推测**条件式增益**（在某条件下增强主动技能 / 与 30122002"坠叶三叠_传承心法强化版"同类型范式）。
+  最大不确定：
+    1. SubType=601 与 SubType=701 标签效果在 mental_model 中的差异（B-012 RQ-B12-1 验证目标）
+    2. 节点数 35 ± 估计宽（心法可简单 15 节点也可复杂 70 节点）
+  作为 holdout 样本，预测之后开卷再校验 mental_model v0.10.1 心法子系统页是否覆盖此形态。

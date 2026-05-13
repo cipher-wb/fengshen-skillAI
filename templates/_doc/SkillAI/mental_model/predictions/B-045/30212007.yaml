@@ -1,0 +1,23 @@
+sample_id: 30212007
+filename: SkillGraph_30212007_木宗门】奇术_地阶_缚灵归根.json
+subcat: 宗门-木 / 木宗门技能
+nodes: 81
+role: holdout
+segment_guess: 30212_5d_木主动_奇术_地阶_缚灵归根
+closed_book_inferences:
+  - master_flag: 0 (主动)
+  - structure: 81 nodes 大型复杂 / 奇术 → 推断 SCN + AR + 多子弹/BUFF/触发器 / 高复杂度近似 30214001/2 木主动 80+ nodes 形态
+  - SubClass: SCN + 主动 AR (D-5601-B 火主动 220 族近邻木主动)
+  - SC=True / NSC=False
+  - ConfigJson.ElementType: 2 (木 / D-3801 5/5 实证)
+  - 段位号系 (AR): 推断 220xxxxxxx 9d (D-5601-B 木主动 30214001/2 已在 220 族 / 30212007 同 30212 5d 兄弟号族 / 预测 220)
+  - filename_pattern: 木宗门】奇术_地阶_缚灵归根 (filename 截断少前【) → 木宗门 + 类型 + 段位 + 名称
+deltas_touched_predicted:
+  - D-2401 (master flag): expect 0
+  - D-2501 (225 段位): low prob (木主动倾向 220 / D-5601-B 木主动 220 族)
+  - D-3801 (ET 完整枚举): expect ET=2 (木) / 已实证 / 不增枚举
+  - D-4001 (44 段位): N/A
+  - D-4006 (path ≠ ET): expect path=木 + ET=2 一致
+  - D-5601-B (9d 220xxxxxxx 64 例 candidate): expect AR=220xxxxxxx 9d (+1 例加固 / 主推升正式 4-gate / B-045 优先级 #1)
+  - 元发现 #67 候选: 奇术_地阶_缚灵归根 大型 81 nodes 木主动技能可能含未见 BUFF/触发器形态
+predicted_sample_score_self: 0.70 (holdout / 木主动 81 nodes 大型 / 段位 220 强预测 / 高复杂度可能含未见节点形态)

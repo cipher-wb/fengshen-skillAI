@@ -1,0 +1,47 @@
+---
+batch: B-013
+sample_id: "660007"
+bucket: 66xxx
+role: train
+phase: predict_close_book
+predicted_at: 2026-05-10
+mental_model_version_used: v0.11
+---
+
+# 闭卷预测
+
+## 5 硬信号 + extractor
+
+- SkillNameEditor: 临危剑（filename "临危剑"）
+- SkillSubType: 701 → 心法（Buff 系统 §心法主轴）
+- IsTemplate顶层: False
+- ActiveRoot=0 / PassiveRoot=66001404 → **Mode C 纯被动**（心法主流形态）
+- bullet=0, buff=1, template_run=False, register_event=True
+- corpus_scan top_classes: TSET_NUM_CALCULATE × 2 / RefConfigBaseNode × 2 / SkillConfigNode × 1 / SkillTagsConfigNode × 1 / TSET_CONDITION_EXECUTE × 1 / TSCT_VALUE_COMPARE × 1 / TSET_REGISTER_SKILL_EVENT × 1 / TSET_ADD_BUFF × 1
+
+## v0.11 mental_model 段位归纳预测
+
+- 66xxx 段位字典："数值模板"（B-010 holdout 66000081 单证 / IsTemplate=True 标在 TSET_NUM_CALCULATE）
+- 但 660007 不同：顶层 IsTemplate=False / SubType=701 心法 / Mode C / PassiveRoot=66001404 / register_event=True / buff=1
+- **关键差异**：660007 是真技能（心法）而非纯数值模板！
+- mental_model 66xxx 段位主张"数值模板"被本样本反证 = 段位字典命名空间混淆 SBL-4 同源反模式实证
+
+## 预测拓扑
+
+- 拓扑：PassiveRoot 66001404 → REGISTER_SKILL_EVENT（订阅事件）→ CONDITION_EXECUTE（VALUE_COMPARE 检查阈值）→ ADD_BUFF（加 buff）
+- 这是典型"心法被动监听事件 → 条件触发 → 加 buff"范式（Buff 系统 §仍不确定 §6 子模式 b：REGISTER_SKILL_EVENT 入口）
+
+## 触碰子系统
+
+- SkillEntry 系统（SubType=701 / Mode C）
+- Buff 系统（buff=1 + ADD_BUFF + REGISTER_SKILL_EVENT 范式 = §6 子模式 b3 候选）
+- SkillEvent 系统（REGISTER_SKILL_EVENT 事件订阅）
+- 控制流（CONDITION_EXECUTE + VALUE_COMPARE）
+
+## 关键发现
+
+- 66xxx segment top 8 关键词命中 1（TSET_REGISTER_SKILL_EVENT 命中 EVENT 关键词）= mental_model "数值模板" 主张部分支持，但更接近"心法/被动 + 事件订阅"段位（与 SkillTag 段位重叠）
+
+## confidence
+
+- 中偏低：mental_model 66xxx 段位主张"数值模板"对 660007 心法被动失效

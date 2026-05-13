@@ -1,0 +1,77 @@
+# PostMortem 提案模板
+
+任务结束时，AI 用本格式向用户汇报本轮发现的新坑，由用户决定是否沉淀到 memory。
+
+> **不为强而记**：没踩新坑就不要硬凑提案。
+
+---
+
+## 模板
+
+```markdown
+🔍 PostMortem 提案 #YYYY-MM-DD-NNN
+
+【新规则】<一句话规则>
+
+【现象】<触发的 bug 或不符预期表现>
+
+【根因】<为什么会发生（机制层面）>
+
+【建议沉淀位置】
+- [ ] memory/feedback_skill_compiler_pitfalls.md（私人版）
+- [ ] doc/SkillAI/docs/易错点速查.md（团队版）
+- [ ] doc/SkillAI/tools/<相应脚本>.py（直接固化为代码护栏）
+
+【利】<避免再犯的好处>
+【弊】<可能造成的噪音 / 与现有 N 条规则的重叠>
+【噪音风险】低 / 中 / 高 — <说明为什么>
+
+【你的决定】
+[ ] 入库
+[ ] 与第 N 条合并  
+[ ] 修改后入库（建议改成：...）
+[ ] 不入库（理由：...）
+```
+
+---
+
+## 示例（参考 memory/feedback_skill_compiler_pitfalls.md 第 10 条）
+
+```markdown
+🔍 PostMortem 提案 #2026-05-08-001
+
+【新规则】不同表的 TableTash 不同，SkillConditionConfig 必须用专属 hash
+
+【现象】扇形分层弹幕模板的 TSCT_VALUE_COMPARE 节点在编辑器中不报错也通过 lint，
+        但运行时所有子弹方向集体相同（条件判断 fallback 到默认值）
+
+【根因】SkillConditionConfig 的 TableTash 是 ED89F46EAB95F7ACF5C1911A5A375278，
+        与 SkillEffectConfig 的 0CFA0556... 不同。给条件节点错配 SkillEffect 的 hash
+        会导致 ConfigJson 反序列化失败 → Config=null → 节点静默用默认值。
+
+【建议沉淀位置】
+- [x] memory/feedback_skill_compiler_pitfalls.md（私人版）
+- [x] doc/SkillAI/docs/易错点速查.md（团队版）
+- [ ] 工具固化（暂不需要：build_fan_layered_template.py 已强制传 TASH_SKILL_CONDITION）
+
+【利】避免反序列化默认值这种隐蔽 bug 再次发生（无报错的 bug 最难调）
+【弊】与现有第 5 条"引用节点 ConfigJson 必须完整"有 30% 重叠
+【噪音风险】低 — 这条只在跨表节点出现，频率不高但杀伤大
+
+【你的决定】
+[ ] 入库
+[ ] 与第 5 条合并  
+[ ] 修改后入库（建议改成：...）
+[ ] 不入库（理由：...）
+```
+
+---
+
+## 写好提案的 6 条建议
+
+1. **规则要可操作** — "不要漏字段" 是废话；"BulletConfigNode 必须从已有 JSON 拷贝而非 xlsx 拼装" 是规则
+2. **根因到机制层面** — 别停在"我忘了"；要写"C# 反序列化 int 字段遇到 false 会失败导致 Config=null"
+3. **诚实的弊端** — 与现有规则重叠就说，不要硬凹独立性
+4. **噪音风险评估** — 这条规则覆盖多少场景？是绝对警告还是偶尔提示？
+5. **沉淀位置选最合适的** — 能用代码护栏（lint 规则、编译器检查）就别用文档；能加文档就别只放 memory
+6. **多条提案分别提** — 一次踩了 3 个坑就出 3 份提案，别合并写一坨

@@ -1,0 +1,53 @@
+{
+  "$schema": "https://code.claude.com/schemas/plugin.json",
+  "name": "fengshen-skillai",
+  "displayName": "FengshenForge SkillAI",
+  "version": "1.0.0",
+  "description": "Claude Code SkillAI 系统 for Unity SkillEditor — 自然语言 → mermaid → IR YAML → JSON 全流程，含 v0.16.41 心智模型 (15 升正式不变量 + 7 道防线 + 4 agent peer review 闭环)。配合 npm 包 fengshen-skillai 使用 (npx fengshen-skillai init)。",
+  "author": "cipher-wb",
+  "license": "MIT",
+  "homepage": "https://github.com/cipher-wb/fengshen-skillAI",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cipher-wb/fengshen-skillAI"
+  },
+  "keywords": ["claude-code", "skillai", "unity", "skill-editor", "fengshen", "moba", "game-development"],
+  "category": "game-development",
+  "components": {
+    "agents": [
+      ".claude/agents/skill-designer.md",
+      ".claude/agents/skill-reviewer.md",
+      ".claude/agents/skill-knowledge-curator.md",
+      ".claude/agents/skill-knowledge-auditor.md"
+    ],
+    "skills": [
+      ".claude/skills/skill-design/SKILL.md",
+      ".claude/skills/skill-review/SKILL.md"
+    ],
+    "commands": [],
+    "hooks": []
+  },
+  "requirements": {
+    "claudeCode": ">=1.0.0",
+    "python": ">=3.10",
+    "node": ">=18.0.0"
+  },
+  "configuration": {
+    "configFile": "fengshen.config.json",
+    "schema": "schemas/config.schema.json",
+    "requiredFields": ["project_root", "skillgraph_jsons_root", "skill_excel_path"]
+  },
+  "documentation": {
+    "quickstart": "doc/SkillAI/README.md",
+    "mentalModel": "doc/SkillAI/mental_model/README.md",
+    "workingRules": "CLAUDE.md",
+    "userGuide": "README.md"
+  },
+  "fengshen": {
+    "mentalModelVersion": "v0.16.41",
+    "designDecisions": {
+      "scaffoldMode": "npx fengshen-skillai init",
+      "dualMode": "npm scaffold + Claude Code plugin manifest"
+    }
+  }
+}

@@ -1,0 +1,52 @@
+---
+batch: B-013
+sample_id: "140040"
+bucket: 14xxx
+role: train
+phase: predict_close_book
+predicted_at: 2026-05-10
+mental_model_version_used: v0.11
+---
+
+# 闭卷预测（仅 5 硬信号 + extractor 旗标 / 不读 flow）
+
+## 5 硬信号 + 关键 extractor 信号
+
+- SkillNameEditor: 拓海集众/普攻（filename 含中文 "普攻"）
+- SkillSubType: 101（按 SkillEntry §0 决策树 = 主动技能 / 战斗技）
+- SkillType: ?（待开卷）
+- Icon: ?（待开卷）
+- EnhanceSkillBuffConfigID: ?（待开卷）
+- IsTemplate顶层: False / 有 SkillConfigNode → 类别 1 真技能（模板系统 §SkillEditor 三分类）
+- ActiveRoot=186005435 / PassiveRoot=0 → Mode A 纯主动
+- bullet_config_count=2, has_template_run=True, register_event=False
+
+## v0.11 mental_model 段位归纳预测
+
+**14xxx 段位字典**（模板系统.md §段位字典 v0.11 更新版）：
+- mental_model 主张：14xxx 是"通用功能 / 技能 / 状态模板大段"（含 v0.2 已知 146003779 持续施法）
+- 但 140040 顶层 IsTemplate=False / ActiveRoot 186005435 != 0 → **不是模板本体**
+- 更可能是"宿主真技能（filename 含'普攻'）"，文件 ID 落入 14xxx 段位仅是数字巧合
+- **关键发现**（PREDICT 阶段）：mental_model 主张"14xxx 是模板大段"被本样本反证 = 段位字典命名空间混淆 SBL-4 同源反模式实证
+
+## 预测节点数
+
+- corpus_scan node_count = 32
+- 预测拓扑：Mode A → ActiveRoot 186005435（注：186 段位是模板段）→ 推测主流程通过 RUN_TEMPL 调用 186 模板做命中链
+- 推测 bullet=2 = 双段命中（普攻 2 段或左右挥砍）
+- 预测使用模板：可能含 19xxx 三联包（命中型技能）+ 186 段（特效）
+
+## 触碰子系统
+
+- 模板系统（RUN_TEMPL × 5 + ActiveRoot 跨段调用 186 模板）
+- SkillEntry 系统（Mode A / SubType=101）
+- 子弹系统（bullet=2 双段）
+
+## 仍不确定的地方
+
+- 14xxx 段位作为真技能宿主 vs 模板本体的占比？
+- ActiveRoot=186xxx 跨段位是否常见（v0.11 段位字典命名空间区分注脚已声明 7d 模板文件 ID vs 真技能内部 SkillEffect ID 是两个独立命名空间，但此处 SkillID=140040 是文件 ID，ActiveRoot=186005435 是真技能内部 SkillEffect ID）
+
+## confidence
+
+- 中：mental_model 14xxx 段位主张"通用功能模板大段"对真技能宿主预测命中率不高

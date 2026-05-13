@@ -1,0 +1,403 @@
+---
+name: skill-design
+description: 用自然语言生成或修改 SkillEditor 蓝图（SkillGraph_xxx.json）。当用户描述"配一个 XX 技能"、"改某技能的 X 段为 Y"、"把这个 JSON 加上 Z 效果"、"新建一个木宗门技能"等场景时触发。覆盖：从零设计新技能 + 修改已有 JSON 两个工作流。**优先于 fs-client-logic 触发**——技能编辑器配置任务必须用本 Skill。
+---
+
+# skill-design — 自然语言生成/修改 SkillEditor 蓝图
+
+> 用户角色：战斗策划。本 Skill 把自然语言或已有 JSON 转换为合法的 `Saves/Jsons/**/SkillGraph_*.json` 文件。
+>
+> **核心原则**：永远不让 LLM 直接生成 JSON。先生成 IR YAML，再用编译器转 JSON。
+>
+> **harness 视角**：本流程 = guides（mental_model 子系统页 + 模板库 + 节点字典）+ sensors（compiler / lint / GATE-3.5 自审）+ steering loop（GATE-MENTAL-OUT 触发心智更新）。
+
+---
+
+## 第 0 步：识别工作流类型
+
+| 工作流 | 输入 | 走法 |
+|---|---|---|
+| **A. 新建技能** | 用户描述 + 无现有 JSON | A0→A0.5→A1→A2→A3→A4→A4.5→A5→AOUT |
+| **B1. 数值级修改** | JSON + "改 CD/伤害系数/参数" | A0→B1→A4→AOUT |
+| **B2. 结构级修改** | JSON + "改段为扇形/加新段" | A0→A0.5→B2→A3→A4→A4.5→A5→AOUT |
+
+不确定？用 AskUserQuestion 问，**别盲猜**。
+
+---
+
+## A0. ⚠️ GATE-MENTAL-IN（心智回想）— 任何工作流都必做
+
+> 区别 AI 是"查表"还是"懂"的支点。说不出来 = 立刻翻样本/源码补强，**不要硬上**。
+
+**动作**：
+
+1. 列出本任务**触碰的子系统**（如：配回旋追踪子弹 → 子弹系统 + 触发器与碰撞 + 时间轴）
+
+2. 对每个子系统，**说出 3 句话**：
+   - "我对它的本质理解是 ..."
+   - "本任务需要利用它的哪个不变量是 ..."
+   - "我目前对它**仍不确定**的是 ..."
+
+3. 检查 [doc/SkillAI/mental_model/](../../../doc/SkillAI/mental_model/) 下对应子系统页：
+   - 存在 → Read，照页中"关键不变量 / 反直觉点 / 与其他子系统因果"对照本任务
+   - 不存在 → 标记为"首次触碰子系统"，任务结束 GATE-MENTAL-OUT 时由 curator 决定是否新建
+
+**汇报模板（必须输出给用户）**：
+
+```
+🧠 GATE-MENTAL-IN 心智回想
+触碰子系统：子弹系统 / 触发器与碰撞
+- 子弹系统（confidence: 高，last_review 2026-05-01）
+  · 本质：BulletConfig 是子弹蓝图，AfterBornSkillEffectExecuteInfo 是命中链根
+  · 本任务用：AngleAdjustType=3（追踪）
+  · 不确定：follow_creator=1 时是否会破坏追踪轨迹（去找 30122001 比对）
+- 触发器与碰撞（首次触碰，无心智页 — GATE-MENTAL-OUT 时由 curator 评估是否建页）
+```
+
+**跳过 GATE-MENTAL-IN = 流程违规**。
+
+---
+
+## A0.5 ⚠️ GATE-0.5（先验研究）— 心智回想之后
+
+意图澄清前必做 4 项扫描：
+
+### 1. grep 已踩过的坑
+```bash
+grep -E "^(\| \[|## )" doc/SkillAI/postmortem/README.md | head -30
+```
+看到与本任务相关的标题 → 立刻读全文。**不相信"我记得"，记得不准。**
+
+### 2. 找 3 个最相似真实样本
+```bash
+# 例：火系扇形子弹技能
+ls {{SKILLGRAPH_JSONS_ROOT}}宗门技能/SkillGraph_304*.json
+grep -l "TSET_CREATE_BULLET" .../SkillGraph_304*.json
+```
+
+### 3. 提取关键参考值
+- 图标路径 / 同元素子弹 ID 列表 + AngleAdjustType / 通用 BUFF 库 ID / 时长四元组 / 指示器类型分布
+
+### 4. 非常规模式 → "能力研究三件套"
+> PRD 提到"实时调整 / 动态修改 / 持续监听 / 环绕 / 折返 / 链接 / 反弹 / 传送" → 必做。
+
+1. **grep 全部 SkillEffectType 枚举**（按关键词过滤）
+2. **读 X 的 ConfigNode 类源代码**，列出全部钩子字段
+3. **读 X 相关全部枚举**，穷举每个值含义
+
+详见 [PostMortem #025](../../../doc/SkillAI/postmortem/2026-05-09-025-gate05-bullet-engine-limits.md)。
+
+### 5. 全工程 ID 占用扫描（PostMortem #035）— 新建 ConfigBaseNode 节点必做
+
+> NodeEditor CheckError 把所有 SkillGraph 当一张总表，`BulletConfigNode` / `ModelConfigNode` / `SkillTagsConfigNode` / `SkillEffectConfigNode` 等 **`ConfigBaseNode` 子类节点 = 常规节点 = 全工程 ID 唯一**。AI 抄样本时如果连 ID 一起抄过来 → NodeEditor 红字"严重错误-ID重复"。
+
+**强制扫描脚本**（生成新 BulletConfig/ModelConfig/SkillTag/SkillEffect 前先跑）：
+
+```python
+import json, glob
+used_b, used_m, used_t, used_e = set(), set(), set(), set()
+for fp in glob.glob('{{SKILLGRAPH_JSONS_ROOT}}**/*.json', recursive=True):
+    try:
+        with open(fp, 'r', encoding='utf-8') as f: d = json.load(f)
+    except: continue
+    for r in d.get('references', {}).get('RefIds', []):
+        cls = r.get('type', {}).get('class', '')
+        nid = r.get('data', {}).get('ID', 0)
+        if cls.endswith('BulletConfigNode'): used_b.add(nid)
+        if cls.endswith('ModelConfigNode'): used_m.add(nid)
+        if cls.endswith('SkillTagsConfigNode'): used_t.add(nid)
+        if cls.endswith('SkillEffectConfigNode'): used_e.add(nid)
+# AI 专属 IP 段 250 - 选段头未占用首号
+ai_b = next(i for i in range(2500001, 2509999) if i not in used_b)
+ai_m = next(i for i in range(25000001, 25099999) if i not in used_m)
+ai_t = next(i for i in range(2500001, 2509999) if i not in used_t)
+print(f'BulletConfig 可用首号: {ai_b}  ModelConfig: {ai_m}  SkillTag: {ai_t}')
+```
+
+**ID 命名规则**（[ConfigIDManager.cs:518-540](../../../Assets/Thirds/NodeEditor/Datas/ConfigIDManager.cs)）：
+- `ID = ip * ConfigIDAdd + 序号`
+- 步长查 [TableAnnotation.json](../../../Assets/Thirds/NodeEditor/SkillEditor/Saves/TableAnnotation.json)（BulletConfig=10000 / ModelConfig=100000 / SkillEffectConfig=1000000 / SkillTagsConfig=10000）
+- AI 专属 IP=250（项目 [`AIGeneratorConfig.json`](../../../Assets/Thirds/NodeEditor/SkillEditor/Saves/SvnIgnore/AIGeneratorConfig.json) 字段 `AIIpSegment` 预留）
+
+**禁止行为**（PostMortem #035 反例）：
+- ❌ 抄样本 BulletConfig.ID（如 `bullet_id: 320032 # 沿用 PoC`）
+- ❌ 凭直觉拍一个未扫描的 ID
+- ❌ 跨 SkillGraph 引用别人的 BulletConfigNode / ModelConfigNode（火宗 25 SkillGraph fs 真扫 0 用例 / 业界惯例自包含）
+
+### 6. 模板默认值偏离实战值速查（PostMortem #036）— 用模板时必查
+
+> 用 `make_template_call_node` 调用 `SkillGraph_【模板】xxx.json` 时 / **模板自身 TemplateParams 的 DefalutParamJson default 才是权威默认值**。编译器历史上有些 expander 硬编码了反向 default 值 / 必须查 [skill-designer.md §9 模板默认值偏离速查表](../../agents/skill-designer.md) 确认。
+>
+> 触发实例：30214005 烈焰直射首次 PoC 编译产物里"侦测间隔=10 / 侦测冷却=0"是反向值 / 用户口头修订为"间隔=1 / 冷却=10"（与模板 L1 default 一致）。
+
+**强制动作**（用模板前必做）：
+
+1. **查 skill-designer §9 速查表** — 表内列出已知偏离条目（当前条目：碰撞模板 侦测间隔/冷却）
+2. **若模板不在表内 / 或修订了 IR 字段** — 必扫模板根节点 TemplateParams default：
+   ```python
+   import json
+   with open('{{SKILLGRAPH_JSONS_ROOT}}技能模板/<分类>/<模板>.json', encoding='utf-8') as f:
+       d = json.load(f)
+   for r in d['references']['RefIds']:
+       tps = r['data'].get('TemplateParams') or []
+       if len(tps) > 0:
+           print(f'== {r["type"]["class"]} rid={r["rid"]} ID={r["data"].get("ID")} ==')
+           for i, tp in enumerate(tps):
+               print(f'  [{i}] {tp.get("Name")} default={tp.get("DefalutParamJson")}')
+   ```
+3. **比对**编译器 expander 硬编码 default 与模板 L1 default — **不一致即编译器 bug** / 走 PostMortem #036 同源修订流程
+
+**禁止行为**：
+- ❌ 盲信编译器旧 expander 的硬编码 default（可能是 PostMortem #036 类反向值）
+- ❌ 凭"我以为 default 是 0/10"配参数 — 不同模板 default 不同 / L1 = 真相
+
+### ⚠️ 三大特别警告（凭字段名猜 = 必踩）
+
+- **A. 不能凭字段名猜行为**（PostMortem #007）：FlyType=6 ≠ "追施法者"；TracePathType=4 ≠ "悬停"。**必须直接抄真实样本的 BulletConfig / ModelConfig / BuffConfig 全部字段**。
+- **B. 模板调用前 3 层校对**（PostMortem #008/#009）：TemplateParam Name + RefTypeName + 去 `common.nothotfix.cs` 查实际取值。`TShapeType` vs `TTriggerType` 取值规则不同。
+- **C. 模板需 OnTick 持续机制 → 用 1860216 风格自包含 BulletConfig + 字段端口边**（PostMortem #024），不许走"调用方手动接 effect ID"双根反模式。
+
+### 整理输出给用户（格式）
+
+```
+📋 先验研究结果（A0.5）
+
+【参考样本】
+- 304004 星火燎原（爆炸火球+灼烧）— 用追踪子弹 1080570
+- 304005 大火球普攻（直线火弹）
+【推荐参考值】
+- 图标：Skill/Pugong/PuGong_huo
+- 追踪子弹：1080570（AngleAdjustType=3 / Speed=2000）
+- 通用燃烧 buff：10002
+- 时长样板：cast=16/bs=0/bf=20/bd=20/cd=40
+【相关易错点】
+- 速查§11：collision_radius 已 AOE，不要加 QUICK_DAMAGE
+- 速查§13：cast≤buffer_end 必须满足
+```
+
+---
+
+## A1. 意图澄清（mermaid 蓝图）
+
+输出**高层蓝图**给用户审（不是 JSON，不是 IR，是给人看的图）：
+
+```
+flowchart LR
+    Cast[出招动作] --> Delay[延迟5帧]
+    Delay --> Bullet[直线子弹: 速度10/射程800]
+    Bullet --> Hit[命中: ATK×150% 法术伤害]
+```
+
+附**参数表**列关键值（伤害系数、范围、CD 等）。**用户确认前不写代码。**
+
+**A1 强约束**：
+- 参数表 ID 类字段**必须用 A0.5 推荐值**作默认，不写"⚠️占位"
+- **绝对禁止**：用 `320032` `200001` `Skill/GongFa/Huo/skill_huo_30142001` 凭空 ID
+
+---
+
+## A2. 生成 IR YAML
+
+参考 [doc/SkillAI/samples/ir/](../../../doc/SkillAI/samples/ir/) 样本格式。Schema：[ir_schema.json](../../../doc/SkillAI/tools/ir/ir_schema.json)。
+
+支持 step 关键字：`cast_anim` / `cast_effect` / `delay`（含 `then` 嵌套）/ `bullet`（直线）/ `play_sound` / `camera_shake` / `apply_buff` / `remove_buff` / `modify_tag` / `raw_node`（兜底）。
+
+写到 `doc/SkillAI/samples/ir/<skill_id>_<name>.skill.yaml`。
+
+---
+
+## A3. 编译
+
+```powershell
+python doc/SkillAI/tools/skill_compiler.py <ir_path> -v
+```
+
+**硬要求**：返回 `✓ 编译成功`。失败修 IR，**不改输出 JSON**。
+
+---
+
+## A4. Lint
+
+```powershell
+python doc/SkillAI/tools/skill_lint.py <output_json>
+```
+
+**硬要求**：`Summary: E=0`。Warnings 可保留但要在汇报里点出来。
+
+---
+
+## A4.5 ⚠️ GATE-3.5 AI 自审 4 项
+
+> Lint 通过 ≠ 配对了。下面 4 项是只能 AI 负责的语义/最优性检查。
+
+1. **占位 ID 残留扫描**：`grep -E '"Value":\s*(320032|200001|99999)' <output.json>` → 期望 0 命中
+2. **时长 4 规则**：① cast≤base ② cast≤buffer_start+buffer_frame ③ buffer_start≤base ④ base≤cd
+3. **指示器 param-type 自洽**：type 0/1 → param=[]；type 2/3 → [range]；type 4 → [range,angle]；type 5 → [width,height]
+4. **拓扑 diff vs A0.5 相似样本**：节点数差异 <30% ✓；>50% ⚠️
+
+**汇报模板**：
+
+```
+🔬 GATE-3.5 自审：
+✓ 占位 ID 扫描：0 命中
+✓ 时长 4 规则：cast(24)≤bd(30)≤cd(90)；cast(24)≤buffer_end(30)
+✓ 指示器自洽：type=1 + param=[]
+✓ 拓扑 diff：18 节点 vs 304004 参考 ~22，差异 18%
+```
+
+---
+
+## A5. 落盘 + 用户确认
+
+拷贝 JSON 到 `{{SKILLGRAPH_JSONS_ROOT}}宗门技能/AIGen/`。提示用户：
+1. Unity Editor Ctrl+R 刷新 AssetDatabase
+2. **SkillEditor 打开蓝图 → 同步数据**（推 SkillConfig 进 C++/C# 运行时表）
+3. 实测运行（**只有用户实测过才算"做完"**）
+
+---
+
+## AOUT. ⚠️ GATE-MENTAL-OUT（心智回流）— 任务完成后必做
+
+**动作**：自检本轮**对哪些子系统的理解发生变化**？
+
+| 情况 | 输出 | 后续动作 |
+|------|------|---------|
+| 没变化 | "本轮无心智更新" | 结束 |
+| 印证旧认知 | "强化子弹系统 §X 不变量"（confidence +1） | 调 curator Mode B 走 mini 提案 |
+| 修正旧认知 | "原以为 X，实测发现 Y"（含证据） | 调 curator，**conflict_flag=true** |
+| 新增认知 | "首次发现 Z 范式" | 调 curator，可能新建子系统页 |
+
+**curator 调用方式**：通过 Agent 工具调 [skill-knowledge-curator](../../../.claude/agents/skill-knowledge-curator.md) Mode B，传入：
+- 任务摘要
+- 触碰子系统列表（来自 GATE-MENTAL-IN）
+- 认知变化候选 + 证据
+
+**用户拍板才落盘**——curator 不直接覆盖任何 mental_model 文件。
+
+---
+
+## A·特殊：无参考模板时的处置
+
+> 触发：A0.5 §1 找完发现项目里完全没有同模式技能。
+
+**99% 情况都不是真"无参考"**，先做：
+
+### A·1 拆解到能找参考的最小颗粒
+
+```
+"绳索拉扯敌人到自己身边" =
+  ① 选目标（指示器+筛选）→ 普通技能都有
+  ② 拉中目标 entity 引用 → 位移类技能里有
+  ③ 让目标朝 caster 移动 → 175_0024 反向
+  ④ 视觉绳索特效 → 特效轨迹
+```
+
+### A·2 真正的零参考原子（罕见）
+
+**绝不 AI 凭直觉拼**。两条路：
+
+- **Path 1: raw_node 兜底** — IR 直接写 `raw_node` 指定 TSET_*/TSCT_* + 完整 Params（按 `tools/skill_editor_enums.json` 查），前提是先读 [docs/节点字典.md](../../../doc/SkillAI/docs/节点字典.md) 确认语义
+- **Path 2: Python builder 脚本** — 涉及 5+ 节点的复杂拓扑，写 `tools/builders/build_<feature>.py`，参考 `build_fan_layered_template.py`
+
+### A·3 PoC 标记
+
+- IR meta.description 加 `[PoC]` 前缀
+- StickyNote 自动加"⚠️ 无项目内参考样本"
+- PostMortem 提案标 `noise_risk: high`
+- GATE-MENTAL-OUT 触发 curator 评估是否建新子系统页
+
+---
+
+## B. 修改已有 JSON
+
+### B1. 数值级修改（直接 edit）
+
+只改 ConfigJson 数字字段（伤害系数 / CD / 范围 / buff 时长）。
+
+**判定**：改动只涉及单个 Param.Value，不动节点拓扑、不加/删节点。
+
+直接 Read + Edit 修字符串里数字 → A4 lint 验证 → AOUT。
+
+### B2. 结构级修改（走 IR 中转）
+
+加段 / 改子弹形态 / 加分支 / 删节点。**强制走 JSON → IR → 改 IR → JSON 路径**：
+
+```powershell
+# Step 1: 反编译为 IR
+python doc/SkillAI/tools/skill_decompiler.py <input.json> -o <output.skill.yaml>
+# Step 2: AI 修改 IR YAML（基于用户描述）
+# Step 3: 编译回 JSON
+python doc/SkillAI/tools/skill_compiler.py <ir_path>
+```
+
+**硬要求**：B2 不许 AI 直接编辑 JSON 文件；改 IR 前先用 mermaid 给用户看新蓝图。
+
+### B3. IR 表达不了的复杂改动
+
+反编译输出 >30% `raw_node`，或需求 IR Schema 不支持：
+- 告诉用户："这改动 IR 暂不支持"
+- 选项：[tools/builders/](../../../doc/SkillAI/tools/builders/) Python 模板 / 引导用户 Unity Editor 手改
+
+---
+
+## 硬性 GATE 表
+
+| GATE | 检查 | 失败动作 |
+|---|---|---|
+| **GATE-MENTAL-IN** | 心智回想（说出对触碰子系统的理解 + 不确定点） | 说不出来回去翻样本/源码 |
+| **GATE-0.5** | A0.5 先验研究 6 项扫描完成（#5 全工程 ID 占用扫描 + #6 模板默认值偏离速查）  | 没做就回去做，**不许跳**——80% PoC 翻车都是跳了这步 |
+| GATE-1 | mermaid + 参数表用户已审，**ID 已用 A0.5 推荐值，无占位** | 用户不确认就停 |
+| GATE-2 | IR YAML 通过 ir_schema.json 校验 | 修 IR，不修编译器 |
+| GATE-3 | `skill_compiler.py` 输出 `✓ 编译成功` | 看错误改 IR |
+| GATE-3.5 | A4.5 自审 4 项全过 | 任一项不过回上一步 GATE 改 |
+| GATE-4 | `skill_lint.py` 输出 `Summary: E=0` | 修 IR 直到过 |
+| GATE-5 | 用户在 Unity 实测过 | 反馈不符回 GATE-1 重审 |
+| **GATE-MENTAL-OUT** | 心智回流（说出对子系统理解变化 / 调 curator Mode B） | 跳过 = 流程违规 |
+
+**禁止跳 GATE**。harness engineering 核心：把 AI 当能力强但缺纪律的初级工程师，给它流程护栏。
+
+---
+
+## 易错点速览（**生成前先看**）
+
+详见 [doc/SkillAI/docs/易错点速查.md](../../../doc/SkillAI/docs/易错点速查.md) + [postmortem 索引](../../../doc/SkillAI/postmortem/README.md)。
+
+**绝对会遇到的 5 个坑**：
+1. **TSET_ORDER_EXECUTE 是 dynamic port** — 所有出边 outputPortIdentifier 必须 `"0"`（编译器已处理）
+2. **不同表 TableTash 不同** — SkillCondition≠SkillEffect，搞错节点会悄悄失效
+3. **BulletConfigNode/ModelConfigNode 必须显式生成** — 不能只填 ID 数字
+4. **子弹伤害走"碰撞→命中ORDER→[伤害+表现]"模板链** — 别直接 TSET_DAMAGE_QUICK
+5. **PT=5 是 TCommonParamType**（运行时上下文：1=主体/3=施法者/6=施法者伤害归属），不是"槽位"
+
+**RepeatExecute 间隔=0 单帧硬上限**（PostMortem #026）：
+`iIntervalTime=0` 时 `iExecuteCount` 必须 ≤ 50 安全 / ≤ 100 极限（C++ 引擎 `BattleEffectFactory.cpp:1800` 硬限制）。EXT_PARAM 暴露次数槽位时必须在 `DefaultValueDesc` 写 `⚠️ 安全范围 N ≤ 50` 警告。
+
+**接力消息节点角色不可信**（PostMortem #026）：遇到运行时报错涉及具体 SkillEffectConfig ID 时，**第一步必须 grep emitted JSON 的该节点 `Desc` 字段确认节点角色**（spawn? OnTick? 周期? init?）再决定修复。不许仅凭"REPEAT 报错就改 count=-1"启发式动作。
+
+---
+
+## 反思 / PostMortem 提案
+
+任务完成后（用户确认/拒绝），AI 自检：本次踩了**未沉淀过**的新坑？
+
+**有** → 按 [postmortem_template.md](references/postmortem_template.md) 出提案 → 用户决定是否入库。  
+**没有** → **不为强而记**，结束。
+
+提案入库后跑 `python doc/SkillAI/tools/sync_postmortem_to_easy_pitfalls.py` 同步到团队级速查。
+
+---
+
+## 工具脚本一览
+
+| 脚本 | 用途 |
+|---|---|
+| [skill_compiler.py](../../../doc/SkillAI/tools/skill_compiler.py) | IR → JSON |
+| [skill_decompiler.py](../../../doc/SkillAI/tools/skill_decompiler.py) | JSON → IR |
+| [skill_lint.py](../../../doc/SkillAI/tools/skill_lint.py) | 静态校验 |
+| [skill_graph_to_mermaid.py](../../../doc/SkillAI/tools/skill_graph_to_mermaid.py) | JSON → mermaid + 参数表 |
+| [tools/builders/](../../../doc/SkillAI/tools/builders/) | 复杂 Python 模板生成器 |
+
+## 相关 Skill
+
+- **[skill-review](../skill-review/SKILL.md)** — 审核已有 JSON
+- **[skill-knowledge-curator](../../agents/skill-knowledge-curator.md)** — GATE-MENTAL-OUT 调用对象

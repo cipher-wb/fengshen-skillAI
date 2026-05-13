@@ -1,0 +1,64 @@
+sample_id: 30124001
+sample_path: 宗门技能/SkillGraph_30124001【火宗门】飞星印_地阶.json
+predicted_at: 2026-05-09
+mental_model_version_used: v0.1
+metadata_known_at_prediction:
+  node_count: 116
+  category: 宗门技能
+  sub_category: 火宗门技能
+  top_classes_visible:
+    TSET_ORDER_EXECUTE: 18
+    TSET_DELAY_EXECUTE: 6
+    TSET_RUN_SKILL_EFFECT_TEMPLATE: 17
+    TSET_GET_SKILL_TAG_VALUE: 8
+    TSET_MODIFY_SKILL_TAG_VALUE: 0
+  flags_visible:
+    skill_tag_read_only_pattern: true
+prediction:
+  semantic_intent: |
+    "飞星印_地阶" — 名字直觉是"远程印记式打击"。
+    "印" = 标记，可能在目标身上打 buff/debuff；
+    "飞星" = 多颗星形飞弹（多 bullet）或抛物轨迹；
+    地阶 = 中阶技能，节点数 116（高位）说明结构复杂；
+    特征：MOD_TAG=0 但 GET_TAG=8 → 只读 SkillTag，说明此技能消费/读取已有 tag（可能是从修炼系统/共有 tag 取数）；
+    RUN_TEMPL 17 次很高 → 大量套用现成模板（可能是 7-8 次发星模板的循环调用）。
+  topology_mermaid: |
+    flowchart LR
+      A[出招动画] --> B[ORDER 主流程]
+      B --> C[GET_TAG 修炼等级/某共享 tag]
+      C --> D[NUM_CALCULATE 算伤害系数]
+      D --> E[ORDER 多段发射]
+      E --> F[发星 #1: RUN_TEMPL 子弹模板]
+      E --> G[DELAY 5帧]
+      G --> H[发星 #2: RUN_TEMPL]
+      H --> I[DELAY]
+      I --> J[发星 #N...]
+      J --> K[最后一发触发"印"buff RUN_TEMPL]
+  predicted_node_count: 100
+  templates_used_predicted:
+    - 子弹通用逻辑-碰撞
+    - "印记/标记" buff 模板
+    - 火属性灼烧 DOT
+    - 火宗门弹幕通用模板
+  subsystems_touched_predicted:
+    - 控制流子系统 (ORDER + DELAY 串行多段)
+    - SkillTag 系统 (只读模式)
+    - 子弹系统 (多颗飞星)
+    - 伤害管线 (RUN_TEMPL 间接调用)
+    - 模板系统 (大量复用)
+  prediction_confidence: 中
+  reasoning: |
+    "MOD_TAG=0 + GET_TAG=8" 是个强信号——这技能不写 tag，只读取外部 tag 来调整自身行为。
+    可能场景：
+    a) 读修炼等级决定子弹数量
+    b) 读敌人身上现有"印"层数决定爆发伤害
+    c) 读 buff 系统状态决定走哪个分支
+    "RUN_TEMPL 17 次" 是这批最高的——说明这技能复用模板特别多，
+    可能是同一个"发星模板"被调 6-8 次 + 几个"伤害模板"。
+    主要不确定：
+    - "印"是 buff 还是 SkillTag 实现
+    - 飞星具体几颗（5? 7? 9?）
+expected_blind_spots:
+  - 只读 SkillTag 的具体语义（读什么？怎么用？）
+  - "印记类"技能的标准实现范式
+  - RUN_TEMPL 同一模板被多次调用时的参数差异化机制

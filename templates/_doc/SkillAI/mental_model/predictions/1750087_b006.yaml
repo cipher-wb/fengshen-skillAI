@@ -1,0 +1,46 @@
+sample_id: 1750087
+batch: B-006
+sample_name: 【擂台】擂台必胜Buff
+predict_date: 2026-05-10
+mode_hardconfirmed: E_dual_zero_fallback
+
+skill_config_metadata_seen:
+  SkillID: 1750087
+  SkillSubType: 0
+  CdType: 0
+  EnhanceID: 0
+  ActiveRoot: 0
+  PassiveRoot: 0
+  SkillEffectFlowList_len: 0
+  IndicatorType: 0
+  refs_count: 15
+  filename_hint: "BUFF 目录下 / 文件名'擂台必胜Buff' / 'BUFF' 字样"
+
+mental_model_in_state:
+  关于_BUFF_系统:
+    本质理解: "Buff 系统页 confidence=高（v0.5）。Buff 通过 buff_layer 跨 SubType 通用 ≠ 心法标志。Buff 数据节点（BuffConfigNode）存放在文件 SerializedNodes 内，被 ApplyBuff 类节点引用配 ID。"
+    本任务用到的不变量: "Buff 通常不是技能本体而是被技能 ApplyBuff 引用 — Buff 文件本身可能不需要 Mode A/B/C 入口。"
+    仍不确定的: "Buff 文件作为 'SkillGraph' 是否就是 Mode E 真技能的 BUFF 子类？还是说 Buff 文件本身就是文件级模板（不属于 5 类入口模式）？"
+  关于_SkillEntry_5类入口:
+    本质理解: "5 类入口模式（A/B/C/D/E）已经在 v0.6.1 R2 收紧为'已学样本范围'+ 'corpus 165 候选待 B-006 调研'。"
+    仍不确定的: "Mode E 真技能的真实入口机制 — 4 子类是否成立 RQ2 关键。"
+
+prediction:
+  node_count_estimate:
+    range: [10, 25]
+    rationale: "refs_count=15 居中 — BUFF 类技能比心法/物品体量大但比法宝小。15 refs 估计去掉非节点元素后实际节点 10-25。"
+  topology_shape: "buff_data_centric — 推测内部以 BuffConfigNode 为核心，配 SkillTag 标记 + 1-2 个 Apply/Modifier 节点 + 可能 1-2 SkillEvent 注册节点。无典型 flow 链（无 OrderExecute / DelayExecute 等）。"
+  真实入口机制_RQ1猜测:
+    候选优先级: "1. SkillEvent callback 上游驱动（最可能）— 由战斗系统在'擂台胜利'事件触发时直接 ApplyBuff(1750087)；2. 外部召唤入口（次可能）— 系统级表格驱动（GameMode/PvP 配置）。"
+    最不可能: "SerializedNodes 内嵌引用 — 因为 refs_count=15 不够大，且 BUFF 通常被外部触发不自驱动。"
+  4子类_RQ2立场: "BUFF 类对应 v0.4-v0.6 'Mode E 4 子类'中无明确对应 — 4 子类（法宝/装备型被动 / 法宝召唤激发 / 被动响应型心法 / 主动型长 CD 大招）都不是 BUFF。**预测 4 子类作为概念框架不完整 — corpus 165 例至少含第 5 子类 BUFF 类**。"
+  涉及子系统:
+    - Buff 系统（核心）
+    - SkillEvent 系统（次要 — Buff Apply/Remove 事件可能注册）
+    - SkillTag 系统（可能 — Buff 通常带 Tag 标记）
+  闭卷预测_RQ3立场: 不适用（非心法 SubType=701）
+  闭卷预测_RQ4立场: 不适用（SubType=0）
+
+self_assessment_pre_open:
+  conviction_level: 中等（70%）
+  最大不确定: "BUFF 文件是否真有内部节点？还是仅 SkillConfigNode 顶层 + 极少 BuffConfig 子节点？refs_count=15 是节点数还是含其他元素混合？"

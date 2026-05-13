@@ -1,0 +1,424 @@
+{
+    "serializationData": {
+        "SerializedFormat": 0,
+        "SerializedBytes": [],
+        "ReferencedUnityObjects": [],
+        "SerializedBytesString": "",
+        "Prefab": {
+            "instanceID": 0
+        },
+        "PrefabModificationsReferencedUnityObjects": [],
+        "PrefabModifications": [],
+        "SerializationNodes": []
+    },
+    "nodes": [
+        {
+            "rid": 1000
+        },
+        {
+            "rid": 1001
+        },
+        {
+            "rid": 1002
+        },
+        {
+            "rid": 1003
+        }
+    ],
+    "edges": [
+        {
+            "GUID": "cc45a173-10a9-4f49-be9b-0fd2c6fe0aaf",
+            "inputNodeGUID": "90d76e21-fb87-490d-bdcb-131e5c0ed967",
+            "outputNodeGUID": "86b90015-f3b8-4c59-a042-f85fa8253286",
+            "inputFieldName": "ID",
+            "outputFieldName": "PackedParamsOutput",
+            "inputPortIdentifier": "0",
+            "outputPortIdentifier": "12",
+            "isVisible": true
+        },
+        {
+            "GUID": "3a94d0a8-12a5-445c-8a5a-5b7b0038db6e",
+            "inputNodeGUID": "86b90015-f3b8-4c59-a042-f85fa8253286",
+            "outputNodeGUID": "b6cd8197-1579-4073-b69d-36e96d66dfc4",
+            "inputFieldName": "ID",
+            "outputFieldName": "PackedParamsOutput",
+            "inputPortIdentifier": "0",
+            "outputPortIdentifier": "0",
+            "isVisible": true
+        }
+    ],
+    "groups": [],
+    "stackNodes": [],
+    "pinnedElements": [
+        {
+            "position": {
+                "serializedVersion": "2",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 511.0,
+                "height": 629.0
+            },
+            "opened": true,
+            "editorType": {
+                "serializedType": "NodeEditor.ConfigPinnedView, NodeEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"
+            }
+        }
+    ],
+    "exposedParameters": [],
+    "serializedParameterList": [],
+    "stickyNotes": [
+        {
+            "GUID": "9c909ea0-57ca-4a81-b28a-b786cfd9db07",
+            "position": {
+                "serializedVersion": "2",
+                "x": -800.0,
+                "y": -200.0,
+                "width": 700.0,
+                "height": 1500.0
+            },
+            "title": "[PoC] 30212016 旋转扩张圈 v1.0 — 调用 v08 模板",
+            "content": "[作用]\nPoC 测试技能：木宗门人阶奇术。释放后在主角周围生成 8 颗飞叶子弹，圆周均匀分布，整团以 90 度/秒匀速旋转，每颗子弹同时以 13 单位/帧（约 400 单位/秒）的速度径向外扩，2 秒后超出 maxR=1200 单位边界自动销毁。圆心锁定在释放瞬间位置不跟随主角。\n\n[流程]\nOnSkillStart\n  └→ ORDER\n      └→ RUN_SKILL_EFFECT_TEMPLATE (调 v08 模板根 32300001)\n          ├ 模板 spawn 阶段：N 颗子弹同帧创建，phase 角度 2π·i/N 均布\n          ├ 每颗子弹 BulletConfig.AfterBorn=32300101 → 触发模板 OnTick 链\n          └ OnTick 每帧：θ+=ω → R+=vR → 改 X/Y → 应用位置 → maxR/minR 检查\n\n[特殊条件]\n- followPlayer=0：圆心固定在释放瞬间位置，不跟随主角\n- BulletConfig.AfterBorn 必须 = 32300101（模板 contract）\n- 子弹本体 Speed/Acce/TurnSpeed/TracePathType 全 0（位移由 OnTick 接管）\n- LastTime=60 帧（2s），LifeFlag=1（定时销毁=按 LastTime）兜底\n- 调用方完全 hard-code 参数（PT=0 常量），不声明任何 SkillTag\n- PoC 阶段无伤害挂接（验证位移轨迹优先）\n\n[参数]\n- bulletCount N = 8\n- initialRadius R0 = 200 单位 (≈2 米)\n- tangentOffsetAngle φ = 0 度（长边沿切线 / 花瓣）\n- radialVelocity vR = 13 单位/帧 (≈ 400 单位/秒)\n- radialAcceleration aR = 0\n- angularVelocity ω = 3 度/帧 (= 90 度/秒)\n- maxRadius = 1200 单位\n- minRadius = 0\n- followPlayer = 0\n- bulletConfig = 321000 (本文件内嵌)\n- BulletConfig.Model = 3200303 (复用叶散风行飞叶)\n- BulletConfig.LastTime = 60 帧 / LifeFlag = 1（定时销毁，强证据等级 2，6+真实样本印证）\n- SkillCastFrame = 0 / BaseDuration = 30 / BufferFrame = 30 / CdTime = 900\n- IndicatorType = 1 (圆形) / IndicatorParam = [1200] = maxRadius\n\n[联动]\n- 强依赖 v08 模板 SkillGraph_【模板】旋转扩张子弹圈.json (根 32300001 / OnTick 32300101)\n- 强依赖 BulletConfig 321000 的 AfterBorn=32300101 contract\n- Icon=Skill/Pugong/PuGong_mu 为占位，用户后续在 Unity 中手动替换正式美术\n- 首次 Ctrl+R 后必须在 SkillEditor 打开本技能 → 点'同步数据'让 32390000/32390001 进运行时表"
+        }
+    ],
+    "curTab": 3,
+    "path": "{{SKILLGRAPH_JSONS_ROOT}}宗门技能/木宗门技能/SkillGraph_30212016【木宗门】奇术_人阶_PoC_旋转扩张圈.json",
+    "references": {
+        "version": 2,
+        "RefIds": [
+            {
+                "rid": 1000,
+                "type": {
+                    "class": "TSET_RUN_SKILL_EFFECT_TEMPLATE",
+                    "ns": "NodeEditor",
+                    "asm": "NodeEditor"
+                },
+                "data": {
+                    "GUID": "86b90015-f3b8-4c59-a042-f85fa8253286",
+                    "computeOrder": 1,
+                    "position": {
+                        "serializedVersion": "2",
+                        "x": 400.0,
+                        "y": 0.0,
+                        "width": 280.0,
+                        "height": 200.0
+                    },
+                    "expanded": false,
+                    "debug": false,
+                    "nodeLock": false,
+                    "visible": true,
+                    "hideChildNodes": false,
+                    "hidePos": {
+                        "x": 0.0,
+                        "y": 0.0
+                    },
+                    "hideCounter": 0,
+                    "ID": 32390000,
+                    "Desc": "SkillGraph_【模板】旋转扩张子弹圈.json\n-----------------------模板说明-----------------------\n旋转扩张子弹圈模板根 v1.0（9 项运动/边界参数 + [10] bulletConfig）",
+                    "paramVersion": 0,
+                    "templateParamVersion": 0,
+                    "IsTemplate": false,
+                    "TemplateFlags": 0,
+                    "TemplateParams": [],
+                    "TemplateParamsDesc": [],
+                    "TemplateParamsCustomAdd": false,
+                    "TableTash": "0CFA05568A66FEA1DF3BA6FE40DB7080",
+                    "ConfigJson": "{\"ID\":32390000,\"SkillEffectType\":118,\"Params\":[{\"Value\":1,\"ParamType\":5,\"Factor\":0},{\"Value\":2,\"ParamType\":5,\"Factor\":0},{\"Value\":32300001,\"ParamType\":0,\"Factor\":0},{\"Value\":8,\"ParamType\":0,\"Factor\":0},{\"Value\":200,\"ParamType\":0,\"Factor\":0},{\"Value\":0,\"ParamType\":0,\"Factor\":0},{\"Value\":13,\"ParamType\":0,\"Factor\":0},{\"Value\":0,\"ParamType\":0,\"Factor\":0},{\"Value\":3,\"ParamType\":0,\"Factor\":0},{\"Value\":1200,\"ParamType\":0,\"Factor\":0},{\"Value\":0,\"ParamType\":0,\"Factor\":0},{\"Value\":0,\"ParamType\":0,\"Factor\":0},{\"Value\":321000,\"ParamType\":0,\"Factor\":0}]}",
+                    "Config2ID": "SkillEffectConfig_32390000",
+                    "SkillEffectType": 118,
+                    "TemplateData": {
+                        "TemplateParams": [
+                            {
+                                "DefaultValueDesc": "",
+                                "Name": "[阵型] bulletCount 子弹数N",
+                                "ParamUID": 1,
+                                "RefTypeName": "",
+                                "RefPortTypeNames": "",
+                                "DefalutParam": {},
+                                "DefalutParamJson": "{\"Value\":8,\"ParamType\":0,\"Factor\":0}",
+                                "isConfigId": false,
+                                "isEnum": false,
+                                "RefTableFullName": "",
+                                "RefTableManagerName": "",
+                                "RefPortTypeName": "",
+                                "RefPortTypeFullName": "",
+                                "IsFunctionReturn": false
+                            },
+                            {
+                                "DefaultValueDesc": "",
+                                "Name": "[阵型] initialRadius 初始半径R0",
+                                "ParamUID": 2,
+                                "RefTypeName": "",
+                                "RefPortTypeNames": "",
+                                "DefalutParam": {},
+                                "DefalutParamJson": "{\"Value\":200,\"ParamType\":0,\"Factor\":0}",
+                                "isConfigId": false,
+                                "isEnum": false,
+                                "RefTableFullName": "",
+                                "RefTableManagerName": "",
+                                "RefPortTypeName": "",
+                                "RefPortTypeFullName": "",
+                                "IsFunctionReturn": false
+                            },
+                            {
+                                "DefaultValueDesc": "",
+                                "Name": "[阵型] tangentOffsetAngle 切线偏移角φ(度)",
+                                "ParamUID": 3,
+                                "RefTypeName": "",
+                                "RefPortTypeNames": "",
+                                "DefalutParam": {},
+                                "DefalutParamJson": "{\"Value\":0,\"ParamType\":0,\"Factor\":0}",
+                                "isConfigId": false,
+                                "isEnum": false,
+                                "RefTableFullName": "",
+                                "RefTableManagerName": "",
+                                "RefPortTypeName": "",
+                                "RefPortTypeFullName": "",
+                                "IsFunctionReturn": false
+                            },
+                            {
+                                "DefaultValueDesc": "",
+                                "Name": "[运动] radialVelocity 径向速度vR(单位/帧)",
+                                "ParamUID": 4,
+                                "RefTypeName": "",
+                                "RefPortTypeNames": "",
+                                "DefalutParam": {},
+                                "DefalutParamJson": "{\"Value\":10,\"ParamType\":0,\"Factor\":0}",
+                                "isConfigId": false,
+                                "isEnum": false,
+                                "RefTableFullName": "",
+                                "RefTableManagerName": "",
+                                "RefPortTypeName": "",
+                                "RefPortTypeFullName": "",
+                                "IsFunctionReturn": false
+                            },
+                            {
+                                "DefaultValueDesc": "",
+                                "Name": "[运动] radialAcceleration 径向加速度aR(单位/秒²)",
+                                "ParamUID": 5,
+                                "RefTypeName": "",
+                                "RefPortTypeNames": "",
+                                "DefalutParam": {},
+                                "DefalutParamJson": "{\"Value\":0,\"ParamType\":0,\"Factor\":0}",
+                                "isConfigId": false,
+                                "isEnum": false,
+                                "RefTableFullName": "",
+                                "RefTableManagerName": "",
+                                "RefPortTypeName": "",
+                                "RefPortTypeFullName": "",
+                                "IsFunctionReturn": false
+                            },
+                            {
+                                "DefaultValueDesc": "",
+                                "Name": "[运动] angularVelocity 整团角速度ω(度/帧)",
+                                "ParamUID": 6,
+                                "RefTypeName": "",
+                                "RefPortTypeNames": "",
+                                "DefalutParam": {},
+                                "DefalutParamJson": "{\"Value\":3,\"ParamType\":0,\"Factor\":0}",
+                                "isConfigId": false,
+                                "isEnum": false,
+                                "RefTableFullName": "",
+                                "RefTableManagerName": "",
+                                "RefPortTypeName": "",
+                                "RefPortTypeFullName": "",
+                                "IsFunctionReturn": false
+                            },
+                            {
+                                "DefaultValueDesc": "",
+                                "Name": "[终止] maxRadius(最大半径)",
+                                "ParamUID": 7,
+                                "RefTypeName": "",
+                                "RefPortTypeNames": "",
+                                "DefalutParam": {},
+                                "DefalutParamJson": "{\"Value\":1500,\"ParamType\":0,\"Factor\":0}",
+                                "isConfigId": false,
+                                "isEnum": false,
+                                "RefTableFullName": "",
+                                "RefTableManagerName": "",
+                                "RefPortTypeName": "",
+                                "RefPortTypeFullName": "",
+                                "IsFunctionReturn": false
+                            },
+                            {
+                                "DefaultValueDesc": "",
+                                "Name": "[终止] minRadius(最小半径)",
+                                "ParamUID": 8,
+                                "RefTypeName": "",
+                                "RefPortTypeNames": "",
+                                "DefalutParam": {},
+                                "DefalutParamJson": "{\"Value\":0,\"ParamType\":0,\"Factor\":0}",
+                                "isConfigId": false,
+                                "isEnum": false,
+                                "RefTableFullName": "",
+                                "RefTableManagerName": "",
+                                "RefPortTypeName": "",
+                                "RefPortTypeFullName": "",
+                                "IsFunctionReturn": false
+                            },
+                            {
+                                "DefaultValueDesc": "",
+                                "Name": "[运动] followPlayer(是否跟随主角)",
+                                "ParamUID": 9,
+                                "RefTypeName": "",
+                                "RefPortTypeNames": "",
+                                "DefalutParam": {},
+                                "DefalutParamJson": "{\"Value\":0,\"ParamType\":0,\"Factor\":0}",
+                                "isConfigId": false,
+                                "isEnum": false,
+                                "RefTableFullName": "",
+                                "RefTableManagerName": "",
+                                "RefPortTypeName": "",
+                                "RefPortTypeFullName": "",
+                                "IsFunctionReturn": false
+                            },
+                            {
+                                "DefaultValueDesc": "",
+                                "Name": "[子弹] bulletConfig 子弹ID(BulletConfig)",
+                                "ParamUID": 10,
+                                "RefTypeName": "BulletConfig",
+                                "RefPortTypeNames": "",
+                                "DefalutParam": {},
+                                "DefalutParamJson": "{\"Value\":0,\"ParamType\":0,\"Factor\":0}",
+                                "isConfigId": true,
+                                "isEnum": false,
+                                "RefTableFullName": "TableDR.BulletConfig",
+                                "RefTableManagerName": "TableDR.BulletConfigManager",
+                                "RefPortTypeName": "",
+                                "RefPortTypeFullName": "",
+                                "IsFunctionReturn": false
+                            }
+                        ],
+                        "templateParamVersion": 0,
+                        "RefMode": 0,
+                        "TemplatePath": "{{SKILLGRAPH_JSONS_ROOT}}技能模板/子弹/SkillGraph_【模板】旋转扩张子弹圈.json",
+                        "TemplateNodeID": 0
+                    }
+                }
+            },
+            {
+                "rid": 1001,
+                "type": {
+                    "class": "TSET_ORDER_EXECUTE",
+                    "ns": "NodeEditor",
+                    "asm": "NodeEditor"
+                },
+                "data": {
+                    "GUID": "b6cd8197-1579-4073-b69d-36e96d66dfc4",
+                    "computeOrder": 0,
+                    "position": {
+                        "serializedVersion": "2",
+                        "x": 0.0,
+                        "y": 0.0,
+                        "width": 280.0,
+                        "height": 200.0
+                    },
+                    "expanded": false,
+                    "debug": false,
+                    "nodeLock": false,
+                    "visible": true,
+                    "hideChildNodes": false,
+                    "hidePos": {
+                        "x": 0.0,
+                        "y": 0.0
+                    },
+                    "hideCounter": 0,
+                    "ID": 32390001,
+                    "Desc": "OnSkillStart 顶层 ORDER → RUN_TEMPLATE(32390000)",
+                    "paramVersion": 0,
+                    "templateParamVersion": 0,
+                    "IsTemplate": false,
+                    "TemplateFlags": 0,
+                    "TemplateParams": [],
+                    "TemplateParamsDesc": [],
+                    "TemplateParamsCustomAdd": false,
+                    "TableTash": "0CFA05568A66FEA1DF3BA6FE40DB7080",
+                    "ConfigJson": "{\"ID\":32390001,\"SkillEffectType\":1,\"Params\":[{\"Value\":32390000,\"ParamType\":0,\"Factor\":0}]}",
+                    "Config2ID": "SkillEffectConfig_32390001",
+                    "SkillEffectType": 1
+                }
+            },
+            {
+                "rid": 1002,
+                "type": {
+                    "class": "BulletConfigNode",
+                    "ns": "NodeEditor",
+                    "asm": "NodeEditor"
+                },
+                "data": {
+                    "GUID": "90d76e21-fb87-490d-bdcb-131e5c0ed967",
+                    "computeOrder": 2,
+                    "position": {
+                        "serializedVersion": "2",
+                        "x": 913.6854248046875,
+                        "y": -94.44633483886719,
+                        "width": 361.0,
+                        "height": 406.0
+                    },
+                    "expanded": false,
+                    "debug": false,
+                    "nodeLock": false,
+                    "visible": true,
+                    "hideChildNodes": false,
+                    "hidePos": {
+                        "x": 0.0,
+                        "y": 0.0
+                    },
+                    "hideCounter": 0,
+                    "ID": 321000,
+                    "Desc": "内嵌 BulletConfig 321000\nModel=3200303 (复用叶散风行飞叶)\nSpeed/Acce/Turn/Trace 全 0（位移由 OnTick 接管）\nLastTime=60帧=2s LifeFlag=2(定时销毁)\n⭐ AfterBorn=32300101 → 触发 v08 模板 OnTick 链",
+                    "paramVersion": 0,
+                    "templateParamVersion": 0,
+                    "IsTemplate": false,
+                    "TemplateFlags": 0,
+                    "TemplateParams": [],
+                    "TemplateParamsDesc": [],
+                    "TemplateParamsCustomAdd": false,
+                    "TableTash": "1955259A502D05C224412EDD4D1CD75D",
+                    "ConfigJson": "{\"ID\":321000,\"FlyType\":0,\"ChaseTargetEnemy_AttachPos\":0,\"ChaseTargetEnemy_FaceToTarget\":false,\"ChaseTargetEnemy_PitchFaceToTarget\":false,\"IsAiEscape\":false,\"AngleAdjustType\":0,\"Speed\":0,\"AcceSpeed\":0,\"MaxSpeed\":0,\"TurnSpeed\":0,\"TurnAcceSpeed\":0,\"MaxTurnSpeed\":0,\"IsCloseTurnAutoHit\":false,\"PitchTurnSpeed\":0,\"PitchTurnAcceSpeed\":0,\"PitchMaxTurnSpeed\":0,\"IsOpenPhysicalReflect\":false,\"PhysicalReflectCount\":0,\"PhysicalReflectEndActionType\":0,\"TracePathType\":0,\"TracePathParams\":[],\"LastTime\":60,\"delayDestroyTime\":0,\"DestroyWhenCreatorDie\":false,\"Hp\":0,\"ATK\":0,\"BeforeBornSkillEffectExecuteInfo\":{\"SelectConfigID\":0,\"SkillEffectConfigID\":0},\"AfterBornSkillEffectExecuteInfo\":{\"SelectConfigID\":0,\"SkillEffectConfigID\":32300101},\"DieSkillEffectExecuteInfo\":{\"SelectConfigID\":0,\"SkillEffectConfigID\":0},\"Model\":3200303,\"ModelBaseScalePercent\":100,\"ChainModel\":0,\"ChainModelScalePercent\":100,\"ChainTilingFactor\":100,\"DisappearEffect\":0,\"LifeFlag\":1,\"MaxDistance\":0,\"TrackEntityNoTargetSkillEffectConfigID\":0,\"IsDieKeepMove\":false,\"Flags\":0}",
+                    "Config2ID": "BulletConfig_321000"
+                }
+            },
+            {
+                "rid": 1003,
+                "type": {
+                    "class": "SkillConfigNode",
+                    "ns": "NodeEditor",
+                    "asm": "NodeEditor"
+                },
+                "data": {
+                    "GUID": "f77f8ddf-f876-4bd4-87f9-da365df760f7",
+                    "computeOrder": 3,
+                    "position": {
+                        "serializedVersion": "2",
+                        "x": -400.0,
+                        "y": 0.0,
+                        "width": 280.0,
+                        "height": 200.0
+                    },
+                    "expanded": false,
+                    "debug": false,
+                    "nodeLock": false,
+                    "visible": true,
+                    "hideChildNodes": false,
+                    "hidePos": {
+                        "x": 0.0,
+                        "y": 0.0
+                    },
+                    "hideCounter": 0,
+                    "ID": 30212016,
+                    "Desc": "30212016 PoC_旋转扩张圈\n木宗门人阶奇术 SubType=102\n主入口 SkillEffectConfigID=32390001 (ORDER → RUN_TEMPLATE)",
+                    "paramVersion": 0,
+                    "templateParamVersion": 0,
+                    "IsTemplate": false,
+                    "TemplateFlags": 0,
+                    "TemplateParams": [],
+                    "TemplateParamsDesc": [],
+                    "TemplateParamsCustomAdd": false,
+                    "TableTash": "E50E65EC1A6EC53E59E9B3A412153E83",
+                    "ConfigJson": "{\"SkillXinfaType\":0,\"ID\":30212016,\"SkillNameKey\":0,\"SkillDescKey\":0,\"Icon\":\"Skill/Pugong/PuGong_mu\",\"ElementType\":2,\"SkillSchoolResType\":0,\"FeatureLabel\":0,\"BDLabels\":[],\"SkillAITags\":[],\"DamageType\":1,\"SkillMainType\":1,\"SkillSubType\":102,\"MPCost\":0,\"HunLiValue\":0,\"SectXinfaEnergyValue\":0,\"SkillCastFrame\":0,\"SkillBufferStartFrame\":0,\"SkillBufferFrame\":30,\"SkillBaseDuration\":30,\"SkillCastIsNotInterruptable\":false,\"IsSkillBufferFrameCanMove\":false,\"CdType\":1,\"CdTime\":900,\"ComboCdList\":[],\"CDMaxStoreCount\":0,\"SkillFixCdTime\":0,\"SkillRange\":1200,\"SkillMinRange\":0,\"AISkillRange\":1200,\"ExtraAlertRange\":0,\"IsCloseChaseInAlertRange\":true,\"NeedTargetInRange\":false,\"IsSkillCastNoTargetInIdle\":false,\"Condition\":0,\"AICastCondition\":0,\"SkillEffectExecuteInfo\":{\"SelectConfigID\":0,\"SkillEffectConfigID\":32390001},\"SkillEffectPassiveExecuteInfo\":{\"SelectConfigID\":0,\"SkillEffectConfigID\":0},\"SkillEffectOnUnEquip\":0,\"ChantCounterValuesList\":[],\"LGDamageValuesList\":[],\"SkillDamageTagsList\":[],\"SkillTagsList\":[],\"SkillTipsConditionSkillTagsList\":[],\"SkillGrowthDesc\":\"\",\"TalentKeyWord\":[],\"UseSkillSpeedDownValue\":0,\"UseSkillSpeedDownTime\":0,\"SkillIndicatorType\":1,\"SkillIndicatorParam\":[1200],\"SkillIndicatorParamTagConfigIds\":[],\"SkillIndicatorResParam\":[0],\"SkillIndicatorResParamTagConfigIds\":[],\"LockEntityAfterUseSkillDuration\":0,\"LockEntityPosTypeAfterUseSkill\":0,\"SkillEffectOnSkillCastInterrupt\":0,\"UseSkillForbidUpdateFaceDir\":false,\"UseType\":1,\"ButtonUpConfig\":0,\"InterruptConfig\":0,\"ReActiveConfig\":0,\"SkillQuality\":2,\"IsPassiveSkillHideCD\":false,\"IsPassiveSkillNotRunByCD\":false,\"SkillProperty\":0,\"SkillRangeTagConfigId\":0,\"SkillMinRangeTagConfigId\":0,\"SmartCastTargetBasePriority\":3,\"SmartCastTargetCondTemplate\":1,\"SmartCastTargetMonsterRankCond\":[16,15,14,13,12,11,4,5,6,0],\"SmartCastTargetCampCond\":[2],\"SmartCastNoTargetIndicatorPos\":0,\"SmartCastNoTargetCancelUse\":false,\"CastTargetCondTemplate\":3,\"CastTargetMonsterRankCond\":[],\"CastTargetCampCond\":[],\"IsHideContinueUseSkillHeadBar\":false,\"SkillPriority\":0,\"EnhanceSkillBuffConfigID\":0,\"StatisticsDamageAloneForSummon\":false,\"SkillNameEditor\":\"PoC_旋转扩张圈\",\"SkillDescEditor\":\"[PoC] 旋转扩张子弹圈测试技能。N=8 颗子弹圆周分布，vR=13单位/帧外扩，ω=90度/秒整团旋转，2秒后销毁。\"}",
+                    "Config2ID": "SkillConfig_30212016"
+                }
+            }
+        ]
+    }
+}

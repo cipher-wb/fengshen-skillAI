@@ -1,0 +1,103 @@
+---
+sample_id: "280082"
+batch: B-014
+phase: PREDICT_close_book
+predicted_at: 2026-05-10
+mental_model_version_in: v0.12
+bucket: 28xxx_6d
+role: holdout
+filename: "SkillGraph_280082_【关卡定制技能】跟踪玩家范围AOE.json"
+
+# ============================================================================
+# 闭卷输入（仅看技能名 + category metadata）
+# ============================================================================
+
+close_book_inputs:
+  filename_label: "【关卡定制技能】跟踪玩家范围AOE"
+  category_dir: "战斗流程"
+  sub_category: ""
+  semantic_hint: |
+    "【关卡定制技能】" = 关卡场景专属定制技能（非通用技能）；
+    "跟踪玩家范围AOE" = AOE 范围攻击 + 跟踪玩家（位置追踪型）；
+    28xxx_6d 段位（56 文件）= 28xxx_7d 0 文件漂移段位的 6d 子命名空间 /
+    v0.6 D-502 已知 28xxxxx 7d 是流程编排模板段位；6d 可能是真技能宿主侧。
+
+# ============================================================================
+# 5 SkillConfig 硬信号预测
+# ============================================================================
+
+predicted_skill_config_5_hard_signals:
+  SkillNameEditor: "【关卡定制技能】跟踪玩家范围AOE（推断）"
+  SkillSubType_guess: 102  # 怪物技/关卡定制 = 102（v0.4 D-407 SubType 字典 102=怪物攻击/AOE 类似）
+  Icon: "未知"
+  EnhanceSkillBuffConfigID_guess: 0
+  SkillEffectPassiveExecuteInfo_guess: 0  # 主动型 / Mode A
+
+# ============================================================================
+# 拓扑预测（按"AOE + 跟踪 + 玩家定位"范式）
+# ============================================================================
+
+predicted_topology:
+  predicted_node_count: 35  # 估算：SkillConfig + Bullet × 1-2 + Model + WARNING_CIRCLE（AOE 预警）+ SELECT_CIRCLE + RUN_TEMPL × 2 + ORDER × 4 + DELAY × 3 ≈ 35
+  predicted_mode: "A_pure_active"  # 主动技能 / 关卡定制
+  predicted_topology_keys:
+    - "ORDER_EXECUTE"
+    - "DELAY_EXECUTE"
+    - "CREATE_BULLET"               # AOE 用子弹/Marker 实现
+    - "BulletConfigNode"
+    - "TSKILLSELECT_CIRCLE"         # AOE 范围选择
+    - "TSET_CREATE_WARNING_CIRCLE"  # AOE 预警圈（关卡常见）
+    - "TSET_GET_ENTITY_COLLISION_POS_X" # 跟踪玩家 = 读位置
+    - "TSET_GET_ENTITY_COLLISION_POS_Y"
+    - "RUN_SKILL_EFFECT_TEMPLATE"
+    - "PLAY_ROLE_ANIM"
+
+predicted_subsystems:
+  - "模板系统"
+  - "SkillEntry"
+  - "子弹系统"
+  - "时间轴"
+  - "坐标系与朝向"
+
+# ============================================================================
+# 段位字典命名归纳预测（28xxx_7d 0 文件漂移 / 6d 子命名空间补查）
+# ============================================================================
+
+predicted_segment_naming_dict_check:
+  bucket: 28xxx_6d
+  hypothesis_keywords: ["TEMPLATE", "DAMAGE", "CHANNEL"]
+  predicted_naming_keyword_hits_in_segment_top_16: "uncertain"  # 28xxx_7d 漂移 / 6d 补查
+  predicted_naming_keyword_hits_in_segment_top_32: "uncertain"
+  rationale: |
+    28xxx_7d 段位 0 文件（v0.12 D-1301 R1 数据漂移待 B-014+ 排查）/
+    28xxx_6d 段位 56 文件作为 holdout 验证：6d 是否承接了 7d 的"流程编排模板"语义 /
+    v0.6 D-502 已知 280xxxxx 7d 是流程编排模板段位（实际是 8d 段位 280xxxxxx）/
+    本 holdout 验证 28 系前缀的 6d 子命名空间真相
+
+# ============================================================================
+# 当前认知（GATE-MENTAL-IN）
+# ============================================================================
+
+mental_model_understanding:
+  involved_subsystems:
+    模板系统:
+      current_understanding: "v0.6 D-502 28xxxxx 段位流程编排模板 / D-1304 R1 框架：段位整体不主张语义命名 + 段位内特定模板保留 / 28xxx_7d 0 文件待排查"
+      uncertain: "28xxx_6d 56 文件是否承接了 7d 的语义 / 是真技能宿主侧 vs 模板本体侧"
+    SkillEntry:
+      current_understanding: "Mode A 主动 / SubType=102 怪物攻击 / 关卡定制技能形态可能特殊"
+      uncertain: "关卡定制技能与通用怪物技形态差异"
+    子弹系统:
+      current_understanding: "AOE 用 Bullet + WARNING_CIRCLE 组合 / Marker 子弹实现位置定位"
+      uncertain: "本技能 Bullet 子型（直接命中 vs 跟踪型）"
+    时间轴:
+      current_understanding: "DELAY + ORDER 主导 / WARNING_CIRCLE 通常需 DELAY 给玩家反应时间"
+      uncertain: "WARNING_CIRCLE 后 DELAY 长度"
+    坐标系与朝向:
+      current_understanding: "GET_ENTITY_COLLISION_POS_X/Y 读取实体碰撞位置 / 跟踪玩家用 follow_creator/SkillEvent"
+      uncertain: "跟踪机制是 follow_creator 还是事件回调"
+
+uncertainty_sources:
+  - "未读 BulletConfig 实际配置 / Marker vs 跟踪子弹"
+  - "未读 RUN_TEMPL 调用的目标模板 ID"
+  - "未读 WARNING_CIRCLE 实际参数（半径/时长）"
+  - "28xxx_6d 段位整体语义假说命中率不确定"

@@ -1,0 +1,21 @@
+sample_id: 30531001
+filename: SkillGraph_30531001【金宗门】标签效果-蓄势下位-蓄锐.json
+subcat: 宗门标签-宗门 / 金宗门标签
+nodes: 39
+segment_guess: 30531_5d_金宗门标签_蓄势下位_蓄锐
+closed_book_inferences:
+  - master_flag: 0 (宗门标签 / 非模板)
+  - structure: 39 nodes 中等 / 标签 → 推断 SCN + PR (被动 / 标签是触发器形态) + BUFF + 触发器节点
+  - SubClass: SCN + PR (可能 dual / 标签是被动激活)
+  - SC=True / NSC=False
+  - ConfigJson.ElementType: 1 (金 / 30531_5d 金宗门标签)
+  - 段位号系 (PR): 推断 225xxxxxxx 9d (D-2501 enforce / B-044 sample_7 30511003 + sample_10 30531009 PR=225xxxxxxx 已加固 / 30531001 同 30531 5d 族 30531009 的兄弟 / 强预测 +1 例)
+  - filename_pattern: 【金宗门】标签效果-蓄势下位-蓄锐 → 中文宗门 + 标签效果 + 蓄势分位 + 名称
+deltas_touched_predicted:
+  - D-2401 (master flag): expect 0
+  - D-2501 (225 段位号系 PR enforce): expect PR=225xxxxxxx 9d (+1 例最强加固 / 兄弟号 30531009 已实证 PR=225002463 / 30531001 同族)
+  - D-3801 (ET 完整枚举): expect ET=1 (金) / 已实证
+  - D-4001 (44 段位): N/A
+  - D-4006 (path ≠ ET 解耦): expect path=金 + ET=1 = 一致
+  - 元发现新候选: 蓄势分位 (上/中/下位) + 蓄锐/蓄炎 命名族可能 ≥3 例 / 续累积候选
+predicted_sample_score_self: 0.82 (金宗门标签 + 30531 兄弟号 225 PR 强预测)

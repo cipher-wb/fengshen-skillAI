@@ -1,0 +1,107 @@
+sample_id: 30525001
+date: 2026-05-10
+batch: holdout-v0.5
+sample_role: 验证 v0.5 SkillEntry 模式 E 第一子类（被动响应型心法 SubType=701）二阶印证 + SkillEvent ID 字典 15/6/9 扩补区 + buff 时间轴自驱
+
+# === GATE-MENTAL-IN: SkillConfig 5 硬信号 ===
+skill_config_metadata_seen:
+  source: "corpus_scan flags + filename only — 严格闭卷"
+  SkillNameEditor: "未直接看，文件名为【土宗门】砺岩经_地阶（土宗门心法/砺岩经；'砺岩经'三字含'经'明显是心法名）"
+  SkillSubType: 701  # corpus_scan 已给
+  Icon: "未直接看"
+  EnhanceSkillBuffConfigID: "未直接看（推测：SubType=701 心法 + 文件名'经'+ B-004 30532001 同型同 SubType EnhanceID=0 → 倾向 = 0；但 30531005 替换型心法 EnhanceID=2250099 反例存在，故不能 100% 排除 ≠ 0 的可能性）"
+  SkillEffectPassiveExecuteInfo_nonzero: "未直接看（强烈推测 ≠ 0：心法被动响应型 = Mode C 纯 Passive 或 Mode E 双 0 + Passive 通过 SkillEvent callback 驱动；30532001 同型同 SubType 是 Mode E 双 0 入口）"
+  notes: |
+    硬信号闭卷推测：
+    - "心法/砺岩经"= 心法被动型（v0.4 D-307 / v0.5 D-405 心法判定 OR 两类：EnhanceID≠0 替换型 vs CdType=0 + 文件名含心法/经/标签效果 被动型）
+    - 路径在"宗门心法/土宗门心法"目录（与 30532001 在"宗门心法/木宗门心法"完全镜像）
+    - SubType=701 = v0.5 D-403 新增 SubType 字典之一（B-004 30532001 同 SubType 唯一观察样本，是 Mode E 双 0 入口）
+    - corpus_scan flags：has_register_event=True + has_skill_event_callback=True + class_counts has TSET_REGISTER_SKILL_EVENT × 3 + TSET_UNREGISTER_SKILL_EVENT × 1
+    → 强烈对应 v0.5 D-404 SkillEvent 字典扩 15/6/9 + UNREG 反复模式
+    - 2 BuffConfigNode + 2 ADD_BUFF + 1 REMOVE_BUFF：buff 时间轴自驱（D-406 方案 C / SkillEntry 模式 E 子类 1 被动响应型心法范式）
+    - 2 SkillTagsConfigNode + 2 GET_SKILL_TAG_VALUE：心法常用 buff_layer 计层 / SkillTag 数值条件
+    - 1 TSET_REMOVE_BUFF：与 ADD_BUFF 配对的"buff 入栈→检查→出栈" 范式
+    - 3 TSCT_VALUE_COMPARE + 2 TSCT_AND + 1 TSCT_SKILL_CONFIG_DATA_COMPARE：条件树丰富，REGISTER 后 callback 内做条件判定
+    - 0 BulletConfigNode / 0 CREATE_BULLET / 0 has_collision：纯 buff/event 驱动，无独立弹幕
+
+prediction:
+  estimated_node_count: 24  # corpus_scan 已给
+  estimated_node_count_band:
+    low: 22
+    high: 28
+    rationale: "corpus_scan 已给 = 直接命中"
+
+  topology_sketch: |
+    SkillEffectExecuteInfo: ID=0 （推测，模式 E 双 0 入口子类 1：被动响应型心法）
+    SkillEffectPassiveExecuteInfo: ID=非 0
+    根 = TSET_ORDER_EXECUTE (Passive root, ID 推测在 22xxx / 175xxx / 14xxx 段位)
+      ├─ TSET_REGISTER_SKILL_EVENT (event_id=??, callback effect ID=??)
+      │     └─ event_id 候选: 15 (战斗开始?) / 11 (受击?) / 6 (技能释放?) / 9 (??)
+      │     [v0.5 D-404 字典扩 15/6/9 命中区]
+      ├─ TSET_REGISTER_SKILL_EVENT (event_id=??)
+      └─ TSET_REGISTER_SKILL_EVENT (event_id=??)
+    内嵌 SerializedNodes 含若干 callback effect：
+      - callback 1: 内含 TSET_ADD_BUFF (Params[2]=buff_id) + 条件树 TSCT_VALUE_COMPARE
+      - callback 2: 内含 TSET_ADD_BUFF + GET_SKILL_TAG_VALUE 条件
+      - callback 3 (可能 UNREG): 内含 TSET_REMOVE_BUFF + UNREG_SKILL_EVENT (反复模式 v0.5 D-404)
+    BuffConfig 段:
+      - 2 BuffConfigNode（flow 内独立 buff，配对独立 buff 种类数 ≤ BuffConfigNode 数 = 2）
+    SkillTag 段:
+      - 2 SkillTagsConfigNode（顶层 SkillTagsList 或 flow 内）
+      - 2 GET_SKILL_TAG_VALUE（被动条件读 tag）
+
+  topology_keywords:
+    - "Mode E 双 0 入口子类 1：被动响应型心法（v0.5 D-403/406/407）"
+    - "REGISTER × 3 → callback 内含 ADD_BUFF + 条件 + REMOVE_BUFF + UNREG"
+    - "buff 时间轴自驱（无独立 root flow）"
+    - "纯被动响应（has_register_event=True）+ 无独立弹幕（has_create_bullet=0）"
+    - "v0.5 D-405 buff_layer 操作可能跨 SubType 但 30525001 corpus_scan has_get_buff_layer=False，倾向无 buff_layer 操作"
+
+  expected_templates:
+    - id_segment: "22xxx"
+      reason: "心法/buff 段位常用，30532001 同型 22xxx + 175xxx"
+      confidence: 中偏高
+    - id_segment: "175xxx"
+      reason: "通用子弹命中模板，但本技能无 bullet → 中低概率"
+      confidence: 低
+    - id_segment: "14xxx (146xxx)"
+      reason: "持续施法模板段（不大可能，30525001 不是持续施法）"
+      confidence: 低
+    - id_segment: "44xxx"
+      reason: "callback effect ID 或通用子 buff（D-410 v0.5 字典）"
+      confidence: 中
+    - id_segment: "32xxx"
+      reason: "callback effect ID 通用段（D-410 v0.5 字典）"
+      confidence: 中
+
+  touched_subsystems:
+    - SkillEntry系统  # ⭐ Mode E 子类 1 二阶印证（v0.5 D-403/406/407 关键验证点）
+    - SkillEvent系统  # ⭐ REGISTER × 3 + UNREG × 1 + Event ID 15/6/9 字典命中区（v0.5 D-404）
+    - Buff系统  # ⭐ ADD_BUFF + REMOVE_BUFF + buff 时间轴自驱（v0.5 D-405 印证）
+    - SkillTag系统  # 顶层 + flow 内 + GET 读取
+    - 控制流子系统  # ORDER + 条件树
+    - 模板系统  # 不触碰或弱（仅 callback 内若调外部模板）
+    - 实体碰撞与可见性  # 不触碰（has_set_coll=False）
+
+  expected_subsystem_signals:
+    SkillEntry系统: "强信号——Mode E 双 0 入口子类 1 二阶印证（v0.5 关键验证点）"
+    SkillEvent系统: "强信号——3 REG + 1 UNREG + Event ID 字典 15/6/9 高概率命中（v0.5 D-404 验证点）"
+    Buff系统: "强信号——心法判定 OR 两类被动型 + ADD_BUFF + REMOVE_BUFF + buff 时间轴自驱"
+    SkillTag系统: "中信号——2 配对 GET + Config，可能 buff_layer 替代品"
+    控制流子系统: "中信号——ORDER + 3 条件树（TSCT × 6）"
+    模板系统: "弱信号——仅 callback 内或不触碰"
+    实体碰撞与可见性: "无"
+
+  predicted_pitfalls:
+    - "v0.5 D-403/406/407 模式 E 子类 1：是否真的 root_id=0 双 0 入口？还是会有 Active root（Mode B 双 root）"
+    - "v0.5 D-404 Event ID 字典 15/6/9：3 REG 中至少一个会命中 15 / 6 / 9 之一"
+    - "v0.5 D-407 反直觉精化：root_id=0 不限 SubType / CdType——本样本期望确认 SubType=701 也合规"
+    - "v0.5 D-410 callback effect ID 段位约定：32xxx 通用 vs 225xxx root-同段位私有"
+    - "30532001 同型 SubType=701 callback 复用 (44014633 × 3) 是否在本样本也出现？(D-409)"
+
+self_assessment:
+  confidence: 高
+  rationale: |
+    SubType=701 + 心法目录 + corpus_scan 信号高度一致 30532001（B-004 已学），
+    模式 E 子类 1 期望强烈，关键验证点：(1) root_id=0 二阶印证 (2) Event ID 15/6/9 字典命中
+    最大不确定：3 REG 中具体 event_id 是哪几个；callback effect ID 段位

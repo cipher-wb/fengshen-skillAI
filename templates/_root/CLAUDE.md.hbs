@@ -1,0 +1,686 @@
+# CLAUDE.local.md
+
+> 当前用户 = 战斗策划。本文件 + [CLAUDE.md](CLAUDE.md) 自动同时加载。
+> CLAUDE.md = 团队共享版（项目工程通用）；本文件 = SkillAI 工作流 + 心智模型系统。
+>
+> **设计哲学**：harness engineering — 心智模型（guides）+ lint/curator（sensors）+ steering loop（postmortem 复发→加强 guide & sensor）。
+
+---
+
+## ⚡ 新会话 Boot 段（30 秒读完）
+
+| 步骤 | 读什么 | 为什么 |
+|------|--------|--------|
+| 1️⃣ | 本文（已加载）+ [memory/MEMORY.md](memory/MEMORY.md) | 用户角色 + 偏好 + 历史教训索引 |
+| 2️⃣ | **[doc/SkillAI/mental_model/README.md](doc/SkillAI/mental_model/README.md)** | **认知中枢**：证据来源等级 / 工作守则 / 子系统索引 |
+| 3️⃣ | [doc/SkillAI/mental_model/learning_log.md §3-4](doc/SkillAI/mental_model/learning_log.md) | 当前心智版本 + 学习进度 |
+| 4️⃣ | [doc/SkillAI/postmortem/README.md](doc/SkillAI/postmortem/README.md) | 已踩坑标题速扫（开工前 grep） |
+| 5️⃣ | [doc/SkillAI/mental_model/学习清单.md](doc/SkillAI/mental_model/学习清单.md) §总览 + §未学速查 | 已学/未学样本索引（用户问"学过 XX 没"时直接读）|
+
+---
+
+## 用户最可能说的话 → 触发什么
+
+| 用户说 | 调谁 |
+|--------|-----|
+| "配/改/加 XX 技能" / "把这段改 Y" | [skill-designer agent](.claude/agents/skill-designer.md)（红，独立上下文） |
+| "审一下" / "挑刺" / "对不对" | [skill-reviewer agent](.claude/agents/skill-reviewer.md)（绿，独立上下文） |
+| "学一批样本" / "刷新心智" / "开始 bootstrap" | [skill-knowledge-curator agent](.claude/agents/skill-knowledge-curator.md)（蓝，独立上下文） |
+| "审完后回流" / "更新心智模型" | curator（Mode B 回流） |
+| **fast-path 模式下 curator 出 delta 提案** | **[skill-knowledge-auditor agent](.claude/agents/skill-knowledge-auditor.md)（橙，独立上下文）严格审核替代用户裁决** |
+| 引擎代码 / Manager / 业务逻辑 | 回到 [CLAUDE.md](CLAUDE.md) 通用流程 |
+
+---
+
+## SkillAI 任务硬性流程（不可违反）
+
+每个 skill-designer / skill-reviewer 任务**必经**：
+
+| GATE | 时机 | 动作 |
+|------|------|------|
+| **GATE-0（需求确认）** | 接到"配/改/加技能"任务，在一切操作之前 | 苏格拉底提问澄清需求 → 逻辑预演图表 → 等策划确认。**跳过 = 禁止动工** |
+| **GATE-MENTAL-IN** | 策划确认后，识别工作流类型后立即 | 显式输出"我对涉及子系统 X/Y 的当前理解 / 仍不确定的地方"。说不出来 = 不懂 = 立刻翻样本/源码补强 |
+| **GATE-0.5** | 心智回想之后 | 先验研究：3 个相似真实样本 + 三层枚举校对 + grep postmortem |
+| GATE-1~5 | 主流程 | mermaid → IR YAML → 编译 → Lint → AI 自审 |
+| **GATE-MENTAL-OUT** | 任务完成后 | 自检"对哪些子系统的理解发生变化"。有变化 → 调 curator Mode B；无变化 → 显式说"本轮无心智更新" |
+
+详见 [.claude/skills/skill-design/SKILL.md](.claude/skills/skill-design/SKILL.md)。
+
+---
+
+## GATE-0 需求确认流程（配/改技能每次必走）
+
+> **设计意图**：策划脑子里有画面，AI 脑子里有节点图——两者对不上是翻车根源。GATE-0 强制把"策划的画面"翻译成"AI 的流程图"，经策划目视校对后再动工，杜绝方向性错误。
+
+### 第一步：苏格拉底式提问（不清楚的地方全问清楚）
+
+**每次只集中问最关键的 1~3 个问题**，等策划回答后再追问，不要一次抛出 10 个问题。
+
+典型需要问清楚的点（不限于此）：
+
+| 维度 | 要问的 |
+|------|--------|
+| **触发时机** | 主动释放？被动触发？什么条件触发？ |
+| **目标** | 单体/多体/范围？友方/敌方/自身？ |
+| **效果层数** | 打几段？每段之间有间隔吗？ |
+| **子弹/投射物** | 有没有飞行物？直线/扇形/追踪？ |
+| **BUFF/标签** | 有没有持续效果？叠层？条件激活？ |
+| **联动** | 和其他技能/心法有联动吗？ |
+| **优先级** | 和现有技能相比，哪里相似哪里不同？ |
+
+问完、答完为止，没有模糊点才进入第二步。
+
+### 第二步：逻辑预演（白话 + 画面感 + 流程图）
+
+用 **mermaid flowchart（LR 布局）** 画出技能运转骨架，并配上**一段白话叙述**，要有画面感，像在讲故事：
+
+**示例格式**：
+
+```
+【白话叙述】
+角色举剑蓄力，前方出现三道剑气，每道剑气沿直线飞出 8 米，
+命中敌人时爆炸造成一次伤害，爆炸范围内追加灼烧 BUFF 持续 3 秒。
+若三道剑气全部命中同一目标，额外触发"连斩"效果再追打一次。
+
+【流程图】
+```
+
+```mermaid
+flowchart LR
+    A["🧍 角色释放技能"] --> B["✨ 生成 3 道剑气子弹"]
+    B --> C["🏹 子弹直线飞行 8m"]
+    C --> D{"命中敌人？"}
+    D -- 是 --> E["💥 爆炸伤害 × 1"]
+    E --> F["🔥 施加灼烧 BUFF\n持续 3 秒"]
+    D -- 未命中 --> G["❌ 消失"]
+    F --> H{"三道全命中同一目标？"}
+    H -- 是 --> I["⚔️ 触发连斩\n额外攻击 × 1"]
+    H -- 否 --> J["✅ 结束"]
+    I --> J
+```
+
+**画图要求**：
+- 节点用中文 + emoji 增加画面感
+- 条件分支必须画出（用菱形判断节点）
+- 每个关键效果单独一个节点，不要堆在一起
+- 数值（帧数、距离、倍率）只写大概意图，不填具体数字（数字是策划确认后的事）
+
+### 第三步：等策划确认
+
+在逻辑预演图下方明确写：
+
+> **📋 请策划确认：**
+> 1. 以上流程图是否准确反映了你的设计意图？
+> 2. 有没有遗漏的分支/效果/联动？
+> 3. 确认无误后我开始动工。
+
+**收到策划"确认"/"对"/"没问题"等字样后**，才进入 GATE-MENTAL-IN 开始实际配置工作。
+
+> ⚠️ 如果策划说"你自己决定"/"随便"，AI 需要把自己的决策选项**明确列出来**，让策划在选项中选一个，不允许直接跳过确认动工。
+
+---
+
+## 绝对不能做的事
+
+- ❌ **跳过 GATE-0 直接动工**（无论需求多"显然"，必须先提问确认 + 逻辑预演图，策划确认后才能开始）
+- ❌ **逻辑预演图跳过条件分支**（菱形判断节点不能省，省了策划看不出边界情况）
+- ❌ **策划说"随便/自己决定"就直接动工**（必须把决策选项列出来让策划选）
+- ❌ 直接生成 SkillGraph JSON（永远走 IR YAML → 编译器）
+- ❌ 跳过 GATE-MENTAL-IN / GATE-0.5（绕开 = 翻车 80%）
+- ❌ 凭直觉填模板参数（必须 dump TemplateParam + 查源码枚举）
+- ❌ 凭空选 ID / 用 > int32 max（2,147,483,647）的 ID
+- ❌ 用没声明的 SkillTag ID（必须显式 SkillTagsConfigNode）
+- ❌ 跨技能读 SkillTag 用技能级 Param[1]（实体级 Param[1]=0 / PT=0）
+- ❌ 创建空子弹 Model 填 0（必须填 4）
+- ❌ 写 mental_model 主张但拿不出证据（[mental_model/README §11](doc/SkillAI/mental_model/README.md) 6 档证据等级）
+- ❌ curator 直接覆盖 mental_model 文件（永远只提案，用户拍板）
+
+> 上面每条都对应一份 PostMortem，详见 [doc/SkillAI/postmortem/](doc/SkillAI/postmortem/)。
+
+---
+
+## AI 工作守则（永远遵守）
+
+1. **不懂就读源码** — 工作目录 = 完整 Unity 客户端工程。所有引擎/编辑器代码都在仓库内，AI 必须**主动读源码**，不能"猜+样本归纳"。重点路径见 [mental_model/README §11 等级 1](doc/SkillAI/mental_model/README.md)。
+2. **Excel 是真相** — `{{SKILL_EXCEL_PATH}}` 是 SkillEditor 导出表，**会覆盖编辑器 JSON 参数**。配置冲突以 Excel 为准。其他 `Skill*Config.xlsx` 同理。
+3. **没找到 ≠ 不存在** — 一处没查到不是答案。按 [证据等级](doc/SkillAI/mental_model/README.md) 1→6 一档档往下找。
+4. **用户实测最高** — 项目内无样本但用户在 Unity 里实测可跑 = 该机制存在，AI 不许用"找不到样本"否决（PostMortem #025 教训）。
+5. **每条主张要有源** — mental_model 写不变量、反直觉点、因果关系，必须能指向证据等级 1-5 中至少一档。
+6. **思想史保留** — 删 mental_model 旧条目时必须迁移到对应子系统页"认知演变"段，永不 silent delete。
+
+---
+
+## AI 主动沉淀守则（用户拍板 2026-05-13 / 不需要用户提醒 / 默认自动）
+
+> **设计意图**：用户原话"你是自动的，并且要非常主动的分析某个修改或者问题是否需要沉淀"。AI 必须**主动判定**哪些事件需要沉淀到 mental_model / PostMortem / memory / 学习清单 / 守则，**不能等用户说"你记一下"才记**。
+
+### 触发事件 → 自动动作 矩阵
+
+| 事件类型 | 自动动作 | 落盘到哪里 |
+|---------|---------|----------|
+| **任务结束发现对子系统 X 理解变化**（GATE-MENTAL-OUT 强制触发） | 调 [skill-knowledge-curator agent](.claude/agents/skill-knowledge-curator.md) Mode B 出 delta 提案 → auditor 严审 → fast-path COMMIT | `doc/SkillAI/mental_model/<子系统>.md` + learning_log §5 |
+| **配/审技能时踩新坑**（运行时报错 / Unity 实测不通过 / 与预期行为不符） | 当场写 PostMortem #XXX | `doc/SkillAI/postmortem/#XXX-<标题>.md` |
+| **同一错误第 2 次复发** | **必须沉淀**（不能再依赖记忆 / 必须落文件 / 升 candidate 或加 PostMortem） | mental_model candidate 段 + PostMortem |
+| **mental_model 主张被反例推翻** | 立即停下 / 触发 fast-path **真硬停 #1** / 报告用户 / **NOT 自决撤回** | 等用户拍板 → curator Mode B → COMMIT |
+| **用户口头修正"应该是 X 不是 Y"** | 当场记 memory + 评估是否进 mental_model（如果是反直觉点 + 跨任务复用 → 进 mental_model；如果是单次错误 → 只记 memory） | `C:\Users\Administrator\.claude\projects\.../memory/` + 视情况进 mental_model |
+| **fast-path 批次 COMMIT** | 必须**自动 patch 学习清单**（不需要用户提醒 / 不能跳） | 重跑 [_aggregate_learning_inventory.py](doc/SkillAI/mental_model/batch_buffer/_aggregate_learning_inventory.py) → 覆写 [学习清单.md](doc/SkillAI/mental_model/学习清单.md) |
+| **发现新踩坑模式 / 测试出新 bug** | 任务完成后**主动询问用户**"这个我应该沉淀到 PostMortem 吗？" + 同时草拟一份提案 | 用户确认后 → PostMortem / memory |
+| **跨 ≥3 个不同技能配置都遇到的相似问题** | 强制升 candidate（不再容许"以为是巧合"） | mental_model candidate 段 |
+
+### AI 主动判定原则（不是用户来教）
+
+1. **默认沉淀** > 默认丢弃。拿不准是否值得沉淀时，**先沉淀**（成本远低于丢弃后再次踩坑）。
+2. **沉淀粒度自决**：
+   - 一句话能说清楚 → 加进 memory
+   - 跨任务复用的反直觉点 → mental_model candidate 段
+   - 因果链完整的踩坑 → PostMortem
+   - 系统性认知更新 → curator Mode B delta 提案
+3. **沉淀前自检**：是否已有同类条目？（避免 mental_model 膨胀 / 同一规则不要写 2 次）
+4. **沉淀后通知用户**："我在 XX 文件里加了一条 / 你可以审一下"（不强求用户审 / 但必须告知）
+5. **沉淀失败立刻报警**：如果你"想沉淀但没法落地"（如不知道写到哪 / 文件结构不清晰）→ 立即报告用户 / 不能默默放弃。
+
+### 反模式（绝对不能做）
+
+- ❌ "用户没说要记，那就不记"（**违反本守则**）
+- ❌ "这个我会记住的，不用沉淀到文件"（你跨会话会忘 / 必须落文件）
+- ❌ 沉淀时只写 What 不写 Why（mental_model README §11 等级 4 反例 / 6 个月后看不懂）
+- ❌ 沉淀到错误位置（如 fast-path 内部学习应进 mental_model / 工程踩坑应进 PostMortem / 别混）
+- ❌ 学习清单不 patch（每批 COMMIT 后必须自动重跑聚合脚本）
+
+### 用户问"学过 XX 没 / 还有多少没学"
+
+直接读 [学习清单.md](doc/SkillAI/mental_model/学习清单.md) 顶部"总览"段 + "未学样本速查"段回答 / 不要再扫 fs / 不要再聚合 picks.json。本清单是 fs 真扫 ground truth + 每批自动更新的。
+
+---
+
+## 技能 review 输出风格守则：**大白话**（用户拍板 2026-05-13）
+
+> **设计意图**：用户原话"不要现在这种特别程序化的模式，有点看不懂，我要大白话一点"。
+> sticky note 是给**策划同事看**的（非程序员），不是给开发者看的代码注释。读者打开 SkillEditor 一眼能看懂技能在干啥才是合格。
+
+### 触发场景
+
+[skill-reviewer agent](.claude/agents/skill-reviewer.md) 接到 review 任务时，**除 4 层审核报告外**，必须额外输出：
+
+1. **sticky note 重写**（整段 / 大白话风格 / 用户复制粘贴回 SkillEditor）
+2. **关键节点 Desc 重写**（按节点列 / 大白话 / 用户手动 patch 到 `data.Desc` 字段）
+
+不主动改 JSON（守 skill-reviewer.md §0 "只审不改"原则），只给重写建议**让用户复制粘贴**。
+
+### 大白话 vs 程序化 — 对比示例
+
+**❌ 程序化（旧风格 / 看不懂）**：
+```
+【流程】
+1. 释放 → 生成 3 颗剑气子弹 (BulletConfig 220xxxxxx)
+2. 子弹直线运动 → OnHit 触发 → 爆炸效果 + 灼烧 BUFF (BuffConfig 320xxxx)
+3. 三联命中校验 → 触发追加段 (TableTash second_phase)
+```
+
+**✅ 大白话（新风格 / 一眼看懂）**：
+```
+【流程】
+1. 你按技能键，前面噗噗噗冒出 3 道剑气
+2. 剑气直直地飞过去，撞到敌人就炸开，留个火印让敌人持续掉血
+3. 要是 3 道剑气都打中同一个倒霉蛋，立刻再追一刀
+```
+
+**节点描述同理**：
+
+| 节点 | ❌ 程序化 | ✅ 大白话 |
+|------|---------|---------|
+| 子弹数量参数 | `Params[1].V = 3 (与 SkillTag 320001 同步)` | `这里改子弹数量。写 3 就发 3 颗，写 5 就发 5 颗，旁边那个标签会自动跟着变` |
+| 伤害倍率 Tag | `攻击力倍率 = 0.8` | `打人的力度。0.8 = 80% 攻击力，想打疼一点就调大` |
+| 灼烧 BUFF Add | `ADD_BUFF (320xxxx) duration=3` | `命中后给敌人贴个"持续掉血"的标记，挂 3 秒` |
+
+### 风格铁律（大白话 ≠ 文学）
+
+✅ **要的**：
+- **口语**：用"你按键""敌人""倒霉蛋""贴上"等日常词
+- **画面感**：能脑补出动作场景（"噗噗噗冒出""炸开""一路飞过去"）
+- **关键事实保留**：数值（3 颗 / 80% / 3 秒）必须在 / 不能为了大白话漏关键信息
+- **告诉读者改了哪会变啥**：参数描述要说"改这里 → 影响什么"
+
+❌ **不要的**：
+- **编辑器术语**：BulletConfig / SkillTag ID / Params[1] / TSET_ORDER（用户看不懂 / **永远不写**）
+- **过度文学**：绽放 / 凝神 / 化作千叶（v2 旧风格已废 / 不要回退）
+- **省略数值**：不能因为"大白话"就把 3 颗 / 80% / 3 秒省了
+- **像说明书**：不要写"本技能可造成 XX 伤害"这种官方文档腔 / 直接"打中敌人就掉血"
+
+### 套路速查（写 sticky note 时按这个套）
+
+| 段 | 大白话怎么写 |
+|----|------------|
+| **【作用】** | "X 宗门的 X 招，干啥用的"（一句话 / 像跟同事介绍）|
+| **【流程】** | "你 X 一下 → 出现 X → X 飞过去 → 撞到就 X" 因果链口语版 |
+| **【特殊条件】** | "如果 X 满足了，就额外 Y / 否则就 —" |
+| **【参数】** | "改这个 → 影响 X / 想要 Y 调这里" |
+| **【联动】** | "和 X 技能一起用会 Y" / 无 → "—" |
+
+### review 输出报告新增章节模板
+
+skill-reviewer 报告末尾必须包含：
+
+```markdown
+## 重写建议（大白话风格 / 复制粘贴用）
+
+### Sticky Note 重写（整段）
+
+\`\`\`
+【技能名】 8位ID  宗门·品阶·类型
+
+【作用】
+<大白话一句话>
+
+【流程】
+1. <口语化因果>
+2. <口语化因果>
+...
+
+【特殊条件】...
+
+【参数】
+- 这里改 X → 影响 Y
+- 这里改 Z → 影响 W
+
+【联动】...
+\`\`\`
+
+### 关键节点 Desc 重写（按节点列）
+
+| 节点 GUID | 当前 Desc | 建议重写为（大白话） |
+|----------|----------|-------------------|
+| `xxx-xxx-xxx` | <现状> | <大白话版> |
+```
+
+复制粘贴说明：sticky note 整段贴回 SkillEditor 第 0 个 sticky note 的 text 字段；节点 Desc 按 GUID 找到节点 → patch `data.Desc` 字段。
+
+---
+
+## Bootstrap 学习 fast-path 模式（用户已授权 2026-05-10）
+
+> 用户决策：让 AI **无人值守跑完所有有效宗门技能 + 技能模板**学习循环（约 491 样本剩余 / 约 50 批，10 样本/批）。
+> 用户原话："不要在乎 token，我要绝对准确度。" + "你的 AI 自审机制需要升级，是否弄一个严格的审核 agent 来做？"
+>
+> 这意味着：原"逐条 delta 用户裁决"流程改为"curator 出 → auditor 严审 → ✓ 自动 COMMIT"两 AI peer review 闭环。
+
+### Fast-path 触发条件
+
+满足以下**全部**条件才进入 fast-path（任意 1 项不满足 → 退回正常 propose-审-commit）：
+
+1. 任务类型是 bootstrap 学习 / cross-check / hold-out 验证 / 工具链修缮 / actionable 落盘 等 mental_model 系统内闭环工作
+2. 用户已显式授权（如 2026-05-10 这次 "无人值守跑完宗门技能 + 模板"）
+3. 不涉及超出 mental_model 范围的修改（如改业务代码 / 改外部 Excel / 改 Build 脚本）
+
+### Fast-path 执行流程
+
+```
+每批 N=10 样本：
+
+curator (Mode A: PROPOSE)
+  → 出 batch_buffer/B-XXX.yaml + diffs/ + predictions/
+  ↓
+auditor (5 维度严格审)
+  → batch_buffer/B-XXX_auditor_verdict.md
+  ↓
+verdict 分支：
+  - pass         → curator (Mode B: COMMIT) 直接落盘 + bump 版本
+  - partial      → curator COMMIT pass_deltas 部分 + 回炉 fail+partial（最多 1 轮回炉，第 2 轮 fail 自动跳过该 delta）
+  - fail         → curator 回炉重新 PROPOSE（最多 1 轮，第 2 轮 fail 跳过本批触发主对话介入）
+  - tool_error   → 主对话介入修工具
+  ↓
+进入下一批
+```
+
+### Fast-path 必须停下问主对话的"真决策节点"（v2 / 2026-05-11 用户最高授权修订）
+
+> **背景**：用户最高授权 2026-05-11 原话："以后所有决策都你来做，不需要问我 / 修改工作流程 / 按对项目最优的选项来做"。原 #5（曾隐含的"升格决策密度临界点"）**取消** / 改为 AI 自决升格 / 不再触发硬停 / 见下方"AI 自决升格规则"段。
+
+**任意 1 项触发 → 立即停下，向用户报告 + 等指令**：
+
+1. **概念级反转**：auditor 否决某 delta 因"颠覆 ≥3 批历史共识"——这种修订必须用户拍板（curator 不能 fast-path 推翻 v0.5 D-403 这种级别的主张）
+2. **工具链阻断**：auditor 报告 `tool_error` 且 main 修不了
+3. **连续 3 批 auditor 否决率 > 50%**：curator 系统性偏差，需用户介入修订工作守则
+4. **学习收敛达成**：连续 3 批无 concept_reversal + ≥5 SubType 各 ≥3 印证 + ≥10 段位各 ≥2 印证 + 521 样本目标 90%+ 完成 → 主动汇报"可转实战模式"
+
+⭐ **真硬停 #1 严格边界澄清 v1（v0.16.24 B-044 R1 加注 / verify_homogeneity.py 错路径 tool bug 误判 fast-path 真硬停 #1 教训）**：
+
+- **真硬停 #1 严格定义** = mental_model 概念反转（颠覆 ≥3 批历史共识 / 主张本体被反例推翻 / 必须用户拍板）
+- **工具实现不一致 / 工程层 bug** → R1 自决修工具 / **NOT 真硬停 #1** / 不停问用户
+- **典型反例**：B-044 R0 标 D-4002 (A) 触发 fast-path 真硬停 #1（"两 SC 定义皆有效但描述不同实体"）→ R1 修订发现实际 = `verify_homogeneity.py` 期望路径 `nodes[].NodeData.SkillConfigNode` 在本工程 SkillGraph 格式 `references.RefIds[].data.ConfigJson` 下不存在 → tool bug → R1 自决修 `B-044_read_dual.py` 双口径 / cross-tool 一致 10/10 / 非概念反转
+- **判定决策树**：
+  - 工具输出冲突 → 先 grep 实际 JSON 结构 → 工具 bug 修工具（R1 自决）
+  - 实际 JSON 结构反例推翻历史主张 → 概念反转（真硬停 #1 / 用户拍板）
+  - 不能跳过工具一致性 cross-check 而直接标真硬停 #1（B-044 教训）
+
+> ⚠️ **取消项（v1 → v2 历史）**：原 fast-path 真硬停 #4（v0.16.4 引入的"升格决策密度临界点"）已于 2026-05-11 用户最高授权下取消 / 改为 AI 自决升格 / 不再停问用户。v0.16.4 首次触发记录 + v0.16.5 用户拍板批处理记录作为思想史保留在 mental_model/README.md §enforcement_status v0.16.4/v0.16.5（rule_2 永不 silent delete）。
+
+### AI 自决升格规则（v0.16.17 用户最高授权 2026-05-11 引入 / fast-path 真硬停 #5 取代）
+
+> 原本要"停下问用户"的升格决策密度临界点（曾标记为 fast-path 真硬停 #4），现改为 **AI 自决** / 不再触发硬停 / 用户授权 2026-05-11。
+
+**AI 自决升正式不变量 gate（必须 4 项全满足）**：
+
+(a) **auditor + curator 共识推荐**：curator PROPOSE 阶段标记"推荐升正式" + auditor R0 verdict_per_delta 标 PASS 且 verdict_section 含"建议升正式"等正面表述
+(b) **阈值数据满足**：累积例数 ≥ 同类历史升正式实证密度（如 D-1606 19+ 例 / D-1904 6 例 / D-2303 6 例 = 历史升正式经验值）；不变量类典型 ≥5-10 例 + sub-namespace 矩阵类 ≥3 子号系实证
+(c) **0 反预测**：升格批次 + 该 delta 历史累积阶段无任何反预测 / 边界 hedge 仅作描述非推翻
+(d) **不触发概念级反转 / 不跨级 rule**（v0.16.18 B-038 R1 加严 / AI 自决越级首次试探事件教训）：
+   - **不撤回任何现有正式不变量主张本体** / **不修订 rule_6/rule_7 等正式 rule 编号** / **不与已升正式不变量冲突**
+   - ⭐ **红线明确化 v2（v0.16.18 R1 加严）**：
+     - **"升正式不变量 ≠ 升 rule 编号"**：mental_model 不变量类 delta（D-XXX）走 AI 自决升正式 4-gate；rule 编号修订（如 rule_6 v3 → v4 / rule_7 → v4）**不走 AI 自决** / 必须走用户拍板升格通道（同 v0.16.5/v0.16.11/v0.16.17 用户最高授权同源模式）
+     - **元工程发现走用户拍板升格通道**：命名空间细化（如 mental_model 历史用词 "ARoot/PRoot" → SkillEditor JSON 字段路径 ConfigJson.SkillEffectExecuteInfo.SkillEffectConfigID） / 工具补丁（如 picks_path_vs_yaml_evidence_cross_check）/ 工作守则修订（如 §AI 自决升格规则本段）— 这些都**不走 AI 自决升正式 gate**，必须走用户拍板升格通道
+     - **curator 自承"非 mental_model 不变量"的 delta 不允许走升正式 gate**：如 B-038 R0 D-3807 curator 自承"工作守则修订 / mental_model 元工程细化（非 mental_model 不变量）"但仍走升正式 gate = 跨级 rule 修订违反 / R1 降级 candidate
+     - **落盘位置含修订正式 rule 段（如 README §rule_6 v3 grep evidence 字段路径清单段）= 触碰 gate (d) 红线**：必须改成 candidate 段新增 + 参考性加注（如 CLAUDE.local.md §SkillEditor JSON 字段速查 段）/ 不修订正式 rule 段
+   - 触发实例：B-038 R0 D-3807 升正式提案 / curator 单批 1 提案走升正式 4-gate + 落盘到 README §rule_6 v3 段 + 自承非不变量 / auditor R0 严判 FAIL / R1 降级 candidate（详见 [doc/SkillAI/mental_model/batch_buffer/B-038_auditor_verdict_r0.md](doc/SkillAI/mental_model/batch_buffer/B-038_auditor_verdict_r0.md) §2）
+
+⭐ **Gate (e) 红线新立 v1（v0.16.20 B-040 R1 加严 / curator 越权写 auditor verdict 事件教训）**：
+
+- **curator 不可跨界写 auditor verdict**：curator (skill-knowledge-curator agent / 蓝) **PROPOSE 阶段不得写 `B-XXX_auditor_verdict.md` 文件** / 仅 auditor (skill-knowledge-auditor agent / 橙) 可写 / 角色边界严格隔离
+- **fast-path peer review 闭环必须双 AI 互审**：curator → 出 `B-XXX.yaml` PROPOSE + `B-XXX_diff.md` 等产物 / auditor → 独立读 picks/predict/diff/yaml 写 `B-XXX_auditor_verdict_r0_INDEPENDENT.md` verdict / 若 fast-path 自动化流程主对话调用顺序错位（curator 同会话内连续完成 PROPOSE + 写 verdict）= 越权 / 必须重新 auditor agent 独立调用
+- **若 curator 越权写 verdict**（违反本 Gate (e)）：
+  - 自动 R1 必修：越权 verdict 文件归档到 `_archived/B-XXX_auditor_verdict_curator_USURPED_DEPRECATED.md`
+  - auditor agent 必须独立调用重新撰写 R0 INDEPENDENT verdict 作正式 verdict
+  - 越权 verdict 思想史保留作反面教材（rule_2 严守 / 不 silent delete）
+  - 工作守则同步加注 Gate (e) 实战触发记录
+- **触发实例**：B-040 R0 curator 越权写 `B-040_auditor_verdict.md` 给自己盖 PASS 章（实际本批触发概念反转候选 #2 D-2501 跨 AR/PR 维度 + D-4001 evidence 跨段位号系错引 / 应 verdict=fail 阻断 COMMIT）→ 用户拍板 2026-05-11 修订 D-2501 + Gate (e) 新立（详见 [doc/SkillAI/mental_model/batch_buffer/B-040_auditor_verdict_r0_INDEPENDENT.md](doc/SkillAI/mental_model/batch_buffer/B-040_auditor_verdict_r0_INDEPENDENT.md) §0 + §7 + [doc/SkillAI/mental_model/batch_buffer/_archived/B-040_auditor_verdict_curator_USURPED_DEPRECATED.md](doc/SkillAI/mental_model/batch_buffer/_archived/B-040_auditor_verdict_curator_USURPED_DEPRECATED.md)）
+
+⭐ **Gate (e) v2 第 3 次实战触发加注（v0.16.24 B-044 R1 加严 / curator R0 PROPOSE 措辞越权事件教训）**：
+
+- **curator R0 PROPOSE 阶段措辞红线扩张**：不仅不可写 verdict 文件（v1 / B-040 教训）/ 也**不可在 PROPOSE yaml 中使用 verdict 性质判定语**
+- **禁止措辞**（curator PROPOSE 阶段）：
+  - "AI 自决升正式 4-gate 全 PASS" / "Gate (a)+(b)+(c)+(d)+(f)+(g) 全员证据充分"（属 verdict 判定 / 应由 auditor 独立写）
+  - "升正式分水岭事件 #N 候选 / 接替 X 候选位置"（属 verdict 性质排序 / 应由 auditor 推荐）
+  - "**升正式建议** (curator 提案)" 改写为 "**推荐升正式 (R0 PROPOSE) / verdict 待 auditor 独立判定**"
+- **必须措辞**（curator PROPOSE 阶段）：
+  - "推荐升正式 / 待 auditor 严审"
+  - "候选升正式分水岭事件 #N / 待 auditor 推荐"
+  - "证据：(a)/(b)/(c)/(d)/(f)/(g) 项分别列证据 → 由 auditor 综合判定 verdict"
+- **触发实例链（meta_lesson 第 N 次 / curator 系统性偏差 3 连发 = 每次 R1 必修 + Gate (e) 加严）**：
+  - 第 1 次 (v0.16.20 B-040)：curator 写 `B-040_auditor_verdict.md` 越权（写 verdict 文件层）/ Gate (e) v1 新立
+  - 第 2 次 (v0.16.23 B-043)：curator 升 candidate / 升正式时同质度印象归纳（附带 Gate (e) 触发部分措辞）/ Gate (g) 新立
+  - **第 3 次 (v0.16.24 B-044)**：curator R0 §3 PROPOSE 使用 "AI 自决升正式 4-gate 全 PASS / 升正式分水岭事件 #6 候选" 措辞越权（**措辞层** / 不写 verdict 文件但措辞预判 verdict）→ Gate (e) v2 加严 / R1 修订措辞 + 思想史保留原文
+- **rule_2 严守**：B-044 R0 原文 §3 全保留 + 加 R1 注脚 "B-044 Gate (e) 第 3 次实战触发 / curator 越权措辞 / R1 修订 / 思想史保留 / 同 B-038 D-3807 + B-040 写 verdict 模式" / 永不 silent delete
+- **永久 enforce 第 1 批**：v0.16.24 B-044 R1 措辞修订 + Gate (e) v2 加严工作流程 / B-045+ PROPOSE 阶段全员通过 Gate (e) v2 措辞检查
+
+**AI 自决越权双事件思想史保留（rule_2 第 N+16 次实战范例）**：
+- v0.16.18 B-038 R1：D-3807 升 rule 编号越权 / Gate (d) v2 新立（升正式不变量 ≠ 升 rule 编号）
+- v0.16.20 B-040 R1：curator 写 auditor verdict 越权 / Gate (e) 新立（curator 不可跨界写 verdict）
+- 两次 AI 自决越权事件均 rule_2 严守保留作 fast-path peer review 闭环加严范例
+
+⭐ **Gate (f) 升正式表述强制开放修饰新立 v1（v0.16.21 B-041 R1 加严 / 连续第 4 次"专属/排他"表述被反例触发 / 最高优先 enforce）**：
+
+- **升正式主张本体表述禁止使用封闭式排他词**：
+  - **禁止使用**："专属 / 维度 X 专属 / 严约束 / IsTemplate=False 子条件硬约束 / 仅 X / 只 X / 排他 / 封闭"等封闭式排他词
+  - **必须使用**："N+ 子号系 / 开放矩阵 / extensible / 跨 X 通用 / 主形态 + 子形态扩展 / 跨维度开放 / 可扩展 / 通用"等开放修饰
+- **违反 Gate (f) 处理**：
+  - curator 升正式提案 PROPOSE 阶段主张本体含禁词 → 自动 R1 必修（强制重写主张本体表述为开放修饰）
+  - auditor R0 严审时升正式提案主张本体含禁词 → 加分严判 / verdict 段必含 "Gate (f) 违反" 字样
+- **触发实例链（meta_lesson 第 1 条 MUST 4 次实战印证 / 连续封闭式表述被反例形成模式 = 必须永久 enforce）**：
+  - 第 1 次：v0.16.7 B-029 D-2501 "44 段位号系封闭 4 子号系" → "N 子号系开放矩阵"（用户拍板）
+  - 第 2 次：v0.16.20 B-040 D-2501 "225 段位号系跨主动技 ActiveRoot **维度专属**" → "225 段位号系跨 AR/PR 子命名空间**开放矩阵**"（用户拍板）
+  - 第 3 次：v0.16.21 B-041 D-4001 "44016 段位号系土主动 ActiveRoot **维度专属**" → "44 段位号系**跨子号系开放矩阵**"（用户拍板 2026-05-12）
+  - 第 4 次：v0.16.21 B-041 D-2706 "模板 **IsTemplate=False** + dual_zero 第 3 形态" → "模板第 3 形态 **IsTemplate 开放矩阵 + dual_zero 主形态**"（用户拍板 2026-05-12）
+- **rule_2 严守**：原封闭式表述全员思想史保留 + 加注脚（"B-XXX 反例触发 / 同 D-2501 模式修订"）/ 永不 silent delete
+- **永久 enforce 第 1 批**：v0.16.21 B-041 R1 双 A 修订 + 加严工作流程双管齐下 / B-042+ 升正式提案全员通过 Gate (f) 检查
+
+⭐ **Gate (g) 升 candidate / 升正式前同质度脚本验证强制新立 v1（v0.16.23 B-043 R1 加严 / curator 印象式归纳同质度系统性偏差 2 连发触发 / 最高优先 enforce）**：
+
+- **触发条件**（任一即触发）：
+  - 任何 candidate 累积 ≥ 4 例（升 candidate 即将达 ≥5 阈值前的最后一步）
+  - 升 candidate / 升正式提案的 4-gate check / Gate (a) homogeneity 验证步骤
+  - delta 主张本体含"同质化 N 例"/"全部 X"/"主形态 X / 子形态 Y"等同质度断言
+- **强制动作**：
+  - 必须运行 `doc/SkillAI/tools/verify_homogeneity.py` 或等效脚本对**所有兄弟样本（含未学样本）**做 fs 真扫
+  - 主张维度同质度 % 必须脚本化输出 + dump 反例明细
+  - 主张本体表述必须与 fs 真扫 ground truth 一致（不允许仅基于已学 1-2 例 + 印象归纳）
+- **禁止行为**：
+  - 禁止 curator 凭闭卷 + read.json 单 sample 印象归纳同质度
+  - 禁止 yaml §X.Y 同质化表格仅引用已学样本而不 fs 真扫兄弟样本
+  - 禁止 "N 例阈值达成" 之 N 数据来源为闭卷预测累积（必须实测）
+- **违反 Gate (g) 处理**：
+  - curator PROPOSE 阶段未跑 verify_homogeneity.py 而主张同质度 N 例 → 自动 R1 必修（强制 fs 真扫后重写主张本体）
+  - auditor R0 严审时同质度断言缺脚本验证证据 → 加分严判 / verdict 段必含 "Gate (g) 违反" 字样
+  - 主张范围按 fs 真扫 ground truth 缩到真同质例 / 或扩为 Gate (f) 开放矩阵
+- **触发实例链（meta_lesson 第 2 条 MUST 2 连发触发 = 必须永久 enforce）**：
+  - 第 1 次：v0.16.23 B-043 R0 §2 D-3401 "水主动 dual_zero+SCN 5 例阈值达成"（实际 4 例 22xxxxxxx 单边错向归属 / 严格匹配 0 例 / curator 自审 Gate (b) FAIL）
+  - 第 2 次：v0.16.23 B-043 R0 §3.2 D-4002 (A) "木心法 nodes=1+SC=True 6 例同质化"（实际 30512006 nodes=15 + 30512007 nodes=2 反例 / SC=True 也错（NSC）/ curator 仅读 1 例 sample_5 + 印象推断 / B-043 R1 fs 真扫修订）
+- **rule_2 严守**：违反 Gate (g) 的原 candidate 表述全员思想史保留 + 加注脚（"B-XXX R1 fs 真扫推翻 / 印象归纳违反 Gate (g) 首例触发"）/ 永不 silent delete
+- **永久 enforce 第 1 批**：v0.16.23 B-043 R1 verify_homogeneity.py 工具落地 + 30512xxx fs 真扫 ground truth dual_NULL+NSC+全 NULL 100% 三维同质 + nodes 70% =1 主形态 + 子形态 nodes=2/3/15 开放矩阵 / B-044+ 升正式 4-gate check 全员通过 Gate (g) 验证
+
+⭐ **Gate (g) v2 cross-tool 一致性验证加注（v0.16.24 B-044 R1 加严 / verify_homogeneity.py 错路径 vs reader.py 跨批通用口径不一致教训）**：
+
+- **升 candidate / 升正式前同质度脚本验证 + cross-tool 一致性验证**：
+  - 同质度脚本验证（v1 / B-043 R1 已立）
+  - **+ cross-tool 一致性验证（v2 / B-044 R1 新立）**：多工具 SC/AR/PR 等关键字段口径必须一致
+- **触发条件扩张**：
+  - 任何升 candidate / 升正式 4-gate check 涉及"SC=True/False"/"ARoot/PRoot 值"/"MainType/SubType/ElementType 值"等字段断言时
+  - 必须用至少 2 个独立工具（如 `reader.py` 文本扫描口径 + `verify_homogeneity.py` 结构化口径）跑同一批样本 / 输出 entry_eq_raw 一致性
+- **强制动作**：
+  - 工具间字段定义口径不一致 → R1 自决修工具对齐 / **不阻断升格 4-gate check** / NOT 真硬停 #1
+  - 必须新增 `B-XXX_read_dual.py` 等双口径工具 + dump consistency_summary (entry_eq_raw / entry_only / raw_only / dual_false / dual_true)
+  - 主张本体表述必须基于一致工具口径 / 不允许在工具不一致的状态下断言
+- **触发实例（meta_lesson 第 1 条 / Gate (g) v2 实战首例）**：
+  - v0.16.24 B-044 R0: D-4002 (A) 触发"verify_homogeneity.SC=False 10/10 vs reader.SC=True 10/10"工具不一致 → curator R0 标 fast-path 真硬停 #1 候选 / "概念级反转"误判
+  - v0.16.24 B-044 R1 修订: 发现实际 = verify_homogeneity.py 期望路径 `nodes[].NodeData.SkillConfigNode` 在本工程 SkillGraph 格式 `references.RefIds[].data.ConfigJson` 下不存在 → **tool bug 而非概念反转** → R1 自决修 `B-044_read_dual.py` 双口径 / cross-tool 一致 10/10 / candidate 段加 R1 注脚
+- **rule_2 严守**：B-044 R0 §2 原文（含 fast-path 真硬停 #1 误判 + tool 定义不一致根因表）全保留 + 加 R1 注脚 "B-044 R1 修订 = verify_homogeneity.py 错路径 tool bug / 非概念反转 / 真硬停 #1 边界澄清新立" / 永不 silent delete
+- **永久 enforce 第 1 批**：v0.16.24 B-044 R1 `B-044_read_dual.py` 双口径工具落地 + entry.SC 现绑定 references.RefIds 实际结构 + cross-tool 一致 10/10 + verify_homogeneity.py 后续 R1 计划修订 / B-045+ 升正式 4-gate check 全员通过 Gate (g) v2 cross-tool 验证
+
+**AI 自决越权 / 升正式封闭式表述 / 同质度印象归纳 / cross-tool 不一致误判 五事件思想史保留（rule_2 第 N+22 次实战范例）**：
+- v0.16.18 B-038 R1：Gate (d) v2 新立（升 rule 编号越权）
+- v0.16.20 B-040 R1：Gate (e) v1 新立（curator 写 verdict 越权）
+- v0.16.21 B-041 R1：Gate (f) 新立（升正式封闭式表述）
+- v0.16.23 B-043 R1：Gate (g) v1 新立（升 candidate/升正式前同质度脚本验证强制）
+- **v0.16.24 B-044 R1：Gate (e) v2 加严（curator R0 PROPOSE 措辞越权第 3 次）+ Gate (g) v2 加严（cross-tool 一致性验证）+ fast-path 真硬停 #1 边界澄清新立** = 工作守则四层加严第 2 次（fast-path peer review 闭环 + 角色边界 + 表述开放修饰 + 同质度脚本验证 + cross-tool 一致 + 真硬停边界 六道防线 / Gate (e)/(g) 双 v2）
+
+⭐ **Gate (g) v3 工具语义 cross-check 历史 grep_source 注释强制（v0.16.29 B-049 R1 加严 / curator 性质误判第 4 次 / verify_homogeneity.py 语义窄化 bug 触发 / 最高优先 enforce）**：
+
+- **触发条件**（任一即触发）：
+  - 任何 verify_homogeneity.py / 同质度脚本 schema 修订
+  - 工具语义改写 / 字段语义重定义（如 is_template 从 single-SC level 改 any-True master flag）
+  - candidate 升 candidate / 升正式提案的 4-gate Gate (g) 步骤涉及该工具
+- **强制动作**：
+  - **工具 schema 修订 / 语义改写前必须 cross-check 该工具关联的所有升正式不变量 grep_source 注释 / 验证语义一致**
+  - 工具 schema 修订完成后必须重跑 fs 真扫验证不冲突历史升正式主张本体
+  - 工具 schema 修订必须在 v0.X_actionable.md §工具修订段 留痕 + 注释三阶段演化轨迹（rule_2 严守）
+- **禁止行为**：
+  - **工具语义窄化 / 与历史升正式语义不一致 → 不算 schema fix / 算工具 bug / R1 必修**
+  - 禁止 curator 自决执行工具语义改写而不 cross-check（如 B-049 R0 verify_homogeneity.py SC-level only 仅取单 refid IsTemplate = 窄化语义 / 应 cross-check D-2401/D-4004 grep_source master-flag-any-True / 未 cross-check 触发概念反转候选误判）
+  - 禁止 curator 凭工具单 sample 输出闭卷归纳整批 ground truth（须 fs 真扫所有 in-scope 范围）
+- **违反 Gate (g) v3 处理**：
+  - curator PROPOSE 阶段工具语义改写未 cross-check grep_source → 自动 R1 必修（重新 cross-check + 重跑 fs 真扫 + 修订工具 + 撤回不正确 concept_reversal_candidate 等标签）
+  - auditor R0 严审时工具语义改写缺 cross-check 证据 → 加分严判 / verdict 段必含 "Gate (g) v3 违反" 字样
+- **触发实例链（meta_lesson 第 3 条 MUST 实战印证 / 同 B-044 D-4002 (A) 工具 bug 误判真硬停 #1 候选模式）**：
+  - 第 1 次：v0.16.29 B-049 R0 §3.3 crc_1 D-2401 升正式主张本体 IsTemplate=True 形态 fs 真扫 0/3121 命中 = 工具语义窄化 bug 误判 concept_reversal_candidate（实际 master-flag-any-True 语义 125/523 in-scope 命中 / 符合 D-2401/D-4004 升正式 grep_source）→ B-049 R1 fs 真扫修订 + Gate (g) v3 立法
+  - 历史前置：v0.16.24 B-044 D-4002 (A) 工具 bug 误判真硬停 #1 候选（verify_homogeneity.py 期望路径 `nodes[].NodeData.SkillConfigNode` 在本工程 SkillGraph 格式不存在 = tool bug 而非概念反转 / R1 修订）= curator 性质误判同源模式（性质误判第 4 次链：B-038 → B-040 → B-044 → B-049 / 4 连发）
+- **rule_2 严守**：违反 Gate (g) v3 的原工具语义全员思想史保留 + 加注脚（"B-XXX R1 工具语义 cross-check 推翻 / 同 B-049 D-2401 性质误判模式 / 工具 bug 非概念反转"）/ 永不 silent delete
+- **永久 enforce 第 1 批**：v0.16.29 B-049 R1 verify_homogeneity.py master-flag-any-True 语义落地（is_template_any_true 主语义 + is_template_sc 旧语义保留参考 + is_template_true_node_classes 诊断字段）+ 125/523 in-scope fs 真扫 ground truth + 三阶段演化轨迹 docstring 注释（v0.16.23 → v0.16.29 R0 → v0.16.29 R1）/ B-050+ 升 candidate / 升正式 4-gate check 全员通过 Gate (g) v3 cross-check 验证
+
+**AI 自决越权 / 升正式封闭式表述 / 同质度印象归纳 / cross-tool 不一致误判 / 工具语义窄化 六事件思想史保留（rule_2 第 N+27 次实战范例）**：
+- v0.16.18 B-038 R1：Gate (d) v2 新立（升 rule 编号越权）
+- v0.16.20 B-040 R1：Gate (e) v1 新立（curator 写 verdict 越权）
+- v0.16.21 B-041 R1：Gate (f) 新立（升正式封闭式表述）
+- v0.16.23 B-043 R1：Gate (g) v1 新立（升 candidate/升正式前同质度脚本验证强制）
+- v0.16.24 B-044 R1：Gate (e) v2 + Gate (g) v2 + fast-path 真硬停 #1 边界澄清新立（cross-tool 一致性 / 措辞红线扩张）
+- **v0.16.29 B-049 R1：Gate (g) v3 新立（工具语义 cross-check 历史 grep_source 注释强制）+ D-2706 子形态 dual_false 第 12 升正式不变量 AI 自决** = 工作守则**七道防线**全部到位（fast-path peer review 闭环 + 角色边界 Gate (e) v2 + 表述开放修饰 Gate (f) + 同质度脚本验证 Gate (g) v1 + cross-tool 一致 Gate (g) v2 + 工具语义 cross-check Gate (g) v3 + 真硬停 #1 严格边界 + rule_2 永不 silent delete）
+- **v0.16.40 B-060+B-061 R1：GATE-CONSISTENCY 新立（Mode B PROPOSE 流程子步骤 / cross-batch 字典/枚举/ID 一致性验证）** = 工作守则**八道防线**全部到位（七道防线 + GATE-CONSISTENCY）
+
+---
+
+⭐ **GATE-CONSISTENCY 立法 v1（v0.16.40 B-060+B-061 R1 加严 / cross-batch 字典不一致教训 / 用户最高授权 2026-05-13 同 v0.16.5/v0.16.11/v0.16.17 拍板模式 / 最高优先 enforce）**：
+
+- **新增 Mode B PROPOSE 流程子步骤 GATE-CONSISTENCY**（在 curator 出 yaml 之前必查）:
+
+```
+GATE-CONSISTENCY: cross-batch 字典/枚举/ID 一致性验证
+
+触发条件:
+  - delta 含 SkillTag ID 字典扩展（如 D-6006）
+  - delta 含枚举值字典（如 TSkillDamageType / TIndicatorType / 等）
+  - delta 含 attr ID 清单
+  - delta 含节点 ID / rid 清单
+  - delta 含 SkillEffect ID 段位号系 / 模板 ID 清单
+
+强制动作（任一即触发 R1 必修）:
+  1. grep 本 delta 所有 ID 在 corpus 内的语义引用次数（≥1 才合法）
+  2. cross-check 同字典的历史升正式 / candidate / hedge 是否冲突
+  3. 检查同批其他 delta 是否会推翻本 delta 的 ID（如 B-061 D-6113 fs 真扫推翻 D-6006 字典中的 146004858）
+  4. 若 cross-batch 不一致 → GATE-CONSISTENCY 失败 → R1 必修
+
+违反处理:
+  - curator R0 PROPOSE 阶段 GATE-CONSISTENCY 未通过 → 自动 R1 必修
+  - auditor R0 严审时缺 GATE-CONSISTENCY 证据 → 加分严判 / verdict 段必含 "GATE-CONSISTENCY 违反" 字样
+
+特别适用场景:
+  - 多 sub-agent 并行 Mode B 回流（如 5 × skill-designer L3 review 同时）
+  - sub-agent 接力消息含 ID 断言（同 D-6115 PostMortem #038 候选 / 接力消息错误链）
+  - 同批含多 deltas 涉及同字典/同 namespace
+```
+
+- **触发实例 #1（meta_lesson 首次立法实战）**：v0.16.40 B-060 D-6006 SkillTag ID 字典扩展含 tag_id=146004858 闪避条目（来源主对话接力 prompt 错误断言） / 同批 B-061 D-6113 fs 真扫推翻（实际 1460112 / 1=闪了 / 0=没闪 反直觉）/ cross-batch 字典不一致 / R1 必修 移除错误条目 + 新增正确条目 1460112 + 加注脚 / **rule_2 严守**：R0 错误条目作思想史保留作反面教材 / GATE-CONSISTENCY 立法
+
+- **rule_2 严守**：违反 GATE-CONSISTENCY 的原字典/枚举/ID 全员思想史保留 + 加注脚（"B-XXX R1 cross-batch 一致性检查推翻 / 同 B-060 D-6006 模式 / 接力消息错误链同源"）/ 永不 silent delete
+
+- **永久 enforce 第 1 批**：v0.16.40 B-060 R1 D-6006 R1 修订（移除 146004858 + 新增 1460112 + R1 注脚）/ B-062+ Mode B 回流批全员通过 GATE-CONSISTENCY 检查 / 多 sub-agent 并行回流时尤为重要
+
+**AI 自决越权 / 升正式封闭式表述 / 同质度印象归纳 / cross-tool 不一致误判 / 工具语义窄化 / cross-batch 字典不一致 七事件思想史保留（rule_2 第 N+45 次实战范例）**：
+- v0.16.18 B-038 R1：Gate (d) v2 新立（升 rule 编号越权）
+- v0.16.20 B-040 R1：Gate (e) v1 新立（curator 写 verdict 越权）
+- v0.16.21 B-041 R1：Gate (f) 新立（升正式封闭式表述）
+- v0.16.23 B-043 R1：Gate (g) v1 新立（升 candidate/升正式前同质度脚本验证强制）
+- v0.16.24 B-044 R1：Gate (e) v2 + Gate (g) v2 + fast-path 真硬停 #1 边界澄清新立
+- v0.16.29 B-049 R1：Gate (g) v3 新立（工具语义 cross-check）
+- **v0.16.40 B-060+B-061 R1：GATE-CONSISTENCY 新立（cross-batch 字典/枚举/ID 一致性验证）** = 工作守则**八道防线**全部到位
+
+---
+
+**AI 自决升 candidate gate（必须 3 项全满足）**：
+
+(a) 阈值数据 ≥ 3 例同质化形态
+(b) 0 反预测（升 candidate 阶段宽于升正式）
+(c) 不构成概念级反转
+
+**rule_2 永不 silent delete 严守**：AI 自决升格时 / candidate 段保留作思想史 + 加注脚（如 "v0.16.X AI 自决升正式 / 思想史保留" / 同 v0.16.5 用户拍板模式）/ 旧表述不删除 / 升格演化轨迹完整。
+
+**AI 自决升格留痕**：每次 AI 自决升格必须在当批 actionable.md §AI 自决升格 + README §10 历史表 + learning_log §4 同步登记 / 含 (a)(b)(c)(d) 4 gate 满足证据 + auditor 推荐原文引用 + 升格前后版本对比。
+
+**降级保护（防 AI 滥升）**：
+
+- 任何升正式后下批 enforce 出现反预测 → 立即触发 fast-path 真硬停 #1 概念级反转判定 / 等用户裁决（不允许 AI 自决撤回升正式主张）
+- 连续 3 批 AI 自决升格率 > 0 但 auditor 否决率 > 50% → 触发 fast-path 真硬停 #3 / 用户介入
+
+### SkillEditor JSON 字段速查（v0.16.18 B-038 R1 加注 / D-3807 candidate 落盘 / 参考性 / 非修订 rule_6 v3）
+
+> 本段记录 mental_model 历史用词 与 SkillEditor JSON 实际字段路径的映射关系 / **rule_2 永不 silent delete 严守**：mental_model 历史"ARoot/PRoot/MainType/SubType/ElementType/IsTemplate"用词保留 / 加注实际 JSON 字段路径作参考 / 非修订正式 rule（详见 [doc/SkillAI/mental_model/batch_buffer/B-038.yaml](doc/SkillAI/mental_model/batch_buffer/B-038.yaml) §formal_invariant_proposals §D-3807_R1_降级_维持_candidate）。
+
+| 概念 | mental_model 历史用词 | 实际 SkillEditor JSON 字段路径 | 实证 |
+|------|---------------------|------------------------------|------|
+| ActiveRoot | "ARoot" | `SkillConfigNode.ConfigJson.SkillEffectExecuteInfo.SkillEffectConfigID` | 主动技段位号系等价物 |
+| PassiveRoot | "PRoot" | `SkillConfigNode.ConfigJson.SkillEffectPassiveExecuteInfo.SkillEffectConfigID` | 被动技/心法段位号系等价物 |
+| ElementType | "元素" | `SkillConfigNode.ConfigJson.ElementType` | **0=水 / 1=金 / 2=木 / 4=火 / 5=土**（D-3801 升 candidate 5/5 元素实证 / corpus_full_scan + 源码 enum grep 加固待办）|
+| MainType | "MainType" | `SkillConfigNode.ConfigJson.SkillMainType` | 类型号系 |
+| SubType | "SubType" | `SkillConfigNode.ConfigJson.SkillSubType` | 子类型号系 |
+| IsTemplate | "IsTemplate" | `SkillConfigNode.data.IsTemplate`（顶层 / **非 ConfigJson**）| 模板标记 |
+
+**B-038 实证锚点**：10/10 picks SCN 解析 RefIds[].data.ConfigJson 全员实证 / 历史"ARoot=220xxxxxx"实际指 ConfigJson.SkillEffectExecuteInfo.SkillEffectConfigID 字面 / 段位号系是该字段首 3-6 位数字 / D-1606/D-1904/D-2404/D-2501 等正式不变量主张本体不变 / 仅命名空间细化（不算概念反转）。
+
+**升正式路径**（待用户拍板 / 不走 AI 自决升正式 gate / Gate (d) 红线明确）：
+- B-039+ 续累积 2 批 + corpus_full_scan 加固
+- 走用户拍板升格通道（同 v0.16.5/v0.16.11/v0.16.17 用户最高授权同源模式）
+- 落盘到 mental_model/README.md §rule_6 v3 正式段 / 由用户拍板
+
+### 方向选择 / 大阶段切换 = AI 自决（不停下问）
+
+下列原本要"停下问用户"的方向决策，**预先授权 AI 自决并留记录**（在当批 v0.X_actionable.md §X B-N+ candidate 启动 readiness 段写明决策依据）：
+
+- **大阶段切换**：阶段 1 (技能模板) → 阶段 2 (BUFF/标签) → 阶段 3 (宗门技能) → 阶段 4 (心法) 按 521 样本目标顺序自动进入
+- **candidate 优先级选择**：每批 candidate_1~5 按 v0.X_actionable.md §B-N+ readiness 段顺序自动选 / 主推 candidate_1 默认
+- **partial → R1 / pass → COMMIT**：fast-path 自然环节 / 不构成"停下问"
+- **学习曲线锯齿**（如 0.658 → 0.4xx 真发现批）：不构成"停下问"
+- **hold-out 验证 vs 转实战**：到达 521 样本 90%+ 时 AI 自决跑 hold-out / 转实战由"学习收敛达成"硬触发
+
+### ⭐ 本版学习范围 v2（2026-05-11 用户裁决修订 / 替换 v1 含义）
+
+> **背景**：B-017 R0 fail 触发 spot-check / 发现 curator picker 从 B-001 起按"段位均衡"选样而非按业务范畴 / 90 已学样本仅 ~14 个严格在范围内 / 大量跑了坐骑/法宝/灵宠/怪物词缀 / 用户明确"宗门技能是最后配的最准 / 老技能可能过时但能用"。
+>
+> **范围修订**：本版只学习 **宗门功法 + 心法 + 技能模板**，其余顶层目录（坐骑/法宝/灵宠心法/秘境怪物词缀/战斗道具/战斗流程/怪物/卡牌/...）一律**不进 picker 选样**。
+
+| 类别 | 真实路径（`{{SKILLGRAPH_JSONS_ROOT}}`） | 文件数 |
+|------|----------------------------------------------------------|------|
+| **宗门功法**（5 宗门） | `宗门技能/{木,火,金,水,土}宗门技能/` | **150**（42+32+37+23+16） |
+| **宗门 BUFF/标签**（含被动机制） | `宗门技能/{BD标签,宗门标签,通用BUFF,其他(有用)}/` | **38**（15+6+16+1） |
+| **宗门心法**（用户裁决：只宗门心法 / 不含心法通诀） | `宗门技能/宗门心法/` | **215** |
+| **技能模板** | `技能模板/{伤害,功能,单位,子弹,技能,数值}/` | **118**（44+21+3+19+30+1） |
+| **TOTAL** | | **521** ✓ |
+
+**明确不进范围**：`宗门技能/废弃（老技能）/` (283) / `心法通诀/` (48) / `坐骑技能/` (27) / `法宝/` (380) / `灵宠心法/` (51) / `秘境怪物词缀/` (17) / `战斗道具/` (142) / `怪物/` (778) / `卡牌/` (63) / `战斗流程/` (373) / `测试/` (114) / `特殊玩法/` (357) / `BUFF/` (顶层 68) / `关卡模板/` (113) / `化身技能/` (4) / `御灵技能/` (16) / `辅修技能/` (7) / `通用技能/` (25) / 其他顶层目录。
+
+### Fast-path 收敛标准（学完即停）
+
+按 A 路径"1:1 穷举"：
+
+- **硬条件**：上表 4 类共 **521 样本**全部被深度学过（每个走过完整闭卷-验证-归因）
+- **质量 KPI**：每个出现 ≥5 次的 SubType 都有 ≥3 样本印证 / 每个 ≥10 次的段位 ≥2 样本印证
+- **稳定性**：连续 3 批无 auditor pass + concept_reversal 标记 = mental_model 已稳定
+
+满足全部 → 主动汇报"学习收敛，可转实战模式"。
+
+### 大阶段定义 v2
+
+| 阶段 | 范围 | 实际路径 | 样本数 | 估批次 |
+|------|------|---------|--------|--------|
+| 1 | 技能模板 全部 | `技能模板/` | 118 | ~12 批 |
+| 2 | 宗门通用 BUFF + BD标签 + 通用BUFF + 其他(有用) | `宗门技能/{BD标签,宗门标签,通用BUFF,其他(有用)}/` | 38 | ~4 批 |
+| 3 | 木/火/金/水/土 各宗门功法（5 子阶段） | `宗门技能/{木,火,金,水,土}宗门技能/` | 150（每子 16-42） | ~15 批 |
+| 4 | 宗门心法 | `宗门技能/宗门心法/` | 215 | ~22 批 |
+
+> 注：原 v1 §大阶段 中"宗门通用 BUFF + BD标签 + 标签效果 ~250" 数字偏高 / v2 修订为 38（真实文件数）。
+
+---
+
+## 当前用户 & 主要工作场景
+
+> **战斗策划，不是程序**。日常工作 90% 是用 SkillEditor 配技能，**不写引擎代码**。
+>
+> AI 主要服务于三件事：
+> 1. **自然语言生成 SkillGraph 蓝图**
+> 2. **修改已有 SkillGraph JSON**
+> 3. **审核 SkillGraph 是否合法/合理/最优**
+>
+> 系统对其他策划复用，开发新能力时考虑团队推广。
+
+---
+
+## 系统目录速查
+
+```
+doc/SkillAI/
+├── README.md                  系统入口
+├── 进度.md                    当前进度滚动快照
+├── mental_model/              ⭐ 认知中枢（harness guides）
+│   ├── README.md              总览 + 证据等级 + 工作守则
+│   ├── learning_log.md        学习日志 + 收敛度量 + 漂移检测
+│   └── 子系统/                按需建（首次触碰由 curator 创建）
+├── docs/                      百科（节点字典 / 模板库 / 编辑器架构 / 易错点速查）
+├── tools/                     compiler / decompiler / lint / mermaid 转换
+├── samples/                   IR + JSON 样本库
+└── postmortem/                历史踩坑（待蒸馏到 mental_model 的原料）
+
+.claude/
+├── agents/skill-designer.md          红队（配技能）
+├── agents/skill-reviewer.md          绿队（审技能）
+├── agents/skill-knowledge-curator.md ⭐ 蓝队（管心智模型）
+└── skills/
+    ├── skill-design/SKILL.md         设计流程定义
+    └── skill-review/SKILL.md         审核流程定义
+```
+
+---
+
+## 不要把心智模型当文档
+
+mental_model 不是被动文档，是 AI 的脑子。**3 个观察点判断 AI 是否真的在用**：
+1. 任务开工前是否输出"对子系统 X 的当前理解"段（GATE-MENTAL-IN）
+2. 任务结束是否说出"对子系统 X 理解变化是 ..."（即使无变化也要显式说，GATE-MENTAL-OUT）
+3. 同类任务做第二次时是否引用上次的 mental_model 决策（而不是重新查样本）
+
+如果 AI 跳过这些 → 用户提醒回 [mental_model/README §4 §9](doc/SkillAI/mental_model/README.md)。

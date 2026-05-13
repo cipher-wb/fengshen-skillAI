@@ -1,0 +1,60 @@
+sample_id: 30234006
+sample_path: 宗门技能/SkillGraph_30234006【火宗门】炎龙噬天_天阶_蓄炎流.json
+predicted_at: 2026-05-09
+mental_model_version_used: v0.1
+metadata_known_at_prediction:
+  node_count: 104
+  category: 宗门技能
+  sub_category: 火宗门技能
+  top_classes_visible:
+    TSET_ORDER_EXECUTE: 16
+    TSET_DELAY_EXECUTE: 5
+    TSET_RUN_SKILL_EFFECT_TEMPLATE: 7
+    TSET_GET_SKILL_TAG_VALUE: 7
+    TSET_MODIFY_SKILL_TAG_VALUE: 14
+  flags_visible:
+    bullet_count: unknown_at_prediction_time
+    has_skill_tag_heavy: true
+prediction:
+  semantic_intent: |
+    "炎龙噬天_蓄炎流" — 名字直觉是"积蓄/充能再爆发"型大招。
+    "蓄炎流" = 应该有充能/层数计数器，可能用 SkillTag 计 stack；
+    "炎龙噬天" = 大型 AOE 或穿透弹道；
+    天阶 = 顶级技能，节点数 100+ 合理；
+    多次 MOD_TAG (14) > GET_TAG (7) → 写多读少，符合"积蓄+消耗"模式。
+  topology_mermaid: |
+    flowchart LR
+      A[出招动画] --> B[ORDER 主流程]
+      B --> C[GET_TAG 蓄炎层数]
+      C --> D{层数判断 VALUE_COMPARE}
+      D -->|未满| E[MOD_TAG 累加层数]
+      D -->|满层| F[爆发分支]
+      F --> G[创建子弹/AOE]
+      G --> H[apply 伤害模板]
+      H --> I[MOD_TAG 清空层数]
+      F --> J[DELAY 5帧]
+      J --> K[多段连击]
+  predicted_node_count: 95
+  templates_used_predicted:
+    - 子弹通用逻辑-碰撞 (190016404 系列)
+    - 伤害模板（火属性 DOT 灼烧 buff）
+    - 火宗门通用气场/特效模板
+  subsystems_touched_predicted:
+    - 控制流子系统 (ORDER + DELAY 主干)
+    - SkillTag 系统 (蓄炎层数读写)
+    - 子弹系统 (火龙弹道)
+    - 伤害管线 (AOE 多目标)
+    - 触发器与碰撞 (扇形或直线指示器)
+  prediction_confidence: 中
+  reasoning: |
+    主要不确定点：
+    1) "蓄炎流"是否用 SkillTag 还是 entity attr 存储（postmortem #019 暗示实体级 tag 用 PT=0/Param[1]=0）
+    2) "天阶"和"地阶"的差异是否纯靠多段子弹堆出来（无别的差异）
+    3) MOD_TAG 14 次很多，可能是"多次小修改"而非"两段大修改"
+    我的盲点候选：
+    - 不知道"蓄炎"具体用什么节点存层数
+    - 不知道是否有"层数满了才能放"的前置 check 节点
+expected_blind_spots:
+  - SkillTag 系统中"积蓄类"技能的写入模式
+  - 火属性"灼烧 DOT"是否用通用 buff 模板还是宗门专属
+  - 天阶技能与地阶在节点结构上的具体差异

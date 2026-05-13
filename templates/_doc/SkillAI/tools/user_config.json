@@ -1,0 +1,30 @@
+{
+    "_comment_zh": "SkillAI 工具链的用户本地配置 / 每位策划本地一份 / 这个文件不应提交到 git",
+    "_doc": "doc/SkillAI/tools/README_user_config.md",
+    "version": 1,
+
+    "user_name": "insectwb",
+    "ip_end": 32,
+    "ip_notes": "本机 IPv4 第 4 段 / 等同于 SkillEditor 里 LocalSettings.Inst.ID / 决定你所有自动分配的 ID 段位",
+
+    "_section_id_segments": "下面这段不用改 / 是规则展示 / id_allocator.py 会自动按你的 ip_end + 各表 ConfigIDAdd 算出实际段位",
+    "id_segment_examples_if_ip_32": {
+        "SkillEffectConfig": "[32000000, 32999999] (step=1000000)",
+        "ModelConfig":       "[3200000,  3299999]  (step=100000)",
+        "SkillTagsConfig":   "[320000,   329999]   (step=10000)",
+        "BulletConfig":      "[320000,   329999]   (step=10000)",
+        "BuffConfig":        "[320000,   329999]   (step=10000)"
+    },
+
+    "_section_future": "下面字段为未来拓展占位 / 现在用不到 / 不要删",
+    "preferred_skill_id_namespace": null,
+    "auto_run_lint_after_patch": true,
+    "auto_backup_before_write": true,
+
+    "_section_team": "其他策划的 ip_end / 如果你团队有多人协作 / 这里登记每个人 / id_allocator 调试 / 看 ID 冲突时能反查谁配的",
+    "team_members": {
+        "insectwb": 32,
+        "_example_zhang_san": 33,
+        "_example_li_si": 34
+    }
+}

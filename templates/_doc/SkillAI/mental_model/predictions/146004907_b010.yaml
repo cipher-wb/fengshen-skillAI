@@ -1,0 +1,45 @@
+sample_id: "146004907"
+date: 2026-05-10
+batch: B-010
+subdir: 伤害
+mode: closed-book PREDICT (extractor signals + filename only, no flow read)
+
+skill_config_metadata_seen:
+  category: template_body (no SkillConfigNode)
+  filename_hint: "【模板】伤害流程_计算造成总伤害值"
+  refs_count: 44
+  IsTemplate_count: 1
+  TemplateParam_count: 0
+  top_classes: {RUN_TEMPL: 27, NUM_CALC: 10, GET_ENTITY_ATTR: 5, GET_MAX: 2}
+  notes: |
+    类别 2 模板本体（v0.6 §SkillEditor 文件三分类）。RUN_TEMPL × 27 主导（61%）+ NUM_CALC × 10 = 套娃模板拼装伤害数值流程，调用大量子模板。
+    TemplateParam = 0 是 6 样本一致信号（RQ-B10-3 候选答案：模板入口 IsTemplate=True 不一定带 TemplateParam，多数模板靠节点 ID 引用即可）。
+    段位 146xxxxx 是 v0.6 §段位字典 14xxx 主段中的「伤害」子段（已学含 146003779 持续施法 / 146004489-520 子模板伤害加成包）。
+
+prediction:
+  estimated_node_count: 50  # refs=44 + ~5 输入端口节点 + ORDER root
+  topology_sketch: |
+    ROOT (TSET_ORDER_EXECUTE, IsTemplate=True, ID=146004907)
+      → ORDER 串行 27 RUN_TEMPL（拆解伤害流程为 27 段子模板调用，疑命中 v0.6 §段位字典 子模板段 146004489-520 三联包/扩展三联包）
+      + NUM_CALC × 10（在调用间累加结果）
+      + GET_ENTITY_ATTR × 5（取攻击/防御/血量等基础属性）
+  expected_templates_called: [
+    "146004489 子模板_计算攻击力",
+    "146004491 子模板_计算防御率",
+    "146004495 子模板_计算技能系数",
+    "146004496 子模板_计算化解乘区",
+    "146004497 子模板_计算会心乘区",
+    "146004499-520 一系列乘区子模板",
+    "190016404/485/523 三联包（候选）"
+  ]
+  touched_subsystems: [模板系统, 控制流子系统, SkillTag 系统（间接）]
+  predicted_template_form: |
+    形态：**伤害结算流程总编排型**——一个大型模板的 ORDER 子节点串接 27 个 RUN_TEMPL 调用各种乘区子模板（攻击力/防御率/化解/会心/伤害加深/五行/异常状态/Condition/战斗道具/单位类型/玩法类型/最终增减乘区/技能效果主被动增减/伤害类型加深/...）。形态对应 v0.6 §模板系统 §模板组合模式 三联包模式的「总编排父模板」语义。
+  predicted_internal_signature_for_skillentry_diff: |
+    模板本体 vs 真技能 系统性差异（RQ-B10-1 候选答案）：
+    1. SkillConfigNode 缺席（√ 已在 metadata 看到）
+    2. IsTemplate=True 在 ORDER root 上（√ 已在 metadata 看到）
+    3. **TemplateParam 不显式**（待 verify：B-006~B-008 已学心法 type1-5 都没看到 TemplateParam 显式数组；这与 v0.6 主张"TemplateParams 数组"的写法可能是 SubType=0 模板入口默认零 TemplateParam，差异在被调用时由 RUN_TEMPL 的 InputParams 注入）
+    4. 入口字段：模板本体的 root.ID（如 146004907）= 被 RUN_TEMPL 引用的目标 ID，文件名 ID 通常等于 root.ID（这与 v0.6 §"文件名 vs root.ID" 175_0001 反例的对比关键）
+  notes: |
+    高 confidence：v0.6 §模板系统 已有 "146xxx 大段 + RUN_TEMPL 主导 + 子模板拼装" 完整范式，此样本应是范式直接印证（不是 drift）。

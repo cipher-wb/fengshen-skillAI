@@ -1,0 +1,87 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/cipher-wb/fengshen-skillAI/raw/main/schemas/config.schema.json",
+  "title": "fengshen.config.json",
+  "description": "fengshen-skillai 用户工程配置 / scaffold 落盘 / 每次 init 生成 / 后续 update 不覆盖用户字段",
+  "type": "object",
+  "required": ["version", "project_root", "skillgraph_jsons_root", "skill_excel_path"],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "JSON Schema URL"
+    },
+    "_comment": {
+      "type": "string"
+    },
+    "version": {
+      "type": "integer",
+      "const": 1,
+      "description": "配置文件 schema 版本"
+    },
+    "project_root": {
+      "type": "string",
+      "description": "Unity 工程根路径 (相对或绝对 / POSIX 风格优先)",
+      "default": "."
+    },
+    "skillgraph_jsons_root": {
+      "type": "string",
+      "description": "SkillGraph_*.json 根目录 (相对 project_root)",
+      "default": "Assets/Thirds/NodeEditor/SkillEditor/Saves/Jsons/"
+    },
+    "skill_excel_path": {
+      "type": "string",
+      "description": "SkillEditor 导出 Excel 绝对路径 (1SkillEditor.xlsx)",
+      "examples": ["F:/MyTeam/Design/Excel/excel/1SkillEditor.xlsx"]
+    },
+    "fengshen_skillai_version": {
+      "type": "string",
+      "description": "安装时 fengshen-skillai npm 包版本",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "mental_model_version": {
+      "type": "string",
+      "description": "安装时 mental_model 版本",
+      "pattern": "^v\\d+\\.\\d+\\.\\d+$"
+    },
+    "installed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "installed_by_cli": {
+      "type": "string"
+    },
+    "ai_id_segment": {
+      "type": "integer",
+      "description": "AI 生成技能 ID 段位 (跟 SvnIgnore/AIGeneratorConfig.json 同步)",
+      "default": 250,
+      "minimum": 100,
+      "maximum": 999
+    },
+    "default_skill_save_dir": {
+      "type": "string",
+      "description": "AI 生成技能默认保存目录 (相对 project_root)",
+      "default": "Assets/Thirds/NodeEditor/SkillEditor/Saves/Jsons/宗门技能/AIGen/"
+    },
+    "python_executable": {
+      "type": "string",
+      "default": "python",
+      "description": "Python 可执行命令名 (python / python3 / py)"
+    },
+    "update_strategy": {
+      "type": "string",
+      "enum": ["backup-and-merge", "merge-only", "overwrite", "abort-on-conflict"],
+      "default": "backup-and-merge",
+      "description": "fengshen-skillai update 时遇到用户改过的文件如何处理"
+    },
+    "auto_doctor_on_init": {
+      "type": "boolean",
+      "default": true
+    },
+    "claude_plugin_mode": {
+      "type": "boolean",
+      "default": true,
+      "description": "是否安装 .claude-plugin/plugin.json (Claude Code 官方 plugin 模式)"
+    }
+  },
+  "additionalProperties": false
+}

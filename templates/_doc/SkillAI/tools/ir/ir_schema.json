@@ -1,0 +1,592 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "skill-ir-v1.0",
+  "title": "Skill IR Schema v1.0",
+  "description": "技能蓝图中间表示 schema。PoC 阶段聚焦最小可用集合：cast_anim/cast_effect/delay/bullet/order/condition_branch。后续按 PRD §4.6 迭代扩展。",
+
+  "type": "object",
+  "required": ["meta", "skill", "flow"],
+  "additionalProperties": false,
+  "properties": {
+    "meta":      { "$ref": "#/definitions/meta" },
+    "skill":     { "$ref": "#/definitions/skill" },
+    "flow":      { "type": "array", "items": { "$ref": "#/definitions/flow_step" } },
+    "passive":   { "type": "array", "items": { "$ref": "#/definitions/flow_step" } },
+    "tags":      { "type": "array", "items": { "$ref": "#/definitions/tag_decl" } },
+    "references":{ "type": "object" }
+  },
+
+  "definitions": {
+
+    "meta": {
+      "type": "object",
+      "required": ["ir_version", "skill_id"],
+      "properties": {
+        "ir_version":  { "type": "string", "pattern": "^\\d+\\.\\d+$" },
+        "skill_id":    { "type": "integer", "minimum": 1 },
+        "skill_name":  { "type": "string" },
+        "description": { "type": "string" },
+        "author":      { "type": "string" },
+        "created":     { "type": "string" }
+      }
+    },
+
+    "skill": {
+      "type": "object",
+      "required": ["element", "main_type", "sub_type"],
+      "properties": {
+        "element":     { "enum": ["金", "木", "水", "火", "土", "无", "空"] },
+        "main_type":   { "type": "string" },
+        "sub_type":    { "type": "string" },
+        "damage_type": { "enum": ["物理", "法术", "真实", "直接伤害", "-"] },
+        "cd_type":     { "enum": ["普通", "连招", "技能结束", "充能", "-"] },
+        "cd_frames":   { "type": "integer", "minimum": 0 },
+        "range":       { "type": "integer", "minimum": 0 },
+        "ai_range":    { "type": "integer", "minimum": 0 },
+        "min_range":   { "type": "integer", "minimum": 0 },
+        "cast_frame":          { "type": "integer", "minimum": 0 },
+        "buffer_start_frame":  { "type": "integer", "minimum": 0 },
+        "buffer_frame":        { "type": "integer", "minimum": 0 },
+        "base_duration":       { "type": "integer", "minimum": 0 },
+        "mp_cost":             { "type": "integer" },
+        "hunli_value":         { "type": "integer" },
+        "xinfa_energy":        { "type": "integer" },
+        "quality":             { "type": "integer" },
+        "icon":                { "type": "string" },
+        "skill_name_text":     { "type": "string", "description": "编辑器内显示名" },
+        "skill_desc_text":     { "type": "string" },
+        "combo_cd_list":       {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "cd_time":       { "type": "integer" },
+              "base_duration": { "type": "integer" },
+              "buffer_frame":  { "type": "integer" },
+              "buffer_start_frame": { "type": "integer" },
+              "cast_frame":    { "type": "integer" }
+            }
+          }
+        },
+        "indicator": {
+          "type": "object",
+          "description": "施法指示器（可选，不写则按 flow 自动推断）",
+          "properties": {
+            "type":  { "oneOf": [
+              { "enum": ["无目标", "单体", "直线", "圆形", "扇形", "矩形"] },
+              { "type": "integer" }
+            ]},
+            "param": { "oneOf": [
+              { "type": "array", "items": { "type": "integer" } },
+              { "type": "integer" }
+            ]}
+          }
+        },
+        "ai_cast": {
+          "type": "object",
+          "description": "智能施法（AI 用，可覆盖默认）",
+          "properties": {
+            "target_priority": { "oneOf": [
+              { "enum": ["距离最近", "血量最低", "血量最高", "无"] },
+              { "type": "integer" }
+            ]},
+            "target_camp":          { "type": "array", "items": { "type": "integer" } },
+            "target_monster_rank":  { "type": "array", "items": { "type": "integer" } },
+            "target_cond_template": { "type": "integer" }
+          }
+        },
+        "cast_target": {
+          "type": "object",
+          "description": "玩家释放目标（可覆盖默认）",
+          "properties": {
+            "target_camp":          { "type": "array", "items": { "type": "integer" } },
+            "target_monster_rank":  { "type": "array", "items": { "type": "integer" } },
+            "target_cond_template": { "type": "integer" }
+          }
+        }
+      }
+    },
+
+    "tag_decl": {
+      "type": "object",
+      "required": ["id", "name"],
+      "properties": {
+        "id":              { "type": "integer", "minimum": 1 },
+        "name":            { "type": "string" },
+        "default":         { "type": "integer" },
+        "retain_when_die": { "type": "boolean" },
+        "tag_type":        { "type": "string" }
+      }
+    },
+
+    "flow_step": {
+      "oneOf": [
+        { "$ref": "#/definitions/step_cast_anim" },
+        { "$ref": "#/definitions/step_cast_effect" },
+        { "$ref": "#/definitions/step_delay" },
+        { "$ref": "#/definitions/step_bullet" },
+        { "$ref": "#/definitions/step_play_sound" },
+        { "$ref": "#/definitions/step_camera_shake" },
+        { "$ref": "#/definitions/step_apply_buff" },
+        { "$ref": "#/definitions/step_remove_buff" },
+        { "$ref": "#/definitions/step_modify_tag" },
+        { "$ref": "#/definitions/step_condition_branch" },
+        { "$ref": "#/definitions/step_raw" },
+        { "$ref": "#/definitions/step_displacement" },
+        { "$ref": "#/definitions/step_summon_clone" },
+        { "$ref": "#/definitions/step_two_stage_skill" },
+        { "$ref": "#/definitions/step_return_to_clone" },
+        { "$ref": "#/definitions/step_aoe_circle" }
+      ]
+    },
+
+    "step_cast_anim": {
+      "type": "object",
+      "required": ["cast_anim"],
+      "additionalProperties": false,
+      "properties": {
+        "cast_anim": {
+          "type": "object",
+          "required": ["anim_id"],
+          "properties": {
+            "anim_id":     { "type": "integer" },
+            "speed_pct":   { "type": "integer", "default": 100 },
+            "blend_ms":    { "type": "integer", "default": 200 },
+            "upper_body":  { "type": "boolean", "default": false },
+            "movable_break":{ "type": "boolean", "default": true },
+            "rapid_affect":{ "type": "boolean", "default": false },
+            "entity":      { "type": "string", "default": "entity:主体", "description": "动作播放单位（默认主体）" },
+            "desc":        { "type": "string" }
+          }
+        }
+      }
+    },
+
+    "step_cast_effect": {
+      "type": "object",
+      "required": ["cast_effect"],
+      "additionalProperties": false,
+      "properties": {
+        "cast_effect": {
+          "type": "object",
+          "required": ["model_id"],
+          "properties": {
+            "model_id":         { "type": "integer" },
+            "duration_frames":  { "type": "integer", "default": 30 },
+            "scale_pct":        { "type": "integer", "default": 100 },
+            "destroy_delay_ms": { "type": "integer", "default": 1000 },
+            "speed_pct":        { "type": "integer", "default": 100 },
+            "follow":           { "type": "string", "default": "entity:主体" },
+            "z_height":         { "type": "integer", "default": 0 },
+            "rapid_affect":     { "type": "boolean", "default": true },
+            "desc":             { "type": "string" }
+          }
+        }
+      }
+    },
+
+    "step_delay": {
+      "type": "object",
+      "required": ["delay"],
+      "additionalProperties": false,
+      "properties": {
+        "delay": {
+          "type": "object",
+          "required": ["frames", "then"],
+          "properties": {
+            "frames":         { "oneOf": [ {"type": "integer"}, {"type": "string"} ] },
+            "then":           { "type": "array", "items": { "$ref": "#/definitions/flow_step" } },
+            "die_continue":   { "type": "boolean", "default": false },
+            "rapid_affect":   { "type": "boolean", "default": true },
+            "desc":           { "type": "string" }
+          }
+        }
+      }
+    },
+
+    "step_bullet": {
+      "type": "object",
+      "required": ["bullet"],
+      "additionalProperties": false,
+      "properties": {
+        "bullet": {
+          "type": "object",
+          "required": ["pattern"],
+          "properties": {
+            "pattern":        { "enum": ["直线子弹", "回旋飞回", "圆形AOE", "链状指示器"], "description": "v1.2: 直线子弹（单/多颗直飞）/ 回旋飞回（双 Bullet 接力：飞出阶段无伤 + 回飞阶段有伤）/ 圆形AOE（FlyType=0 静态子弹挂碰撞模板，命中落点范围所有敌方）/ v2.5 链状指示器（FlyType=0 + Model=4 空锚点 + ChainModel 跨主体↔目标视觉光链 / 端绑机制：BeforeBorn=FOLLOW_ENTITY 子弹跟主体 + AfterBorn=MODIFY_ATTR(118=TBN_CHAIN_TARGET_ENTITY) 把链端绑到目标 / 默认无伤纯视觉）" },
+            "bullet_id":      { "type": "integer", "description": "BulletConfig ID。pattern=回旋飞回 时为飞出阶段子弹（Bullet1），可省略让编译器自动分配内联 ID。pattern=链状指示器 时可省略（编译器自动从 IP=250 段分配）" },
+            "chain_model_id": { "type": "integer", "description": "v2.5 仅 pattern=链状指示器 用：链视觉 ModelConfig ID（如复用 280103 狮妖连线的 2800355）。默认 2800355。" },
+            "life_frames":    { "type": "integer", "description": "v2.5 仅 pattern=链状指示器 用：子弹/链 持续帧数（30 帧=1 秒铁律）。默认 60 = 2 秒。" },
+            "bind_to":        { "type": "string", "enum": ["目标", "主体", "施法者"], "description": "v2.5 仅 pattern=链状指示器 用：链的目标端绑到哪个实体。默认'目标'。" },
+            "no_hit":         { "type": "boolean", "description": "v2.5 仅 pattern=链状指示器 用：true=纯视觉无伤害（不挂碰撞 hit 模板）。默认 true。" },
+            "return_bullet_id": { "type": "integer", "description": "v1.2 仅 pattern=回旋飞回 用：回飞阶段子弹（Bullet2）。可省略让编译器自动分配" },
+            "creator":        { "type": "string", "default": "entity:主体" },
+            "offset_forward": { "type": "integer", "default": 0 },
+            "offset_right":   { "type": "integer", "default": 0 },
+            "z_height":       { "type": "integer", "default": 0 },
+            "is_projectile":  { "type": "boolean", "default": true },
+            "rapid_affect":   { "type": "boolean", "default": false },
+            "angles":         { "type": "array", "items": { "type": "integer" }, "description": "v1.1 多颗子弹相对 caster.facing 的角度偏移数组（单位：度）。例 [-30,0,30] 表示 3 颗扇形分布。不写=单颗（向后兼容）。" },
+            "boomerang": {
+              "type": "object",
+              "description": "v1.2 仅 pattern=回旋飞回 用：双 Bullet 接力轨迹参数",
+              "required": ["flight_frames", "max_distance", "return_speed"],
+              "properties": {
+                "flight_frames":  { "type": "integer", "description": "飞出阶段帧数（Bullet1 LastTime 飞行部分）" },
+                "hover_frames":   { "type": "integer", "default": 0, "description": "悬停阶段帧数（Bullet1 LastTime 悬停部分；总 LastTime = flight + hover）" },
+                "max_distance":   { "type": "integer", "description": "Bullet1 最远飞行距离（cm）" },
+                "return_speed":   { "type": "integer", "description": "Bullet2 回飞速度（cm/秒）" }
+              }
+            },
+            "hit":            { "$ref": "#/definitions/hit_block" },
+            "desc":           { "type": "string" }
+          }
+        }
+      }
+    },
+
+    "hit_block": {
+      "type": "object",
+      "description": "子弹/技能命中后效果配置",
+      "properties": {
+        "collision_radius":   { "type": "integer", "default": 400 },
+        "collision_height":   { "type": "integer", "default": 360 },
+        "detect_interval":    { "type": "integer", "default": 1, "description": "侦测间隔(帧) — 默认 1 (PostMortem #036 用户实战经验值，与碰撞模板自身默认一致；旧默认 10 已废)" },
+        "detect_cooldown":    { "type": "integer", "default": 10, "description": "侦测冷却(帧) — 默认 10 (PostMortem #036 用户实战经验值，与碰撞模板自身默认一致；同一目标两次成功侦测之间的冷却)" },
+        "destroy_on_hit":     { "type": "boolean", "default": true },
+        "hit_effect_model":   { "type": "integer", "description": "ModelConfig ID, 命中特效模型" },
+        "damage": {
+          "type": "object",
+          "properties": {
+            "element": { "oneOf": [
+              { "enum": ["随技能", "金", "木", "水", "火", "土"] },
+              { "type": "integer" }
+            ]},
+            "type": { "oneOf": [
+              { "enum": ["随技能", "物理", "法术", "真实"] },
+              { "type": "integer" }
+            ]},
+            "coef":          { "type": "integer", "description": "威力系数 ×10000，例如 15000 = 150%" },
+            "extra":         { "type": "integer", "description": "自定义额外伤害；-1=读参数" },
+            "subtype_flags": { "type": "integer", "description": "技能子类型 flags（伤害标签）" },
+            "is_critical":   { "type": "boolean", "default": false }
+          }
+        },
+        "damage_phase": {
+          "enum": ["forward_only", "return_only", "both"],
+          "default": "forward_only",
+          "description": "v1.2: 子弹哪个阶段才造伤。forward_only=仅飞出（默认）/ return_only=仅回飞（pattern=回旋飞回 强制此值）/ both=双向"
+        },
+        "explosion": {
+          "type": "object",
+          "description": "v1.1 命中后在命中点造圆形 AOE 二次伤害（用 TSET_DAMAGE_QUICK 实现）",
+          "required": ["radius"],
+          "properties": {
+            "radius":      { "type": "integer", "description": "AOE 圆半径（厘米）" },
+            "target_camp": { "oneOf": [
+              { "enum": ["敌方", "友方", "所有", "自己"] },
+              { "type": "integer" }
+            ], "default": "敌方" },
+            "damage": {
+              "type": "object",
+              "properties": {
+                "element": { "oneOf": [
+                  { "enum": ["随技能", "金", "木", "水", "火", "土"] },
+                  { "type": "integer" }
+                ]},
+                "type": { "oneOf": [
+                  { "enum": ["随技能", "物理", "法术", "真实"] },
+                  { "type": "integer" }
+                ]},
+                "coef":          { "type": "integer", "description": "威力系数 ×10000" },
+                "extra":         { "type": "integer", "default": -1 },
+                "subtype_flags": { "type": "integer", "default": 16 }
+              }
+            }
+          }
+        },
+        "on_hit_buff": {
+          "type": "object",
+          "description": "v1.1 命中后给命中目标挂 Buff（v1 仅单个 buff；多 buff 待 v1.2）",
+          "required": ["buff_id"],
+          "properties": {
+            "buff_id":         { "type": "integer" },
+            "duration_frames": { "type": "integer", "default": 0 },
+            "stack":           { "type": "integer", "default": 1 },
+            "target":          { "type": "string", "default": "entity:目标" }
+          }
+        },
+        "extra": { "type": "array", "items": { "$ref": "#/definitions/flow_step" } }
+      }
+    },
+
+    "step_play_sound": {
+      "type": "object",
+      "required": ["play_sound"],
+      "additionalProperties": false,
+      "properties": {
+        "play_sound": {
+          "type": "object",
+          "required": ["sound_type"],
+          "properties": {
+            "voice_id":   { "type": "string", "default": "entity:主体伤害归属" },
+            "sound_type": { "type": "integer" },
+            "config":     { "type": "integer", "default": 1 }
+          }
+        }
+      }
+    },
+
+    "step_camera_shake": {
+      "type": "object",
+      "required": ["camera_shake"],
+      "additionalProperties": false,
+      "properties": {
+        "camera_shake": {
+          "type": "object",
+          "required": ["shake_id"],
+          "properties": {
+            "shake_id":  { "type": "integer" },
+            "executor":  { "type": "string", "default": "entity:施法者根" },
+            "target":    { "type": "string", "default": "1" },
+            "radius":    { "type": "integer", "default": 800 },
+            "priority":  { "type": "integer", "default": 1 }
+          }
+        }
+      }
+    },
+
+    "step_apply_buff": {
+      "type": "object",
+      "required": ["apply_buff"],
+      "additionalProperties": false,
+      "properties": {
+        "apply_buff": {
+          "type": "object",
+          "required": ["buff_id"],
+          "properties": {
+            "buff_id":          { "type": "integer" },
+            "host":             { "type": "string", "default": "entity:目标" },
+            "source":           { "type": "string", "default": "entity:主体" },
+            "duration_frames":  { "type": "integer", "default": 0 },
+            "interval_frames":  { "type": "integer", "default": 0 },
+            "layers":           { "type": "integer", "default": 1 },
+            "rapid_affect":     { "type": "boolean", "default": true }
+          }
+        }
+      }
+    },
+
+    "step_remove_buff": {
+      "type": "object",
+      "required": ["remove_buff"],
+      "additionalProperties": false,
+      "properties": {
+        "remove_buff": {
+          "type": "object",
+          "required": ["buff_id"],
+          "properties": {
+            "target":  { "type": "string", "default": "entity:目标" },
+            "buff_id": { "type": "integer" }
+          }
+        }
+      }
+    },
+
+    "step_modify_tag": {
+      "type": "object",
+      "required": ["modify_tag"],
+      "additionalProperties": false,
+      "properties": {
+        "modify_tag": {
+          "type": "object",
+          "required": ["tag_id", "value"],
+          "properties": {
+            "owner":    { "type": "string", "default": "entity:主体" },
+            "skill_id": { "type": "string", "default": "0" },
+            "tag_id":   { "type": "integer" },
+            "value":    { "type": "integer" }
+          }
+        }
+      }
+    },
+
+    "step_condition_branch": {
+      "type": "object",
+      "required": ["if"],
+      "additionalProperties": false,
+      "properties": {
+        "if":   { "type": "string", "description": "条件 ID 引用或简短表达式" },
+        "then": { "type": "array", "items": { "$ref": "#/definitions/flow_step" } },
+        "else": { "type": "array", "items": { "$ref": "#/definitions/flow_step" } }
+      }
+    },
+
+    "step_raw": {
+      "type": "object",
+      "required": ["raw_node"],
+      "additionalProperties": false,
+      "description": "兜底：直接指定一个 TSET_*/TSCT_*/TSKILLSELECT_* 节点 + Params。",
+      "properties": {
+        "raw_node": {
+          "type": "object",
+          "required": ["class", "params"],
+          "properties": {
+            "class":  { "type": "string", "pattern": "^(TSET_|TSCT_|TSKILLSELECT_)" },
+            "desc":   { "type": "string" },
+            "params": { "type": "array" }
+          }
+        }
+      }
+    },
+
+    "step_displacement": {
+      "type": "object",
+      "required": ["displacement"],
+      "additionalProperties": false,
+      "description": "v2.0：高速位移（编译为调用 175_0023 位移_按速度距离 模板）",
+      "properties": {
+        "displacement": {
+          "type": "object",
+          "required": ["distance", "speed"],
+          "properties": {
+            "direction":     { "oneOf": [
+              { "enum": ["朝向指示器", "朝向目标", "面向"] },
+              { "type": "integer", "description": "指定角度（度）" }
+            ], "default": "朝向指示器" },
+            "distance":      { "type": "integer", "description": "位移距离（cm）" },
+            "speed":         { "type": "integer", "description": "位移速度（cm/帧）" },
+            "invulnerable":  { "type": "boolean", "default": true, "description": "位移期间是否无敌" },
+            "hit_along_path":{
+              "type": "object",
+              "description": "沿途伤害（可选）",
+              "properties": {
+                "damage": { "$ref": "#/definitions/hit_block/properties/damage" },
+                "tick_frames": { "type": "integer", "default": 3 }
+              }
+            },
+            "desc":          { "type": "string" }
+          }
+        }
+      }
+    },
+
+    "step_summon_clone": {
+      "type": "object",
+      "required": ["summon_clone"],
+      "additionalProperties": false,
+      "description": "v2.0：召唤残影/分身单位（调用 146004117 模板）",
+      "properties": {
+        "summon_clone": {
+          "type": "object",
+          "required": ["clone_unit_id", "duration_frames"],
+          "properties": {
+            "clone_unit_id":    { "type": "integer", "description": "残影 BattleUnitConfig ID" },
+            "duration_frames":  { "type": "integer", "description": "残影存活帧数" },
+            "position":         { "type": "string", "default": "当前位置", "description": "可选：当前位置 / 施法者位置 / 施法前位置 / 指示器位置 / entity:位置X 引用" },
+            "invulnerable":     { "type": "boolean", "default": true },
+            "record_position_to_tag": { "type": "integer", "description": "记录残影位置到 SkillTag（用于后续 return_to_clone 读取）" },
+            "active_pattern": {
+              "type": "object",
+              "description": "v2.0 PoC：残影主动行为（周期搜敌发弹）— 实现机制实验中",
+              "properties": {
+                "search_radius":     { "type": "integer", "description": "搜敌范围（cm）" },
+                "target_camp":       { "oneOf": [
+                  { "enum": ["敌方", "友方", "所有"] },
+                  { "type": "integer" }
+                ], "default": "敌方" },
+                "interval_frames":   { "type": "integer", "description": "搜敌+发弹间隔帧数（如 60=2 秒@30fps）" },
+                "on_target_found":   { "type": "array", "items": { "$ref": "#/definitions/flow_step" }, "description": "找到目标后执行的 step 列表（如 bullet）" }
+              }
+            },
+            "desc":             { "type": "string" }
+          }
+        }
+      }
+    },
+
+    "step_two_stage_skill": {
+      "type": "object",
+      "required": ["two_stage_skill"],
+      "additionalProperties": false,
+      "description": "v2.1：两段式技能（按键真机制：编译为 first_stage 末尾调 44014633 修改单位槽位，把当前槽位换成 second_stage_skill_id；second_stage 单独编译为独立 SkillConfig JSON）",
+      "properties": {
+        "two_stage_skill": {
+          "type": "object",
+          "required": ["first_stage", "second_stage"],
+          "properties": {
+            "state_tag_id":      { "type": "integer", "description": "v2.0 兼容字段；v2.1 已不使用（按键机制改为槽位切换）" },
+            "first_stage":       { "type": "array", "items": { "$ref": "#/definitions/flow_step" }, "description": "第一段（首次按键）" },
+            "second_stage":      { "type": "array", "items": { "$ref": "#/definitions/flow_step" }, "description": "第二段（再次按键，独立 SkillConfig）" },
+            "auto_reset_frames": { "type": "integer", "default": 600, "description": "第二段技能槽位持续时间；超时自动还原原技能（44014633 [4] 持续时间）" },
+            "second_stage_skill_id": { "type": "integer", "description": "v2.1：第二段独立 SkillConfig ID。不写则默认 = meta.skill_id + 1" },
+            "second_stage_skill_name": { "type": "string", "description": "v2.1：第二段技能名（仅用于生成 JSON 文件名）" },
+            "second_stage_cd_frames": { "type": "integer", "default": 0, "description": "v2.2：第二段 SkillConfig 的 CD 帧数（默认 0：触发型子技能不应有独立 CD，否则会卡再次按键）" },
+            "swap_slot": { "oneOf": [
+              { "enum": ["动态", "功法", "奇术1", "奇术2", "神通", "额外1"] },
+              { "type": "integer", "description": "TSkillSlotType 整数值" }
+            ], "default": "动态", "description": "v2.2 默认改为'动态'：用 TSET_GET_SKILL_SLOT_TYPE 取施法者当前装备的本技能槽位（不再按 sub_type 写死）" },
+            "swap_cd_refund_pct": { "type": "integer", "default": 100, "description": "切回原始技能时返还百分比CD（0~100）" },
+            "swap_show_ui":       { "type": "boolean", "default": true, "description": "是否在 UI 上显示修改后技能的持续时间" }
+          }
+        }
+      }
+    },
+
+    "step_return_to_clone": {
+      "type": "object",
+      "required": ["return_to_clone"],
+      "additionalProperties": false,
+      "description": "v2.0：飞回残影位置（调用 175_0024 位移_按速度目标点 模板）",
+      "properties": {
+        "return_to_clone": {
+          "type": "object",
+          "required": ["target_position_tag", "speed"],
+          "properties": {
+            "target_position_tag": { "type": "integer", "description": "读取此 SkillTag 储存的位置（与 summon_clone.record_position_to_tag 配套）" },
+            "speed":               { "type": "integer", "description": "飞回速度（cm/帧）" },
+            "invulnerable":        { "type": "boolean", "default": true },
+            "landing_effect": {
+              "type": "object",
+              "description": "落地特效（可选）",
+              "properties": {
+                "model_id":   { "type": "integer" },
+                "scale_pct":  { "type": "integer", "default": 100 }
+              }
+            },
+            "desc":                { "type": "string" }
+          }
+        }
+      }
+    },
+
+    "step_aoe_circle": {
+      "type": "object",
+      "required": ["aoe_circle"],
+      "additionalProperties": false,
+      "description": "v2.0：圆形 AOE 伤害（在主体位置造范围伤害）",
+      "properties": {
+        "aoe_circle": {
+          "type": "object",
+          "required": ["radius", "damage"],
+          "properties": {
+            "radius":         { "type": "integer", "description": "AOE 半径（cm）" },
+            "target_camp":    { "oneOf": [
+              { "enum": ["敌方", "友方", "所有"] },
+              { "type": "integer" }
+            ], "default": "敌方" },
+            "damage":         { "$ref": "#/definitions/hit_block/properties/damage" },
+            "landing_effect": {
+              "type": "object",
+              "properties": {
+                "model_id":   { "type": "integer" },
+                "scale_pct":  { "type": "integer", "default": 100 }
+              }
+            },
+            "desc":           { "type": "string" }
+          }
+        }
+      }
+    }
+  }
+}

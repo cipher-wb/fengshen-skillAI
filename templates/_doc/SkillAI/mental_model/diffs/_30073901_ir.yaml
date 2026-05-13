@@ -1,0 +1,23 @@
+meta:
+  ir_version: '1.0'
+  skill_id: 30073901
+  skill_name: 石柱护主技能
+  author: decompiled
+skill:
+  element: 金
+  main_type: 本命法宝技
+  sub_type: 协战技
+  skill_name_text: 石柱护主技能
+  skill_desc_text: 石柱护主技能。
+  cd_type: 普通
+  damage_type: 直接伤害
+flow: []
+tags:
+- id: 1900041
+  desc: 法宝护主气血倍率
+  default_value: 1000
+- id: 1900042
+  desc: 法宝护主五行伤害加成
+  default_value: 1000
+- id: 1900049
+  desc: 法宝护主固定值

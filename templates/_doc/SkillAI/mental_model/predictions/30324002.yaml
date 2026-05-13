@@ -1,0 +1,69 @@
+sample_id: '30324002'
+date: 2026-05-09
+batch: B-003
+predicted_with_mental_model_version: v0.3
+targeted_blindspot:
+  id: blindspot-1
+  description: |
+    CdType=0 主动技对照（v0.3 字典写"标签型/被动型/无 CD/引擎托管"，但 30214004 是
+    主动技 CdType=0 + CdTime=0；本样本 30324002 也是主动技 CdType=0 + CdTime=0）
+    预期发现：CdType=0 不限被动型，主动技也可设 CdType=0；语义可能是"无内置 CD / 引擎托管"。
+    第二次 hold-out 印证后，v0.3 字典 §D 应修订"标签型/被动型"语义为"无内置 CD"。
+
+# 闭卷前必读：SkillConfig 5 硬信号（B-001 D-6 起强制）
+skill_config_metadata_seen:
+  SkillNameEditor: '【火宗门】焚天_地阶_焚骨流'
+  SkillSubType: 103
+  Icon: '（未读，但根据 SubType=103 推测属"神通"或"特殊"类）'
+  EnhanceSkillBuffConfigID: '（未确认；需读 JSON 才知）'
+  SkillEffectPassiveExecuteInfo_nonzero: '（未确认）'
+  CdType: 0
+  CdTime: 0
+  notes: |
+    从 5 硬信号 + 元数据看：
+    - 名字"焚骨流"+ 火宗门 → 特殊功法 / 蓄炎流变体（不是普通连招）
+    - SubType=103 在 v0.3 字典外（已知 0/102/901），新值
+    - CdType=0 + CdTime=0 主动技 → 不是"标签型/被动型"，应是"无内置 CD"
+    - 节点 132（中等偏多）+ bullet=4 + REPEAT=2 → 多段火属性技能
+    - top_classes 含 17 GET_SKILL_TAG / 10 NUM_CALCULATE / 6 MOD_ATTR / 8 GET_ENTITY_ATTR
+      → 大量数值计算 + tag 读取 → 可能是层数累加 / 燃烧叠层机制
+    - 4 RUN_TEMPL（不调 146003779）+ 4 ADD_BUFF + 2 BuffConfig → 自身骨架 + buff 计层
+
+prediction:
+  estimated_node_count: 132  # 已知元数据
+  topology_sketch: |
+    SkillConfig (CdType=0, CdTime=0, SubType=103, Active=非0)
+      └─ Active root = ORDER (单 root，模式 A)
+          ├─ DELAY × 1
+          ├─ ORDER → REPEAT × 2 (蓄炎/燃烧累加)
+          │    └─ MOD_TAG / NUM_CALCULATE
+          ├─ ORDER → CREATE_BULLET × 4 (多段子弹)
+          │    └─ BulletConfigNode × N + ModelConfigNode × 5
+          ├─ ORDER → ADD_BUFF × 4 (4 个 buff 状态层)
+          │    └─ BuffConfigNode × 2 (其中 2 个有 flow 内 BuffConfig，剩 2 个外部表)
+          └─ ORDER → RUN_TEMPL × 4 (调子弹命中 175_xxxx 类工具模板)
+
+    猜测：本样本是"火属性蓄炎流"主动技变体（不调 146003779 持续施法模板），
+    自己写蓄炎逻辑（REPEAT_EXECUTE × 2 累加层数）+ 4 段火球弹幕。
+    CdType=0 = 无内置 CD，主动施放后靠 buff / 蓄势条 限制频次。
+
+  expected_templates:
+    - '不调 146003779（已确认）'
+    - '可能调 175 段位（子弹通用命中流程）— 4 RUN_TEMPL + 8 类似拓扑'
+    - '可能调 1860xxx 段位（动态创建子弹工具）— 因为有 5 ModelConfig'
+
+  touched_subsystems:
+    - 模板系统（自调子弹工具模板）
+    - 控制流子系统（17 ORDER + 2 REPEAT + 1 DELAY，不依赖 RUN_TEMPL 包大骨架）
+    - SkillEntry 系统（模式 A 纯 Active 推测）
+    - Buff 系统（4 ADD_BUFF + 2 BuffConfig — flow 内/外混合）
+    - SkillTag 系统（17 GET + 3 MOD_TAG，重度蓄势机制）
+    - SkillEvent 系统（推测 0 个 REGISTER，flag 显示 has_register_event=False）
+
+  confidence: 中
+  rationale: |
+    主要不确定的点：
+    1. SubType=103 是 v0.3 字典外，无法从已知 SubType 0/102/901 推机制
+    2. 节点数 132 但只 4 RUN_TEMPL → 大量平铺 ORDER/MOD_TAG 自写蓄炎逻辑
+    3. CdType=0 + CdTime=0 + 主动技 是 v0.3 反直觉点 — 期待此样本验证字典语义
+    4. ADD_BUFF=4 / BuffConfig=2 不平衡 → 部分 buff 引用外部表（盲点 4 弱印证）

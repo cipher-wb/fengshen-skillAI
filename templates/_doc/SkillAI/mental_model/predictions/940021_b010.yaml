@@ -1,0 +1,46 @@
+sample_id: "940021"
+date: 2026-05-10
+batch: B-010
+subdir: 技能
+mode: closed-book PREDICT
+
+skill_config_metadata_seen:
+  category: "**SkillConfigNode 存在 + IsTemplate=False**（罕见模式 2 / 与 1860139 同范式）"
+  filename_hint: "【模板】循环动作模板"
+  refs_count: 11
+  IsTemplate_count: 1
+  TemplateParam_count: 0
+  SubType_seen: 0
+  top_classes: {PLAY_ROLE_ANIM: 3, DELAY: 2, SkillInterruptConfigNode: 2, ORDER: 1, NUM_CALC: 1, SkillConfigNode: 1}
+  notes: |
+    **类别 2b 第二例**（SkillConfigNode + IsTemplate=True 同时成立）。
+    PLAY_ROLE_ANIM × 3 + DELAY × 2 = 循环动作播放（Anim → 延迟 → 重复）。
+    **SkillInterruptConfigNode × 2** = 中断配置嵌入！这是已学样本中首次见到的"模板内嵌中断配置" 模式，可能是 v0.6 §仍不确定 / 候选 [中断系统] 子系统页的驱动信号。
+    段位 940xxx 已在 v0.4-v0.5 字典外（B-008 已学 940068 / 940058 / 940086 / 940107 — 940 段位主要是 BUFF / 心法 deprecated 形态，候选 SubType=1001 怪物 deprecated）。
+
+prediction:
+  estimated_node_count: 18  # 11 refs + ORDER root + SkillConfig + Interrupt × 2 + 端口
+  topology_sketch: |
+    SkillConfigNode (顶层)
+      → ORDER root (IsTemplate=True, ID=940021)
+        → ORDER 串行：
+          PLAY_ROLE_ANIM (开始动作)
+          DELAY × 2 (按动作时长延迟)
+          PLAY_ROLE_ANIM × 2 (循环段动作)
+          NUM_CALC (循环计数)
+        → SkillInterruptConfigNode × 2 (注册 2 类中断条件：被攻击中断 / 主动取消)
+  expected_templates_called: []
+  touched_subsystems: [模板系统, 控制流子系统（DELAY 时间锚）, SkillEvent 系统（SkillInterruptConfigNode 与 EvType 关联）, 中断系统（候选首次触碰）]
+  predicted_template_form: |
+    形态：**循环动作 + 中断配置 包装型工具模板**——典型"持续动作技能"骨架（与 146003779 持续施法 形成对比 — 146003779 是 SkillEvent 短/长按 UI 分支型，本样本是 PLAY_ANIM + DELAY 时间循环型）。
+    SkillInterruptConfigNode × 2 嵌入 = "中断点声明" — 不是 ADD_BUFF / REMOVE_BUFF，而是模板内部的中断条件表（疑：SkillInterruptConfigNode 的字段语义包括"中断时跳转的 effect_id" 或 "中断时是否取消整个调用方技能"）。
+  predicted_internal_signature_for_skillentry_diff: |
+    类别 2b 第二例（与 1860139 同 — SkillConfigNode + IsTemplate=True 共存）。
+    与 1860139 子型差异：
+    - 1860139 = 工具型数学（NUM_CALC × 10 主导）
+    - 940021 = 流程型动作（PLAY_ANIM + DELAY 主导 + Interrupt 嵌入）
+    → 类别 2b 内部还有子子型，但都共享"SkillConfigNode 包装"的形态共性。
+  notes: |
+    高 confidence：循环动作 + Interrupt 模板（PLAY_ANIM / DELAY 是熟字典）。
+    新结构 SkillInterruptConfigNode 嵌入模板：候选 [中断系统] 子系统页（已学样本中首次正式触碰）。
+    候选 D-1004：技能/ 子目录 30 文件（v0.9.1_actionable.md 误标"心法"），实际 940021 不是心法形态，是动作循环工具——RQ-B10-4 答案应矫正为"技能/ 子目录是 [动作 + 持续施法 + 段位变化] 等通用技能骨架的工具模板，非心法专属"。

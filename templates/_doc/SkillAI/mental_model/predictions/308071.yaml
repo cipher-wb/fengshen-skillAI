@@ -1,0 +1,52 @@
+sample_id: "308071"
+date: "2026-05-10"
+batch: B-005
+focus: "1B: SubType=303 Mode C closed-book test (drift fix)"
+
+skill_config_metadata_seen:
+  SkillNameEditor: "(decoded as garbage 法宝名)"  # encoding issue, SubType clear
+  SkillSubType: 303
+  Icon: "Skill/GongFa/Mu/skill_mu_302101"
+  EnhanceSkillBuffConfigID: 0
+  SkillEffectExecuteInfo_root: 44013190  # ⚠️ 非 0！
+  SkillEffectPassiveExecuteInfo_root: 0
+  SkillEffectFlowList_len: 0
+  IndicatorType: 2
+  notes: |
+    ⚠️ **重大反例信号**：本样本 Active=44013190 / Passive=0 → **Mode A 纯 Active**！
+    我（curator）原本预设 SubType=303 法宝候选会大概率是 Mode C 或 Mode E（与 308072 青木天葬镜像），
+    但 308071 居然是 Mode A 纯 Active——
+    这进一步推翻 v0.5 D-403 "SubType=303/501/701 共同特征 = 双 0 入口" 的过度归纳。
+    SubType=303 法宝内同时有：Mode A (308071)、Mode E (308072 已学)。
+    Icon path 提示是"木属性"法宝，与 30510007 / 30532001 系列同源。
+
+prediction:
+  estimated_node_count: 221  # corpus_scan 已知
+  topology_sketch: |
+    单 root（Active=44013190）→ ORDER →
+      [指示器/选目标 IndicatorType=2 直线]
+      → [9 RUN_TEMPL 包含 三联包 190xxx × 8 + 186 × 1]
+         三联包：190016523 × 3 + 190016485 × 3 + 190016404 × 2  ← 已扫确认
+      → 多段命中 / Buff 应用
+    法宝召唤激发型，但走纯 Active 入口（被动技能槽位由其他法宝技能承担）
+  expected_templates: [190016404, 190016485, 190016523, "186xxx 一个"]
+  expected_template_segments: ["190xxx (三联包)", "186xxx"]  # 已扫确认
+  touched_subsystems:
+    - SkillEntry      # Mode A 反例
+    - 模板系统          # 三联包 v0.5 D-401 完整复现 (8/9)
+    - SkillEvent      # has_register_event = True / has_skill_event_callback = True
+    - 实体碰撞与可见性  # IndicatorType=2 指示器
+    - Buff            # 法宝典型
+
+  entry_mode_prediction: "A"  # ⭐ 与 focus 1 hypothesis（推 Mode C）反向
+  entry_mode_rationale: |
+    Active=44013190 + Passive=0 直接命中 SkillEntry §1 不变量 1 模式 A 定义。
+    **这是双重 drift signal**：
+    1. v0.5 hold-out 已暴露 Mode E 过度推；
+    2. 现在 308071 进一步暴露 SubType=303 Mode A 也存在——SubType 与入口模式正交，
+       AI 任何"SubType=X → Mode Y"的强映射都是错的。
+    **正确推理**：SubType=303 内至少有 Mode A (308071) / Mode C 候选 / Mode E (308072)，三模式并存。
+
+  expected_quality:
+    sample_score_target: 0.85+
+    high_risk_dimensions: ["子系统识别（双驱动模式难判）"]

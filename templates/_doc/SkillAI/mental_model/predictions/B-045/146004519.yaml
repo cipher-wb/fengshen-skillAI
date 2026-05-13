@@ -1,0 +1,23 @@
+sample_id: 146004519
+filename: SkillGraph_146004519_【子模板】伤害流程_计算最终伤害增加乘区.json
+subcat: 模板-伤害 / 伤害加成
+nodes: 4
+segment_guess: 1460_7d_子模板_伤害流程_最终伤害增加乘区
+closed_book_inferences:
+  - master_flag: 1 (IsTemplate=True / filename 含【子模板】)
+  - structure: 4 nodes 极简 / 子模板 → SCN + 1-3 计算/伤害节点
+  - SubClass: NSC-style (D-2801 + D-4004) / dual_NULL
+  - SC=True / NSC=True
+  - ConfigJson 全标量字段=0 (D-4002 (A) cousin / 子模板族 4 nodes 极简形态)
+  - ConfigJson.ElementType: 0 (模板 / D-4006 ET=None 解耦)
+  - 段位号系 ref: 0 (子模板独立)
+  - filename_pattern: 子模板 + 伤害流程 + 计算 X 乘区 → 与 146004518 同族子模板形态 (兄弟号)
+deltas_touched_predicted:
+  - D-2401 (master flag): expect 1
+  - D-2706 (模板第 3 形态): expect True (4 nodes 子模板第 3 形态)
+  - D-2801 (NSC 独立平行路径): expect True
+  - D-4002 (A) (30512xxx 标量全零 → 1460 子模板族 cousin): cousin family 候选 / +1 例待 fs 真扫
+  - D-4004 (模板 NSC dual_NULL): expect True
+  - D-4006 (path ≠ ET 解耦): expect ET=None
+  - 元发现新候选 #66 (1460 子模板族命名规则): 146004518 + 146004519 兄弟号 "计算 X 乘区" / 升 candidate 阈值 ≥3 续累积
+predicted_sample_score_self: 0.85 (4 nodes 极简子模板 + NSC dual_NULL + 兄弟号 146004518 同族 / 95%+ 确定)

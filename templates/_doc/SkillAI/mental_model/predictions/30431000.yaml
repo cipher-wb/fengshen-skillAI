@@ -1,0 +1,61 @@
+sample_id: 30431000
+sample_path: 宗门技能/SkillGraph_30431000【金宗门】枪影阻敌_身法_天阶.json
+predicted_at: 2026-05-09
+mental_model_version_used: v0.1
+metadata_known_at_prediction:
+  node_count: 79
+  category: 宗门技能
+  sub_category: 金宗门技能
+  top_classes_visible:
+    TSET_ORDER_EXECUTE: 11
+    TSET_DELAY_EXECUTE: 5
+    TSET_RUN_SKILL_EFFECT_TEMPLATE: 5
+    TSET_GET_SKILL_TAG_VALUE: 5
+    TSET_MODIFY_SKILL_TAG_VALUE: 0
+  flags_visible:
+    is_movement_skill: likely  # 名字含"身法"
+    skill_tag_read_only: true
+prediction:
+  semantic_intent: |
+    "枪影阻敌_身法" — 名字直觉是"位移突进+阻敌（控制）"。
+    身法 = 位移技能，应有 has_displacement=true（前冲/瞬移）；
+    "枪影" = 武器特效轨迹（可能多个分身/残影）；
+    "阻敌" = 减速/眩晕/击退/根性；
+    天阶 = 顶级身法；
+    79 节点（5 个里最少）+ MOD_TAG=0 + GET_TAG=5 → 干脆型技能，只读 tag 无写入；
+    DELAY=5 + ORDER=11 → 短串行流（位移 → 攻击 → 控制）。
+  topology_mermaid: |
+    flowchart LR
+      A[出招] --> B[ORDER 主流程]
+      B --> C[GET_TAG 攻击属性/朝向]
+      C --> D[位移：前冲 displacement]
+      D --> E[DELAY 启动延迟]
+      E --> F[ORDER 攻击段]
+      F --> G[RUN_TEMPL 子弹/碰撞]
+      G --> H[apply 控制 buff/眩晕]
+      H --> I[DELAY 收招]
+      I --> J[RUN_TEMPL 视觉残影]
+  predicted_node_count: 65
+  templates_used_predicted:
+    - 位移/突进模板
+    - 子弹通用逻辑-碰撞
+    - 控制 buff 模板（减速/眩晕）
+    - 金属性破甲特效
+  subsystems_touched_predicted:
+    - 控制流子系统
+    - 位移/移动系统 (这是新子系统)
+    - SkillTag 系统 (只读)
+    - 触发器与碰撞 (位移过程的扫掠碰撞)
+    - 伤害管线
+  prediction_confidence: 中
+  reasoning: |
+    "身法"对应的位移系统我心智完全空白——不知道用啥节点实现 displacement。
+    79 节点对位移技能来说算多——可能位移阶段本身就有 30+ 节点（轨迹/扫描/朝向）。
+    最大不确定：
+    - 位移节点是单个节点还是一组？
+    - "枪影"是真子弹（has bullet）还是纯视觉（VFX-only）？
+    - "阻敌"用什么 buff 类型实现
+expected_blind_spots:
+  - 位移技能的标准节点结构
+  - 武器型技能（无明显 bullet）的伤害实现方式（武器扫掠？）
+  - "天阶身法"的时间结构对比"地阶身法"差异

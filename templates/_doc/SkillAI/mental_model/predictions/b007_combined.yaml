@@ -1,0 +1,423 @@
+# B-007 闭卷 PREDICT (combined for 9 samples)
+# 仅基于 corpus metadata + filename + 5 hard signals + corpus top_classes proxy
+# **未读 flow JSON 内部 nodes**
+# 日期：2026-05-10
+
+# === U1: sid=280002 ===
+- sample_id: 280002
+  tag: U1_empty_sig_mid_refs
+  date: 2026-05-10
+  skill_config_metadata_seen:
+    SkillNameEditor: null
+    SkillSubType: 0
+    Icon: ""
+    EnhanceSkillBuffConfigID: 0
+    SkillEffectPassiveExecuteInfo_nonzero: false
+    extra_seen:
+      IsTemplate: false
+      SkillEffectExecuteInfo_root: 0
+      Mode: "E_dual_zero_fallback"
+      SkillEffectFlowList_len: 0
+      file_size: 54682
+      filename_hint: "SkillGraph_280002_【铁鹰小队】巷战.json"
+      category: 战斗流程
+      corpus_top_classes: {}  # all empty per signature (F,F,F,F,F,F)
+      refs: 23
+    notes: |
+      文件名"【铁鹰小队】巷战"，category=战斗流程，280xxx 段位 v0.6 D-502 字典识为
+      "流程编排型大型内容"。signature (F,F,F,F,F,F) 全空 = 无 buff / tag_cfg / tmpl_run /
+      reg_event / bullet / damage 节点。但 refs=23 说明仍有 23 个引用——这意味着
+      flow 内部一定有非"已编码"节点类型（可能是 SwitchSkillSlot / ChangeSkillBuild /
+      场景调度 / NPC 招募 / dialogue 等关卡控制原语）。Mode E（双 0 fallback）= 无入口
+      = 完全靠外部触发（剧本侧调用此 sid 走外驱）。
+  prediction:
+    type1to5_classification_guess: "type6 候选 (workflow_orchestrator)"
+    rationale: |
+      这是非战斗的"剧情/关卡调度"型文件，不应套 type1-5（type1-5 都偏战斗机制）。
+      预期内含 dialog / scene / npc 操作型节点。如果可编码 → 新增 type6_workflow_orchestrator。
+    real_unknown_or_codable: "可再编码"
+    estimated_node_count: 30  # refs=23 + 一些控制节点 ≈ 30 nodes
+    topology_sketch: |
+      SkillConfig (双 0)
+      └── (无 root flow)
+      ↓ 但 refs=23 暗示散落在 SerializedNodes 里的关卡调度 / 对话 / NPC 招募节点
+      └── 可能由外部 LogicScene/Marker 系统直接调用 inner nodes（rid 引用）
+    expected_subsystems: ["关卡/剧情调度系统(未建)", "SkillEntry 系统(Mode E 入口)"]
+    expected_RQ_answer:
+      RQ-B7-1: "可再编码 type6_workflow_orchestrator"
+      RQ-B7-4: "type1-5 启发式过严漏检：280xxx 该类应单独编码"
+
+# === U2: sid=1860231 ===
+- sample_id: 1860231
+  tag: U2_empty_sig_hi_refs
+  date: 2026-05-10
+  skill_config_metadata_seen:
+    SkillNameEditor: null
+    SkillSubType: 0
+    Icon: ""
+    EnhanceSkillBuffConfigID: 0
+    SkillEffectPassiveExecuteInfo_nonzero: false
+    extra_seen:
+      IsTemplate: false
+      SkillEffectExecuteInfo_root: 0
+      Mode: "E_dual_zero_fallback"
+      SkillEffectFlowList_len: 0
+      file_size: 625873  # 极大！
+      filename_hint: "SkillGraph_1860231【模板】掩护跟随逻辑_已废弃.json"
+      category: 技能模板
+      sub_category: 系统
+      corpus_top_classes: {}
+      refs: 265
+    notes: |
+      ⚠️ 文件名"【模板】掩护跟随逻辑_已废弃"——明示已废弃。但 refs=265 + 文件大小 625KB
+      表明历史上是巨型文件。signature (F,F,F,F,F,F) 但实际可能是工具检测漏掉了节点类
+      （废弃文件 IsTemplate=false 但文件名带"模板"，矛盾）。corpus 标 UNKNOWN 但实际
+      可能是 type5（refs ≥ 50 上限），是 type1-5 启发式 false negative。
+  prediction:
+    type1to5_classification_guess: "type5 (大型自含) 漏检 / 或 type6 deprecated_residue"
+    rationale: |
+      refs=265 远超 type5 阈值（≥50）但 has_tmpl_run/has_buff/has_damage 全 0。可能是：
+      (a) type5 漏检——内部用未编码原语（如 RUN_SKILL_TEMPLATE 之外的 effect class）；
+      (b) deprecated 残留——文件名标"已废弃"，实际不被运行时引用。
+      RQ-B7-4 候选正样本：启发式过严遮蔽了大文件。
+    real_unknown_or_codable: "type5 漏检 (rule_4 false negative)"
+    estimated_node_count: 280  # refs=265 → ~280 nodes
+    topology_sketch: |
+      SkillConfig (双 0)
+      └── 大型 SerializedNodes pool (~265 节点) 散乱
+      └── 可能 IsTemplate 字段历史遗留为 false 但内部仍是模板形态
+    expected_subsystems: ["模板系统", "deprecated_residue (新概念候选)"]
+    expected_RQ_answer:
+      RQ-B7-3: "type5 启发式 false negative（refs=265 该入 type5）"
+      RQ-B7-4: "工具应额外 fallback：refs >= 50 + IsTemplate=false + flag 全 0 → 强制重读 SerializedNodes 类分布"
+
+# === U3: sid=940107 ===
+- sample_id: 940107
+  tag: U3_buff_only_no_trigger_subtype1001
+  date: 2026-05-10
+  skill_config_metadata_seen:
+    SkillNameEditor: null
+    SkillSubType: 1001
+    Icon: ""
+    EnhanceSkillBuffConfigID: 0
+    SkillEffectPassiveExecuteInfo_nonzero: false
+    extra_seen:
+      IsTemplate: false
+      SkillEffectExecuteInfo_root: 0
+      Mode: "E_dual_zero_fallback"
+      SkillEffectFlowList_len: 0
+      file_size: 153982
+      filename_hint: "SkillGraph_940107【死气】全死气死气版本.json"
+      category: 怪物
+      buff_with_effect_list: true  # ⚠️ 注意这是 has_buff=1 + buff_with_effect_list=True！
+      corpus_top_classes: {}
+      refs: 66
+    notes: |
+      ⚠️ SubType=1001 是 corpus 唯一一例，从未观察过。文件名"全死气死气版本"重复字样
+      暗示 deprecated 版本变体。注意 buff_with_effect_list=True——B-006 D-605 type3
+      子模式 a（BuffConfig 字段入口）的判定字段就是这个。但 corpus 标 UNKNOWN 而非 type3。
+      原因可能：判定逻辑要求 has_buff && has_reg_event=True 才进 type3，但这里 reg=0。
+      所以暴露了 type3 启发式 false negative：仅有 BuffConfig 字段无 REG 也是合法入口模式。
+  prediction:
+    type1to5_classification_guess: "type3a 漏检（buff_with_effect_list=True 该入 type3）/ 或 type6 deprecated"
+    rationale: |
+      若 buff_with_effect_list=True → 至少应进 type3 子模式 a（BuffConfig 字段入口
+      自驱）。当前 corpus_full_scan.py 启发式可能强制要求 reg_event，导致 false negative。
+      SubType=1001 文件名"死气死气"暗示废弃。两种解释 50/50。
+    real_unknown_or_codable: "type3 启发式 false negative + RQ4 长尾废弃证据"
+    estimated_node_count: 80
+    topology_sketch: |
+      SkillConfig (双 0)
+      └── BuffConfigNode (含 SkillEffectListOnStart/Loop/End → 内驱循环)
+      └── BUFF 内部 effect chain（不依赖外部 REGISTER_SKILL_EVENT）
+    expected_subsystems: ["Buff 系统 (子模式 a 扩展)", "SkillEntry 系统 (SubType=1001 新值)"]
+    expected_RQ_answer:
+      RQ-B7-1: "type3 子模式 a 不需 reg_event 也合法（启发式过严）"
+      RQ-B7-2: "确证子模式 a (内驱) vs 子模式 b (外驱) 真分裂"
+      RQ-B7-4: "type3 false negative：仅 buff_with_effect_list=True 也应进 type3a"
+
+# === U4: sid=1860225 ===
+- sample_id: 1860225
+  tag: U4_buff_tmplrun_BUFF_dir
+  date: 2026-05-10
+  skill_config_metadata_seen:
+    SkillNameEditor: null
+    SkillSubType: 0
+    Icon: ""
+    EnhanceSkillBuffConfigID: 0
+    SkillEffectPassiveExecuteInfo_nonzero: false
+    extra_seen:
+      IsTemplate: false
+      SkillEffectExecuteInfo_root: 0
+      Mode: "E_dual_zero_fallback"
+      SkillEffectFlowList_len: 0
+      file_size: 106109
+      filename_hint: "SkillGraph_1860225【木桩】循环召唤.json"
+      category: BUFF
+      buff_with_effect_list: false
+      corpus_top_classes: {}
+      refs: 45
+    notes: |
+      "【木桩】循环召唤" + category=BUFF + has_buff=True + has_tmpl_run=True +
+      buff_with_effect_list=False。"循环召唤" 暗示由 BUFF 周期触发模板调用。
+      与 U3 940107（buff_with_effect_list=True）+ B-006 type3 子模式 a 形成对照：
+      这是 B-006 type3 子模式 a 的"非 effect_list 但仍内驱"变种？或 type3 第三子模式
+      （BuffConfig 字段 + tmpl_run 内驱循环）？
+  prediction:
+    type1to5_classification_guess: "type3 子模式 c（候选）— BuffConfig + tmpl_run 内驱"
+    rationale: |
+      buff_with_effect_list=False 但 has_buff=True + has_tmpl_run=True，说明 BuffConfigNode
+      的 SkillEffectListOnStart/Loop/End 字段都空，但内部 SerializedNodes 含 tmpl_run。
+      "循环召唤"语义 → BuffConfig 内的循环触发字段（tick_interval）配 tmpl_run 实现循环
+      召唤。可能是 type3 的第三子模式（既不是 effect_list 字段也不是 reg_event）。
+    real_unknown_or_codable: "type3 子模式 c 候选（非 effect_list / 非 reg_event 但仍 BUFF 内驱）"
+    estimated_node_count: 55
+    topology_sketch: |
+      SkillConfig (双 0)
+      └── BuffConfigNode (effect_list 字段全空 / 但 tick_interval 配置)
+      └── TSET_RUN_SKILL_EFFECT_TEMPLATE (循环召唤模板)
+      └── 周期触发由 BUFF 引擎 tick_interval 驱动，不靠 REGISTER_SKILL_EVENT
+    expected_subsystems: ["Buff 系统 (子模式 c 候选)"]
+    expected_RQ_answer:
+      RQ-B7-2: "type3 不止 a/b 两子模式，可能 a/b/c 三分裂（c = tick_interval + tmpl_run 周期型）"
+
+# === U5: sid=1750086 ===
+- sample_id: 1750086
+  tag: U5_tmpl_regevent_workflow_main
+  date: 2026-05-10
+  skill_config_metadata_seen:
+    SkillNameEditor: null
+    SkillSubType: 0
+    Icon: ""
+    EnhanceSkillBuffConfigID: 0
+    SkillEffectPassiveExecuteInfo_nonzero: false
+    extra_seen:
+      IsTemplate: false
+      SkillEffectExecuteInfo_root: 0
+      Mode: "E_dual_zero_fallback"
+      SkillEffectFlowList_len: 0
+      file_size: 103792
+      filename_hint: "SkillGraph_1750086【战斗流程主入口】.json"
+      category: 战斗流程
+      buff_with_effect_list: false
+      corpus_top_classes: {}
+      refs: 41
+    notes: |
+      ⚠️ 文件名"【战斗流程主入口】" + category=战斗流程 + 175xxx 段位（v0.6 D-502 模板段
+      但被分到战斗流程目录）= 这是流程编排根级容器。has_tmpl_run=True 暗示内部链式调用
+      其他模板。has_reg_event=True = 通过 SkillEvent 外驱（战斗开始事件等）。
+      这是 type5（大型自含）+ type6（workflow_orchestrator）的交叉。
+  prediction:
+    type1to5_classification_guess: "type5 (大型自含) 边界 / 或 type6 workflow_orchestrator"
+    rationale: |
+      refs=41 接近 type5 阈值（≥50）但小于；has_tmpl_run + has_reg_event 复合。
+      可能是流程主入口型（不直接 spawn bullet/damage 但调度其他战斗模板）。
+      type1-5 框架中无对应类——RQ-B7-1 直接候选 type6_workflow_orchestrator。
+    real_unknown_or_codable: "type6 候选 (workflow_orchestrator 主入口子型)"
+    estimated_node_count: 50
+    topology_sketch: |
+      SkillConfig (双 0)
+      ├── TSET_REGISTER_SKILL_EVENT (注册全局战斗事件 OnBattleStart 等)
+      ├── TSET_RUN_SKILL_EFFECT_TEMPLATE × N (调度子流程模板)
+      └── TSET_DELAY_EXECUTE / TSET_ORDER_EXECUTE (调度时序)
+    expected_subsystems: ["SkillEvent 系统", "模板系统", "战斗流程编排（新概念候选）"]
+    expected_RQ_answer:
+      RQ-B7-1: "type6 候选 workflow_orchestrator 真存在（175xxx + 280xxx 共同段位）"
+
+# === U6: sid=740031 ===
+- sample_id: 740031
+  tag: U6_tmpl_bullet_no_damage_chicken
+  date: 2026-05-10
+  skill_config_metadata_seen:
+    SkillNameEditor: null
+    SkillSubType: 0
+    Icon: ""
+    EnhanceSkillBuffConfigID: 0
+    SkillEffectPassiveExecuteInfo_nonzero: false
+    extra_seen:
+      IsTemplate: false
+      SkillEffectExecuteInfo_root: 0
+      Mode: "E_dual_zero_fallback"
+      SkillEffectFlowList_len: 0
+      file_size: 86774
+      filename_hint: "SkillGraph_740031_【吃鸡技能模板】火球术.json"
+      category: 特殊玩法
+      sub_category: "吃鸡-文化小游戏/模板"
+      buff_with_effect_list: false
+      corpus_top_classes:
+        TSET_ORDER_EXECUTE: 4
+        TSET_GET_SKILL_TAG_VALUE: 3
+        TSET_DELAY_EXECUTE: 2
+        ModelConfigNode: 2
+        TSET_GET_ANGLE_BETWEEN_ENTITY: 2
+      refs: 32
+    notes: |
+      "吃鸡-文化小游戏" 子目录 = 玩法分支模板。文件名带"模板"但 IsTemplate=false。
+      corpus_top_classes 含 ModelConfigNode + GET_ANGLE = 实际有 bullet 形态。
+      has_bullet=True + has_damage=False = 子弹存在但伤害靠 SkillTag 派发或被分支处理。
+      可能是 type5 玩法分支变种或 type1-5 漏检 false negative。
+  prediction:
+    type1to5_classification_guess: "type5 玩法分支变种 / 或 type1-5 漏检 false negative"
+    rationale: |
+      refs=32 < 50 不够 type5 阈值但接近；含 bullet + tmpl_run + GET_TAG。
+      "吃鸡"玩法 = 隔离的小游戏 sandbox，可能不走主战斗 SkillTag/Damage 管线。
+      RQ-B7-4 候选 false negative（启发式 type5 阈值过严）。
+    real_unknown_or_codable: "type5 阈值边缘 / 或独立编码 type6_minigame_template"
+    estimated_node_count: 35
+    topology_sketch: |
+      SkillConfig (双 0)
+      └── ModelConfigNode × 2 (子弹模型)
+      └── BulletConfigNode (隐含)
+      └── TSET_RUN_SKILL_EFFECT_TEMPLATE (玩法子流程)
+      └── 由玩法主控制器外部调度 sid
+    expected_subsystems: ["子弹系统", "模板系统", "玩法 sandbox（新概念）"]
+    expected_RQ_answer:
+      RQ-B7-3: "type5 启发式 refs 阈值=50 太严，30-50 段位是边缘区"
+
+# === BUFF-rev-1: sid=1900111 ===
+- sample_id: 1900111
+  tag: BUFF-rev-1
+  date: 2026-05-10
+  skill_config_metadata_seen:
+    SkillNameEditor: null
+    SkillSubType: 0
+    Icon: ""
+    EnhanceSkillBuffConfigID: 0
+    SkillEffectPassiveExecuteInfo_nonzero: false
+    extra_seen:
+      IsTemplate: false
+      SkillEffectExecuteInfo_root: 0
+      Mode: "E_dual_zero_fallback"
+      SkillEffectFlowList_len: 0
+      file_size: 117135
+      filename_hint: "SkillGraph_【触发】战斗4000057效果-玩法上古魔刃宗大战.json"
+      category: 战斗流程
+      buff_with_effect_list: false
+      corpus_top_classes:
+        TSET_ORDER_EXECUTE: 7
+        TSET_DELAY_EXECUTE: 7
+        TSET_ADD_BUFF: 3
+        BuffConfigNode: 3
+        TSCT_VALUE_COMPARE: 2
+      refs: 48
+    notes: |
+      已被 corpus 标 type3 但 buff_with_effect_list=False（B-006 D-605-R1 反例 1/3）。
+      "战斗4000057效果-玩法上古魔刃宗大战" + has_reg_event=True + has_bullet=True。
+      与 B-006 1750087（type3 子模式 a / buff_with_effect_list=True）对比：
+      1900111 走子模式 b（REGISTER_SKILL_EVENT 入口）。BuffConfigNode=3 多 buff 模式。
+      子模式 b 应是"事件订阅 → 添加 N 个 BUFF → BUFF 内含子弹 / 状态"链。
+  prediction:
+    type1to5_classification_guess: "type3b（已确证 D-605-R1 子模式 b）"
+    rationale: |
+      验证 B-006 R1 D-605：buff_with_effect_list=False + has_reg_event=True →
+      子模式 b 真存在，外部事件 → ADD_BUFF → 多 BUFF 联动。
+    real_unknown_or_codable: "type3 子模式 b 已编码"
+    estimated_node_count: 60
+    topology_sketch: |
+      SkillConfig (双 0)
+      └── TSET_REGISTER_SKILL_EVENT (事件订阅入口)
+      ├── TSET_ADD_BUFF × 3 (添加 3 个 buff)
+      └── BuffConfigNode × 3 (3 个 buff 定义)
+      ↓
+      BUFF 内部触发战斗效果链
+    expected_subsystems: ["Buff 系统 (子模式 b)", "SkillEvent 系统"]
+    expected_RQ_answer:
+      RQ-B7-2: "确证 type3b 真存在 + 事件订阅是顶层入口"
+
+# === BUFF-rev-2: sid=1900093 ===
+- sample_id: 1900093
+  tag: BUFF-rev-2
+  date: 2026-05-10
+  skill_config_metadata_seen:
+    SkillNameEditor: null
+    SkillSubType: 0
+    Icon: ""
+    EnhanceSkillBuffConfigID: 0
+    SkillEffectPassiveExecuteInfo_nonzero: false
+    extra_seen:
+      IsTemplate: false
+      SkillEffectExecuteInfo_root: 0
+      Mode: "E_dual_zero_fallback"
+      SkillEffectFlowList_len: 0
+      file_size: 117424
+      filename_hint: "SkillGraph_【模板】触发单位事件-减伤期.json"
+      category: 战斗流程
+      sub_category: 战斗事件
+      buff_with_effect_list: false
+      corpus_top_classes:
+        TSET_ORDER_EXECUTE: 6
+        TSET_DELAY_EXECUTE: 6
+        TSET_CREATE_EFFECT: 4
+        TSET_PLAY_ROLE_ANIM: 2
+        TSET_REGISTER_SKILL_EVENT: 2
+      refs: 45
+    notes: |
+      "【模板】触发单位事件-减伤期" + sub_category=战斗事件。corpus_top_classes 显示
+      TSET_REGISTER_SKILL_EVENT × 2 = 多事件订阅；TSET_CREATE_EFFECT × 4 = 特效。
+      子模式 b 子型：纯事件订阅型（无 ADD_BUFF，但 has_buff=True 暗示 BuffConfigNode
+      存在但不 ADD_BUFF）。可能是"自身 BUFF 状态 + 事件触发动画/特效"型。
+  prediction:
+    type1to5_classification_guess: "type3b（D-605-R1 子模式 b 第二子型）"
+    rationale: |
+      与 1900111 的差异：1900111 是 ADD_BUFF 联动型（buff_count=3），1900093 是
+      事件 → 特效/动画型（has_damage=True）。子模式 b 内部可能再分裂。
+    real_unknown_or_codable: "type3b 内部子型分裂候选"
+    estimated_node_count: 55
+    topology_sketch: |
+      SkillConfig (双 0)
+      └── TSET_REGISTER_SKILL_EVENT × 2 (多事件订阅)
+      └── (callback) TSET_CREATE_EFFECT × 4 + TSET_PLAY_ROLE_ANIM × 2
+      └── BuffConfigNode (自身状态定义但不 ADD_BUFF)
+    expected_subsystems: ["Buff 系统 (子模式 b 子型 2)", "SkillEvent 系统"]
+    expected_RQ_answer:
+      RQ-B7-2: "子模式 b 内部可能再分裂（ADD_BUFF 型 vs 直接特效/动画型）"
+
+# === BUFF-rev-3: sid=1860234 ===
+- sample_id: 1860234
+  tag: BUFF-rev-3
+  date: 2026-05-10
+  skill_config_metadata_seen:
+    SkillNameEditor: null
+    SkillSubType: 0
+    Icon: ""
+    EnhanceSkillBuffConfigID: 0
+    SkillEffectPassiveExecuteInfo_nonzero: false
+    extra_seen:
+      IsTemplate: false
+      SkillEffectExecuteInfo_root: 0
+      Mode: "E_dual_zero_fallback"
+      SkillEffectFlowList_len: 0
+      file_size: 62409
+      filename_hint: "SkillGraph_1860234【模板】碰撞状态.json"
+      category: 技能模板
+      sub_category: 碰撞
+      buff_with_effect_list: false
+      corpus_top_classes:
+        TSET_SET_ENTITY_COLLISION_ENABLE_STATE: 12
+        TSET_ORDER_EXECUTE: 3
+        TSCT_VALUE_COMPARE: 3
+        SkillConfigNode: 1
+        TSET_DELAY_EXECUTE: 1
+      refs: 25
+    notes: |
+      ⭐ 极典型 type3b："【模板】碰撞状态" + SET_ENTITY_COLLISION × 12（最多）。
+      子模式 b 的"碰撞控制型"——通过 SkillEvent 订阅，回调切换实体碰撞开关。
+      与 1900111（ADD_BUFF）/1900093（特效动画）形成第三子型：碰撞状态控制型。
+  prediction:
+    type1to5_classification_guess: "type3b（D-605-R1 子模式 b 第三子型 = 碰撞控制）"
+    rationale: |
+      type3b 内部可能多子型分裂（按主导原语类）：
+      - 1900111: ADD_BUFF 主导
+      - 1900093: CREATE_EFFECT/PLAY_ANIM 主导
+      - 1860234: SET_ENTITY_COLLISION 主导
+      暗示：type3b 实际是"事件订阅入口 + N 种回调 effector"通用模式，不是单一子型。
+    real_unknown_or_codable: "type3b 是 effector-agnostic 通用入口模式"
+    estimated_node_count: 30
+    topology_sketch: |
+      SkillConfig (双 0)
+      └── TSET_REGISTER_SKILL_EVENT (订阅碰撞事件 / 战斗事件)
+      └── TSET_SET_ENTITY_COLLISION_ENABLE_STATE × 12 (碰撞开关切换矩阵)
+      └── BuffConfigNode (碰撞状态承载)
+    expected_subsystems: ["Buff 系统 (子模式 b 子型 3)", "实体碰撞与可见性", "SkillEvent 系统"]
+    expected_RQ_answer:
+      RQ-B7-2: "type3b 是 effector-agnostic 通用模式，内部按主导原语再分类"

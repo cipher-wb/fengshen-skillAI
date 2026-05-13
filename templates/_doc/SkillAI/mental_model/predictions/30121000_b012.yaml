@@ -1,0 +1,55 @@
+sample_id: 30121000
+date: 2026-05-10
+batch: B-012
+mode: closed_book
+
+skill_config_metadata_seen:
+  SkillNameEditor: null
+  SkillSubType: 101
+  Icon: "Skill/Pugong/PuGong_jin"
+  EnhanceSkillBuffConfigID: 0
+  SkillEffectPassiveExecuteInfo_nonzero: false
+  Mode: A_pure_active
+  IsTemplate: false
+  CdType: 4
+  CdTime: 0
+  SkillIndicatorType: 2
+  notes: |
+    硬信号判读：
+    - SkillNameEditor=null（编辑器未填名 → 老技能或骨架技能候选）
+    - SkillSubType=101 = 招式（普攻）
+    - Mode=A_pure_active
+    - CdType=4 + CdTime=0 = 即时 CD 类（CdType=4 含义可能是"无 CD"）
+    - SkillIndicatorType=2 = 简单单体目标指示器
+    - Icon=PuGong_jin → 金宗门普攻
+    - 文件名"地阶功法1-招式" + 末尾 000 → 推测可能是同段位组的"基础原型/示例"
+
+prediction:
+  estimated_node_count: 30
+  estimated_node_count_range: [10, 50]
+  topology_sketch: |
+    SkillConfigNode → (推测) SkillTagsConfigNode (金宗门连击标签)
+        ↓
+    ActiveRoot → ORDER_EXECUTE
+        ↓
+    ┌── PLAY_ROLE_ANIM (1-2 个动作)
+    │     ↓ (可能 DELAY_EXECUTE)
+    └── RUN_SKILL_EFFECT_TEMPLATE → 175xxx (基础伤害模板)
+  expected_templates:
+    - "175xxx (普攻伤害)"
+    - "可能很简单，模板调用 ≤ 2 次"
+  touched_subsystems:
+    - "技能入口与生命周期"
+    - "时间轴系统 (ORDER_EXECUTE 简单链)"
+    - "动作与动画"
+    - "模板调用"
+    - "SkillTag 系统 (金宗门连击 tag - 候选)"
+
+confidence_self_assess: 0.45
+rationale: |
+  SkillNameEditor=null + 文件名"地阶功法1" + 末尾 000 → 三种可能：
+    (a) 简陋骨架技能，节点数极少（10-20）
+    (b) 完整地阶招式，与 30121001 / 30121100 同段位组
+    (c) 已废弃但保留的旧版本
+  无法仅凭硬信号区分 → 节点数估计宽幅 30 ± 20。
+  最大不确定：是否真"基础"还是名字未填但内容很完整。

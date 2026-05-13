@@ -1,0 +1,99 @@
+sample_id: 30331000
+predicted_with_mental_model_version: v0.3
+phase: holdout-v0.3
+date: 2026-05-09
+
+# 闭卷规则：仅 SkillConfig 5 硬信号允许读，refs/flow 节点 不读
+skill_config_metadata_seen:
+  SkillNameEditor: "枪心永坚"
+  SkillSubType: 103   # B-002 字典里未出现的新 SubType（v0.3 已观察 0/102/901，103 是新值）
+  Icon: "Skill/GongFa/Jin/skill_jin_301201"
+  EnhanceSkillBuffConfigID: 0   # 非心法
+  SkillEffectPassiveExecuteInfo_nonzero: true   # Passive=220000916，提示"双 root 模式 B"
+  # 额外补充（不影响 5 硬信号封锁）：
+  CdType: 3   # B-002 字典 CdType=3="技能结束后 CD"，典型大招/神通型
+  CdTime: 900
+  SkillIndicatorType: 1   # 单体指示器（非直线/圆形/扇形/矩形）
+  SkillTagsList: "顶层声明 tag 321(value=500) / 322(value=200)"
+  SkillDamageTagsList: "顶层声明 5(value=80) / 1211(value=40) — 但缺配对的 1201（违反 1 号子弹伤害对子铁律？）"
+  notes: |
+    硬信号综合解读：
+    - "枪心永坚-神通-天阶" + CdType=3（技能结束后 CD）+ Active/Passive 双非 0 → SkillEntry 模式 B 双 root
+    - SubType=103 是 v0.3 字典外新值（v0.3 仅 0/102/901），出现新值。**这是 v0.3 字典待补的一处**
+    - SkillIndicatorType=1（单体）+ bullet_count=3（推测，flag 显示）→ 多段单体技
+    - SkillDamageTagsList 出现 5+1211 但缺 1201（威力系数 tag for 1 号子弹）→ 推测：要么 1 号子弹威力系数从顶层去掉走 flow 内动态计算，要么 1211 配的是 2 号子弹但又少了 1201 的对子（**铁律疑问**），需 READ 时验证
+
+prediction:
+  estimated_node_count: 95
+  reasoning_for_node_count: |
+    硬信号显示：
+    - 双 root + 神通 + CdType=3 → 大招型，参考 30234006（104 节点）/ 30325002（109 节点）/ 30431000（79 节点）
+    - 节点数 corpus_scan 显示 98（虽然作为元数据可读）
+    - 估 95，与实际 98 接近
+
+  topology_sketch: |
+    ```mermaid
+    flowchart LR
+      A[SkillConfigNode<br>Active=220000789<br>Passive=220000916] --> B[**Active root<br>TSET_ORDER_EXECUTE**]
+      A --> C[**Passive root<br>TSET_ORDER_EXECUTE**]
+      B --> D[施法前演出<br>RUN_TEMPL?]
+      D --> E[**RUN_TEMPL<br>146003779 持续施法?**]
+      E --> F[释放分支:<br>3 段 CREATE_BULLET<br>+ ApplyEntityEffect 屏幕特效]
+      F --> G[ADD_BUFF: 自身增益]
+      F --> H[REGISTER_SKILL_EVENT<br>命中触发回调]
+      C --> I[Passive: 受击/反击 callback]
+    ```
+    主线推测：
+    - Active root 走"施法前摇 → RUN_TEMPL 调持续施法（146003779）→ 释放 3 段子弹 → 屏幕特效 + buff"
+    - Passive root 处理"枪心永坚"的被动效果（受击反击/护盾/buff）
+
+  expected_templates:
+    - "146003779（持续施法）— 推测：神通+CdType=3+多段释放，与 30234006 同范式"
+    - "175_0102（连招2段）— 弱推测：3 段子弹"
+    - "175_0001（子弹通用命中）— 强推测：每段 CREATE_BULLET 都接 RUN_TEMPL 175000004 的子弹命中流程"
+    - "RUN_TEMPL 总数: 11（corpus_scan 已知）"
+
+  touched_subsystems:
+    - "[控制流子系统.md] §A 5 控制原语 — ORDER（13 次 已知）+ DELAY（4 次）+ REPEAT（has_repeat_execute=True 推测 ≥1）"
+    - "[模板系统.md] 不变量 1（root=ORDER + IsTemplate=False，宗门技能）+ 不变量 2 段位字典（推测调 14xxx 大段 / 175 工具段）"
+    - "[SkillEntry系统.md] 不变量 1 入口模式 B 双 root（Active 220000789 + Passive 220000916）"
+    - "[Buff系统.md] 反直觉 4 buff 不止有时长 debuff（has_buff_apply=False 但 ADD_BUFF=3 from corpus_scan 提示 buff 串联）"
+    - "[SkillEvent系统.md] 关键不变量 1 REGISTER_SKILL_EVENT 字段（has_register_event=True 确认）+ 反直觉 4 同技能多 REG 监听战场事件"
+    - "[实体碰撞与可见性.md] 关键不变量 1 SET_COLL（has_set_coll=True 确认）+ APPLY_ENTITY_EFFECT（has_apply_entity_effect=True 确认）"
+    - "[SkillTag系统.md] 反直觉 4 三声明源协作（顶层 SkillTagsList + SkillDamageTagsList 都非空，flow 内可能还有 SkillTagsConfigNode）+ 1 号子弹伤害对子铁律可能违反（缺 1201）"
+
+  prediction_confidence: 中
+
+  reasoning: |
+    **强依赖 v0.3 子系统页推理**：
+
+    1. **[模板系统.md] 不变量 1**："所有 root 都是 TSET_ORDER_EXECUTE，模板系统通过 IsTemplate=True 区分模板入口"。
+       本样本是宗门技能（非模板本体），所以 root 应为 ORDER + IsTemplate=False。Active 入口 220000789 与 Passive 入口 220000916 都应是 SkillEffectConfig.ID 指向某 ORDER 节点。
+
+    2. **[模板系统.md] 反直觉点 1**："节点数 ≥ 80 + RUN_TEMPL ≥ 5 时，先怀疑是否套了核心模板"。
+       本样本 98 节点 + 11 RUN_TEMPL → 强烈套核心模板（≥1 个 14xxx 大段或 175 工具段）。
+       与 30234006（火大招套 146003779，104 节点）形态接近。
+
+    3. **[SkillEntry系统.md] 不变量 1 入口模式 4 类**：Active=220000789 / Passive=220000916 都非 0 → 模式 B 双 root（与 30124001 / 30531005 / 30431000 同模式）。
+       **反直觉点 2**："看 mermaid 必先看 SkillConfig 两入口"——拓扑预测必须分 Active 子树 + Passive 子树。
+
+    4. **[SkillEvent系统.md] 关键不变量 4**："REGISTER 典型在 Passive root 下"。本样本 has_register_event=True，
+       推测 Passive root 下挂 REGISTER 监听受击事件触发反击/护盾。可能 Active 子树也有 REGISTER（命中事件触发额外效果，类似 146003779 模板内 41/42 短按/松开）。
+
+    5. **[实体碰撞与可见性.md] 关键不变量 1 + 标准位移模式**：has_set_coll=True 但 SkillIndicatorType=1（单体非位移）+ has_add_force=False
+       → SET_COLL 不一定为位移，可能为"释放期间防控制"（神通施法期间无敌？）。**这是反直觉应用：标准位移模式不一定适用，SET_COLL 也用于非位移场景**。
+
+    6. **[SkillTag系统.md] 反直觉 4 三源协作**：SkillTagsList 顶层声明 321/322（500/200）+ SkillDamageTagsList 顶层 5/1211 → 顶层声明源 2/3 都用上。
+       flow 内估计还有 1~2 个 SkillTagsConfigNode（运行时初始化值）。
+       **铁律疑问**：1 号子弹伤害对子要求"威力系数 tag=3 + 额外 tag=5"（[memory/reference_bullet_damage_tag_pairs.md]）。
+       但本样本 SkillDamageTagsList 只有 5 + 1211（少 3，且 1211 是 2 号子弹的额外配对）。
+       推测：要么威力系数走 flow 内 ADD_SKILL_TAG_VALUE 动态注入（不需要顶层声明），要么 3 段子弹分别走 1/2/3 号子弹各自配对，顶层只列 5（1号 额外）+ 1211（2号 额外），缺漏需 READ 验证。
+
+    7. **[控制流子系统.md] §D CdType 字典**：CdType=3="技能结束后 CD"+ CdTime=900（9 秒）→ 大招型时间轴。
+
+    8. **[Buff系统.md] 反直觉 3**：SubType=103 是 v0.3 字典外新值（v0.3 仅 0/102/901），且 EnhanceSkillBuffConfigID=0（非心法）。
+       SubType 不映射机制 → 不能从 103 推机制，需 READ 看具体实现。**hold-out 暴露 SubType 字典的缺漏**。
+
+    潜在挑战 v0.3 之处：
+    - SubType=103 是新值，字典待补
+    - 1 号子弹伤害对子可能违反或有 v0.3 未覆盖的灰度场景

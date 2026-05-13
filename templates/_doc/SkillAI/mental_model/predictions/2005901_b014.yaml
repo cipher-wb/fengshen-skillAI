@@ -1,0 +1,92 @@
+---
+sample_id: "2005901"
+batch: B-014
+phase: PREDICT_close_book
+predicted_at: 2026-05-10
+mental_model_version_in: v0.12
+bucket: 20xxx_7d
+filename: "SkillGraph_2005901【普攻-蛙1-火】远程普攻新.json"
+
+# ============================================================================
+# 闭卷输入（仅看技能名 + category metadata）
+# ============================================================================
+
+close_book_inputs:
+  filename_label: "【普攻-蛙1-火】远程普攻新"
+  category_dir: "怪物"
+  sub_category: "蛙妖"
+  semantic_hint: |
+    "怪物/蛙妖" 类目 + "普攻" 标签 + "远程" + "火" = 怪物（蛙妖）的远程火属性普通攻击 / 重做版本（"新"）；
+    20xxx_7d 段位 = 怪物战斗段位（v0.11 字典未覆盖大段位 / 171 文件最大未学桶）。
+
+# ============================================================================
+# 5 SkillConfig 硬信号预测
+# ============================================================================
+
+predicted_skill_config_5_hard_signals:
+  SkillNameEditor: "【普攻-蛙1-火】远程普攻新（推断）"
+  SkillSubType_guess: 101  # 怪物普攻 = 101（v0.4 D-407 SubType 字典 101=主动技能/普攻）
+  Icon: "未知（蛙妖远程普攻图标）"
+  EnhanceSkillBuffConfigID_guess: 0
+  SkillEffectPassiveExecuteInfo_guess: 0  # 主动型 / Mode A
+
+# ============================================================================
+# 拓扑预测（按"主动远程普攻 = 子弹释放 + 模板调用 + 命中检测"范式）
+# ============================================================================
+
+predicted_topology:
+  predicted_node_count: 35  # 估算：SkillConfig + Bullet × 1 + Model × 1 + RUN_TEMPL × 2-3 + ORDER × 3 + DELAY × 2 + ANIM ≈ 35
+  predicted_mode: "A_pure_active"  # 主动技能 / ActiveRoot ≠ 0 / PassiveRoot = 0
+  predicted_topology_keys:
+    - "RUN_SKILL_EFFECT_TEMPLATE"  # 大量调用通用模板（命中/伤害模板等）
+    - "ORDER_EXECUTE"
+    - "DELAY_EXECUTE"               # 远程子弹有延迟
+    - "PLAY_ROLE_ANIM"              # 普攻动作
+    - "CREATE_BULLET"               # 远程 = 必有子弹
+    - "BulletConfigNode"
+    - "ModelConfigNode"
+
+predicted_subsystems:
+  - "模板系统"
+  - "SkillEntry"
+  - "子弹系统"
+  - "时间轴"
+
+# ============================================================================
+# 段位字典命名归纳预测（v0.11 字典未覆盖 20xxx_7d / B-014 新假说验证）
+# ============================================================================
+
+predicted_segment_naming_dict_check:
+  bucket: 20xxx_7d
+  hypothesis_keywords: ["DAMAGE", "BUFF", "EFFECT"]
+  predicted_naming_keyword_hits_in_segment_top_16: false  # 预测：20xxx_7d 怪物战斗段位以"通用业务原语"为主 / 不应以 DAMAGE/BUFF/EFFECT 简单归纳
+  predicted_naming_keyword_hits_in_segment_top_32: "uncertain"  # 不确定 / 待 v2 双窗口
+  rationale: |
+    20xxx_7d 是怪物段位（蛙妖等）/ 171 文件最大未学桶 /
+    通常怪物技能聚焦于 ORDER + RUN_TEMPL + CREATE_BULLET + PLAY_ANIM 等通用业务原语 /
+    与 19xxx_7d 怪物 BOSS 段位（v0.12 D-1301 R1 反例）类似 →
+    段位整体语义不主张语义命名 / 段位内特定模板可能保留
+
+# ============================================================================
+# 当前认知（GATE-MENTAL-IN）
+# ============================================================================
+
+mental_model_understanding:
+  involved_subsystems:
+    模板系统:
+      current_understanding: "通用模板 RUN_TEMPL 调用频次高 / D-1304 R1 框架：段位整体不主张语义命名 + 段位内特定模板保留"
+      uncertain: "20xxx_7d 是否有特定模板需保留语义注解"
+    SkillEntry:
+      current_understanding: "Mode A 主动 / SubType=101 普攻 / 怪物技形态分布与玩家主动技类似"
+      uncertain: "怪物技形态分布是否有独立特征"
+    子弹系统:
+      current_understanding: "远程 = 必有子弹 + Marker / Model + Bullet 节点对"
+      uncertain: "蛙妖火属性远程子弹的 Bullet 子型（直线/弹道/抛物等）"
+    时间轴:
+      current_understanding: "DELAY_EXECUTE + ORDER_EXECUTE 主导 / RUN_TEMPL 拼接业务"
+      uncertain: "本技能 DELAY 段位数"
+
+uncertainty_sources:
+  - "未读 BulletConfig 子型实际配置"
+  - "未读 RUN_TEMPL 调用的目标 ID（可能跨段位调用 14xxx/175xxx 等模板）"
+  - "未读 SkillTag 实际数量与类型"

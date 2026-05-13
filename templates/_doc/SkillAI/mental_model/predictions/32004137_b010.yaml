@@ -1,0 +1,39 @@
+sample_id: "32004137"
+date: 2026-05-10
+batch: B-010
+subdir: 单位
+mode: closed-book PREDICT
+
+skill_config_metadata_seen:
+  category: template_body
+  filename_hint: "【模板】召唤分身（通用）"
+  refs_count: 16
+  IsTemplate_count: 1
+  TemplateParam_count: 0
+  top_classes: {ORDER: 4, RUN_SKILL_EFFECT: 2, CONDITION: 1, CREATE_ROLE: 1, GET_ENTITY_ATTR: 1, COPY_ENTITY_OUTLOOK: 1}
+  notes: |
+    类别 2 模板本体。中小型（refs=16）。COPY_ENTITY_OUTLOOK 是首次见到的节点类（待源码 grep 语义确认 — 推测：复刻施法者外观到分身）。
+    段位 32xxxxx 是 v0.6 §段位字典外（已知 14xxx / 175 / 18xxx-186xxx / 19xxx / 22xxx / 28xxx / 38xxx / 44xxx / 66xxx），候选 D-1002 字典扩补。
+
+prediction:
+  estimated_node_count: 22  # 16 refs + 多 ORDER 子节点 + 端口
+  topology_sketch: |
+    ROOT (ORDER, IsTemplate=True, ID=32004137)
+      → ORDER 串行：
+        ↓ CREATE_ROLE (创建分身实体)
+        ↓ COPY_ENTITY_OUTLOOK (复刻施法者外观)
+        ↓ CONDITION (按某条件分支)
+        ↓ ORDER × 3 子序列 (设置属性 / 设置 AI / 销毁)
+        ↓ RUN_SKILL_EFFECT × 2 (调用具体效果模板，如分身行为模板)
+  expected_templates_called: ["RUN_SKILL_EFFECT 是 effect_id 节点，不必是模板段位（v0.4 D-202 区分 RUN_TEMPL vs RUN_SKILL_EFFECT）"]
+  touched_subsystems: [模板系统, 实体生命周期与替身机制, 控制流子系统]
+  predicted_template_form: |
+    形态：**实体级生命周期模板**——CREATE_ROLE + COPY_OUTLOOK + RUN_SKILL_EFFECT 是"分身/替身"专属的实体复刻范式（参考 30433001 水身法替身机制 / D-210 暂存档子系统页）。
+    与 146001847 召唤怪物（CREATE_ROLE + REPEAT + RANDOM_NUM）的差异：本样本是"复刻型分身"（外观/属性继承施法者），146001847 是"独立怪物召唤"（按怪物 ID 创建独立单位）。
+    32xxxxx 段位假设：可能是"单位 / 分身"专属段位（B-002 字典 22xxx 是单位/角色段位，32xxx 可能是其扩展或独立段位）。
+  predicted_internal_signature_for_skillentry_diff: |
+    类别 2 模板本体（与 146004907 / 146001847 同），SkillConfigNode 缺席。
+  notes: |
+    高 confidence：CREATE_ROLE + COPY_ENTITY_OUTLOOK + RUN_SKILL_EFFECT 三件套的"分身"语义高度明确。
+    中 confidence：32xxxxx 段位语义（首次触碰）。
+    新原语 COPY_ENTITY_OUTLOOK 候选写入 §节点字典 / 候选 [实体生命周期与替身机制.md] 创建子系统页驱动样本。

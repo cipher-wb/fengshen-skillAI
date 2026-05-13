@@ -1,0 +1,104 @@
+sample_id: 30221120
+batch: B-004
+date: 2026-05-09
+role_in_batch: pick4_event_rich
+mental_model_version_used: v0.4
+
+# === SkillConfig 5 硬信号 ===
+skill_config_metadata_seen:
+  SkillNameEditor: "地阶奇术3"
+  SkillSubType: 102
+  Icon: "Skill/GongFa/Jin/skill_jin_301116"
+  EnhanceSkillBuffConfigID: 0
+  SkillEffectExecuteInfo_root_ID: 2250038  # ✓ 真值
+  SkillEffectPassiveExecuteInfo_root_ID: 0
+  CdType: 1
+  CdTime: 150  # 15 秒
+  notes: |
+    "地阶奇术3" + Icon=jin_301116 + ID=30221120 → 文件命名/Icon 矛盾（300=金/302=水），可能是水奇术系列。
+    SubType=102 + CdType=1 + CdTime=150 = "中等 CD 主动技 / 奇术类"。
+    Active root ID=2250038 ≠ 0 → 真有 Active 入口（与 pick3/pick1 对比）。
+    225xxx 段位是新发现：B-003_actionable.md §N-2 提到 225xxx (88 调用)。这个 root ID 段位也是 225xxx！
+    14 RUN_TEMPL = 模板使用密度极高（远超平均），多重模板嵌套。
+
+# === Corpus 元数据 ===
+corpus_metadata:
+  node_count_actual: 119
+  top_classes:
+    TSET_ORDER_EXECUTE: 14
+    TSET_RUN_SKILL_EFFECT_TEMPLATE: 14   # 高密度！
+    TSET_NUM_CALCULATE: 13
+    TSET_DELAY_EXECUTE: 7
+    TSET_GET_ENTITY_ATTR_VALUE: 7
+    TSCT_VALUE_COMPARE: 5
+    TSET_CREATE_BULLET: 4
+    TSET_ADD_BUFF: 4
+  flags:
+    has_register_event: true
+    has_skill_event_callback: true
+    has_get_buff_layer: false
+    has_displacement: false
+    has_set_coll: false
+    bullet_count: 4   # 4 子弹
+    has_add_force: false
+
+# === PREDICTION ===
+prediction:
+  estimated_node_count: 119
+  topology_sketch: |
+    Active root=2250038（225xxx 段位）+ 14 RUN_TEMPL + 4 子弹 + reg_event。这是【模板组合驱动型奇术】。
+
+    伪 mermaid：
+    ```
+    Active 2250038 (root in 225xxx segment) → ORDER_EXECUTE × 14（每段对应一次模板调用）
+        → RUN_TEMPL 模板组合（极有 280xxx 主导）：
+           - 175xxx 子弹命中链（4 子弹 × 1 命中模板？）
+           - 280xxx 通用大招模板（N-2 验证战场）
+           - 186xxx 已知通用模板
+        → CREATE_BULLET × 4（4 子弹）
+        → callback (REG_EVENT) 触发 ADD_BUFF × 4
+        → DELAY × 7 编排时间轴
+    ```
+
+    14 RUN_TEMPL / 119 节点 ≈ 12% 是模板调用，远高于平均。
+
+  expected_event_ids:
+    likely:
+      - 4   # OnDamage（子弹命中）
+      - 6   # 81 hits 未知 ID — N-1 候选
+      - 11
+      - 15  # 必中候选
+    confidence: 中
+    note: "若是 4 子弹命中触发 4 ADD_BUFF，必有 OnDamage event_id=4 callback"
+
+  expected_templates:
+    likely_segments:
+      - "280xxx (N-2 主导段位，14 RUN_TEMPL 概率极大命中至少 1 个)"
+      - "175xxx (子弹命中模板)"
+      - "186xxx"
+      - "190xxx (1995 调用，新段位待验证)"
+      - "225xxx (root 本身就是 225xxx)"
+    estimated_template_count: 14  # 已知
+
+  touched_subsystems:
+    - 子弹系统                 # bullet=4
+    - 控制流子系统
+    - 模板系统                  # 14 RUN_TEMPL（高密度，主战场）
+    - SkillTag 系统           # 7 GET_ATTR + 13 NUM_CALC
+    - Buff 系统               # 4 ADD_BUFF
+    - SkillEvent 系统         # reg_event
+    - SkillEntry 系统         # SubType=102
+
+# === 待验证主张 ===
+risk_points:
+  - "14 RUN_TEMPL 段位分布 — 必含 280xxx 才能验证 N-2。"
+  - "Active root=2250038 (225xxx) — 这是宗门技能的【主战根模板】吗？v0.4 模板系统页未细化 225xxx。"
+  - "callback 链路：是否每个 4 子弹 命中各触发 1 ADD_BUFF（4:4 配对）？"
+  - "为什么有 13 NUM_CALC + 5 VALUE_COMPARE 但 0 TSCT_AND — 条件简单还是逻辑被模板封装？"
+
+# === Confidence 自评 ===
+self_confidence: 中偏高
+reasoning: |
+  Active root 2250038 这种"宗门技能调 225xxx 段位主战根模板"的范式，v0.4 没明确建过认知。
+  14 RUN_TEMPL 是极佳的模板段位字典验证机会。
+  Event ID 字典扩补必命中（reg_event=true + callback=true）。

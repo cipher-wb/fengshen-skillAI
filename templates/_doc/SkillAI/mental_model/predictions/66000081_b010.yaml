@@ -1,0 +1,34 @@
+sample_id: "66000081"
+date: 2026-05-10
+batch: B-010
+subdir: 数值
+mode: closed-book PREDICT (hold-out)
+
+skill_config_metadata_seen:
+  category: template_body (no SkillConfigNode)
+  filename_hint: "【模板】获取护盾值_命力万分比"
+  refs_count: 3
+  IsTemplate_count: 1
+  TemplateParam_count: 0
+  top_classes: {GET_ENTITY_ATTR: 2, NUM_CALC: 1}
+
+prediction:
+  estimated_node_count: 5  # 3 refs + ORDER root + 输出端口
+  topology_sketch: |
+    ROOT (ORDER, IsTemplate=True, ID=66000081)
+      → GET_ENTITY_ATTR × 2 (取施法者命力 + 护盾比)
+      → NUM_CALC × 1 (护盾值 = 命力 × 万分比 / 10000)
+      → 输出端口（被调用方读取）
+  expected_templates_called: []
+  touched_subsystems: [模板系统]
+  predicted_template_form: |
+    形态：**极简数值取值器模板**——单一职责（按"命力 × 万分比" 公式取护盾值），叶子级模板。
+    66xxxxx 段位 已知（B-003 D-306 弱观察 / 66001194 出现 in 30531008 共 3 次单样本观察）— 本样本 66000081 加强 66xxx 段位识别。
+    数值/ 子目录仅 1 文件，**孤例 + hold-out** = 测 §段位字典 66xxx 行是否需精修为"数值取值器子段"。
+  predicted_internal_signature_for_skillentry_diff: |
+    类别 2 模板本体（最纯净形态：3 refs / 无 SkillConfigNode / TemplateParam=0）。
+    与 146001847（refs=9 召唤怪物）对比：本样本 refs=3 比 146001847 还小 = **极简边界**。
+    判定：refs ≤ 5 + 仅 NUM_CALC + GET_ATTR + 文件名"获取/计算" = "数值取值器" 子型（候选 D-1002 字典）。
+  notes: |
+    高 confidence：极简形态 + 命力万分比 公式 = 取值器（节点字典熟悉）。
+    hold-out 用途：测 5 训练样本归纳的 D-1001 + D-1002 在最简形态下是否仍成立。

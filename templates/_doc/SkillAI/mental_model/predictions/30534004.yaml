@@ -1,0 +1,76 @@
+sample_id: 30534004
+date: 2026-05-09
+batch: B-002
+
+skill_config_metadata_seen:
+  SkillNameEditor: None
+  SkillSubType: 0
+  Icon: "(空)"
+  EnhanceSkillBuffConfigID: 0
+  SkillEffectExecuteInfo_Active: 0
+  SkillEffectPassiveExecuteInfo: 220005242
+  CdType: 0
+  SkillTagsList_top: "[{SkillTagConfigID: 2200140, Value: 0}]"
+  SkillDamageTagsList_top: "[]"
+  notes: |
+    **纯 Passive 标签型**（与 hold-out 30531006 镜像）：
+    - SkillNameEditor=None / SkillSubType=0 → 不是常规技能，是"标签效果"型
+    - Active=0 / Passive=220005242 → 验证 [SkillEntry系统.md] hold-out F-3 修订（标签型可单 Passive）
+    - SkillTagsList 顶层声明 1 个 tag (2200140) → SkillTag 系统 3 源声明之一
+    - REGISTER_SKILL_EVENT × 4 + UNREGISTER × 1 → SkillEvent 系统重要样本
+    - GET_BUFF_LAYER_COUNT × 2 + TSCT_HAS_BUFF × 3 → buff 计层（火宗门蓄炎机制）
+    - TSCT_CHECK_SKILL_SCHOOL_RES_TYPE × 2 + IS_ELEMENT × 2 → 元素属性检查（伤害是否火）
+    - 路径：火宗门心法/火宗门心法/SkillGraph_30534004 → 这是火宗门心法，归类心法系统
+
+prediction:
+  reasoning_summary: |
+    citing [SkillEntry系统.md] hold-out F-3 修订："标签型可单 Passive"
+    citing [Buff系统.md] 不变量 1："心法计层用 buff_layer"——本样本含 GET_BUFF_LAYER_COUNT × 2，强证据
+    citing [SkillTag系统.md] 不变量 A 第 2 源："SkillConfig.SkillTagsList 顶层声明"——本样本含 1 个声明
+    citing B-002 教训 3 (sample 1 SkillEvent)：REG/UNREG 字段语义已知
+
+    **预测核心**：本样本是"火宗门标签效果-蓄炎"心法被动——
+    - 监听敌方/自己被打的事件（REGISTER × 4 = 监听 4 种事件）
+    - 检查事件触发的伤害是否含火元素（TSCT_CHECK_SKILL_SCHOOL_RES_TYPE）
+    - 满足条件 → 累加蓄炎 buff 层数
+    - 满层后释放某效果（DELAY × 2 + ADD_BUFF + REMOVE_BUFF × 2）
+    - REG=4 / UNREG=1 不平衡：可能"4 个事件共享一个清理时机"
+
+  estimated_root_class: "TSET_ORDER_EXECUTE"  # Passive root 也是 ORDER（hold-out 30531006 已证实）
+  estimated_node_count: 66
+
+  topology_sketch: |
+    flowchart LR
+      ROOT[Passive root 220005242 ORDER] --> TAG_INIT[SkillTagsConfigNode 蓄炎 tag]
+      ROOT --> REG1[REGISTER 事件1 受击]
+      ROOT --> REG2[REGISTER 事件2 攻击命中]
+      ROOT --> REG3[REGISTER 事件3 技能释放]
+      ROOT --> REG4[REGISTER 事件4 元素效果]
+      REG1 --> COND[CONDITION_EXECUTE: 伤害含火元素?]
+      COND --> CHECK_ELEM[CHECK_SKILL_SCHOOL_RES_TYPE / IS_ELEMENT]
+      CHECK_ELEM --> CALC[NUM_CALCULATE 增加层数]
+      CALC --> MOD_TAG[MODIFY_SKILL_TAG_VALUE 蓄炎层++]
+      ROOT --> MAX_LAYER_CHECK[VALUE_COMPARE 蓄炎==max]
+      MAX_LAYER_CHECK --> ADD_BUFF[ADD_BUFF 满层 buff]
+      MAX_LAYER_CHECK --> REMOVE_BUFF[REMOVE_BUFF × 2 清理]
+      ROOT --> UNREG[UNREGISTER 退场清理]
+
+  expected_subsystems_touched:
+    - 控制流子系统 (ORDER × 6 + DELAY × 2 + REPEAT × 1 + CONDITION × 2)
+    - 模板系统 (RUN_TEMPL × 3)
+    - **SkillEvent 系统 (REG × 4 + UNREG × 1 + Event ID 字典扩充关键样本)**
+    - SkillTag 系统 (GET × 5 + MOD × 5 + ConfigNode × 3 + 顶层 SkillTagsList)
+    - Buff 系统 (GET_LAYER × 2 + ADD × 1 + REMOVE × 2 + HAS_BUFF × 3 — 心法计层)
+    - 元素属性子系统 (CHECK_SCHOOL_RES_TYPE × 2 + IS_ELEMENT × 2 + GET_ELEMENTS_TYPE × 2 — 元素检查 — **新子系统候选 F-9**)
+    - 条件系统 (TSCT_AND × 5 + VALUE_COMPARE × 5 + NOT × 1 + ENTITY_TYPE × 1)
+
+  expected_F5_strong_evidence: |
+    **本样本是 F-5 SkillEvent 系统建页的核心样本**：4 REG 给我们 4 个 Event ID 数据点。
+    结合 sample 1 (146003779) 的 Event ID 41/42 + sample 4 (30433001) 的 Event ID 1，本批共 7 个 Event ID 数据点，
+    可能形成初步 Event ID 字典：1 / 41 / 42 / X / Y / Z / W
+
+  expected_new_finding_F9: |
+    元素属性子系统：火宗门蓄炎机制的核心是"判断伤害源是否火元素"。
+    TSCT_CHECK_SKILL_SCHOOL_RES_TYPE / IS_ELEMENT / GET_SKILL_ELEMENTS_TYPE 三种节点
+    构成元素属性检查范式，对所有"元素响应型心法"通用。
+    建议 B-003+ 见到第 2 个元素心法样本时建 [元素属性子系统.md] 页。

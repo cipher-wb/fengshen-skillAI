@@ -1,0 +1,97 @@
+sample_id: "190008535"
+date: 2026-05-10
+batch: holdout-v0.6
+hold_out_focus: "样本 2 - D-508 §0 非技能文件识别决策树测试（避开 28xxx 段位，测决策树是否能识别字典外段位）"
+
+# ===== 闭卷信源 =====
+skill_config_metadata_seen:
+  SkillNameEditor: "<闭卷不可见>"
+  SkillSubType: null   # ⭐ 关键信号：corpus_scan 抽不到 SkillSubType
+  Icon: "<闭卷不可见>"
+  EnhanceSkillBuffConfigID: "<闭卷不可见>"
+  SkillEffectPassiveExecuteInfo_nonzero: "<闭卷不可见>"
+  notes: |
+    可见信号：
+    - 文件名（粗看）：SkillGraph_190008535_【模板】关卡触发主攻击（"【模板】"前缀 + "关卡触发" 关键词）
+    - 目录: 关卡模板（不是宗门技能 / 不是法宝 / 不是技能模板）
+    - skill_id=None / skill_type=None / skill_sub_type=None / indicator_type=None ⭐⭐⭐
+      = corpus_scan 抽不到 SkillConfigNode 顶层（含 SkillSubType 等字段）= 强信号"无 SkillConfigNode"
+    - node_count=38（中小型）
+    - bullet_count=1
+    - flags：has_set_coll/has_create_role/has_add_force/has_skill_select/has_apply_skill_effect/has_repeat_execute=True
+    - top_classes：5 ORDER_EXECUTE / 4 DELAY / 3 SET_COLL / 2 RUN_TEMPL / 2 DESTROY_ENTITY / 2 REPEAT
+    - has_register_event=False / has_get_buff_layer=False / has_template_146003779=False
+
+# ===== 走 D-508 §0 决策树（关键测试点）=====
+predict_decision_tree:
+  step_1_has_SkillConfigNode: "否（强推断）"
+  reasoning_step_1: |
+    ⭐ 类别 3 候选关键证据：
+    1. corpus_scan skill_sub_type=null（与 28023113 / 28017851 一致 — 那是 D-508 D-502 落地的双证样本）
+    2. 文件名"【模板】"+"关卡触发主攻击"= 流程编排容器，不是技能本体
+    3. 目录 = 关卡模板（而非"宗门技能"/"法宝"/"技能模板"）
+    4. node_count=38 + 段位 1900xxxxx（**字典外段位**！）
+
+    走 D-508 决策树步骤 1：
+    "文件有 SkillConfigNode 顶层吗？"
+    答：否（skill_sub_type=null 强信号 + 关卡模板目录 + "【模板】"前缀）
+
+    步骤 1.5：判定 IsTemplate=True 还是无 SkillConfig 也无 IsTemplate？
+    - 文件名"【模板】"前缀 + 段位 1900xxxxx + 关卡模板目录 = **类别 2 模板本体（IsTemplate=True）的可能性高**
+    - 但也可能是类别 3 剧本调度容器（关卡触发流程编排）
+    - 关键判别信号：has_RUN_SKILL_EFFECT_TEMPLATE=2（被调用模式 OR 自身调用模板？无法仅靠 metadata 区分）
+
+    最终判定：**类别 2 或 类别 3，不属于 5 类入口模式**
+    优先：类别 2 模板本体（理由：文件名"【模板】"前缀强信号 + 段位 1900xxxxx 与 v0.5 D-401 三联包 1900164xx 同段位族 + 目录"关卡模板"）
+
+  step_2_subtype: "不适用（非技能文件）"
+  step_3_mode_prediction: "**模式 D 模板型** （或 类别 3 剧本调度，非 5 类入口）"
+  mode_confidence: "高"  # 多重强信号
+
+# ===== 4 维预测 =====
+prediction:
+  estimated_node_count: 38
+
+  topology_sketch: |
+    类别 2 模板本体（推测）：
+    顶层：SkillEffectConfig (IsTemplate=True，被外部技能 RUN_TEMPL 调用)
+      → ORDER_EXECUTE root
+        → SkillSelect (流程触发选目标)
+        → CreateRole (创建关卡触发实体)
+        → ADD_FORCE (位移 / 投射)
+        → DELAY × 4 (时间锚点)
+        → CREATE_BULLET × 1 (主攻击子弹)
+        → SET_COLL × 3 (碰撞开关)
+        → REPEAT_EXECUTE × 2 (重复触发)
+        → DESTROY_ENTITY × 2 (清理)
+        → RUN_TEMPL × 2 (子模板嵌套)
+
+    无 SkillConfigNode / SkillEffectExecuteInfo / SkillEffectPassiveExecuteInfo 顶层；
+    flow 由外部 RUN_TEMPL 调用进入，参数化复用。
+
+  expected_templates:
+    # 模板本体可能调子模板
+    - "175xxx 子弹通用命中模板（has_create_bullet + apply_skill_effect）"
+    - "190016404 / 190016485 / 190016523（三联包跨段位印证 — 1900164xx 是同 1900xxx 段位族，可能命中）"
+    - "44xxx callback effect 模板"
+
+  touched_subsystems:
+    - "SkillEntry 系统（D-508 §0 决策树测试关键点 — 验证 AI 闭卷正确识别非技能文件）"
+    - "模板系统（D-502 类别 2 模板本体 + 字典外段位 1900xxx 是否真存在 - 注意 1900164xx 是 v0.5 D-401 三联包段位族，1900085xx 应当也是模板段）"
+    - "控制流子系统（5 ORDER + 4 DELAY + 2 REPEAT 标准流程编排）"
+    - "实体碰撞与可见性（3 SET_COLL + has_collision）"
+    - "子弹系统（bullet=1 待建页候选）"
+
+# ===== 关键 KPI 标签 =====
+kpis:
+  d_501_mode_test: "Mode D（不属于 5 类，但仍属于 mental_model 已识别"模板本体"分类）"
+  d_508_non_skill_test:
+    target: "AI 闭卷是否能识别"非技能/模板本体""
+    prediction: "类别 2 模板本体（高 confidence）"
+    rationale: "skill_sub_type=null + 关卡模板目录 + "【模板】"前缀 + 段位 1900xxx 模板段位族（v0.5 D-401 三联包同族）"
+    drift_test: "**关键 drift 检测**：v0.5 hold-out 时若闭卷遇到此样本，AI 可能强行套 5 类入口模式 = drift；v0.6 D-508 决策树应能正确识别"
+
+# ===== 风险标记 =====
+risk_flags:
+  - "类别 2（模板本体）vs 类别 3（剧本调度容器）边界不清——只能开卷看 IsTemplate 字段确认"
+  - "1900xxx 段位 v0.5 D-401 三联包是 1900164xx，1900085xx 是同段位族吗？开卷验证"

@@ -1,0 +1,53 @@
+sample_id: 301102
+batch: B-006
+sample_name: 【金宗门】傲雪凌霜
+predict_date: 2026-05-10
+mode_hardconfirmed: E_dual_zero_fallback
+
+skill_config_metadata_seen:
+  SkillID: 301102
+  SkillSubType: 102
+  CdType: 0
+  EnhanceID: 0
+  ActiveRoot: 0
+  PassiveRoot: 0
+  SkillEffectFlowList_len: 0
+  IndicatorType: 4
+  refs_count: 210
+  filename_hint: "宗门技能/废弃（老技能） / '傲雪凌霜' / SubType=102（疑似法宝相关 SubType）/ IndicatorType=4 扇形指示器（关键信号 — 真有伤害逻辑）/ 路径含'废弃' = 旧版本"
+
+mental_model_in_state:
+  关于_SubType_102:
+    已学认知: "v0.6.1 R2 矩阵 SubType=102 已学样本=0（未覆盖）— corpus_full_scan 真技能 Mode E 候选 3 例。"
+    猜测: "SubType=102 可能是法宝 SubType 的一种（v0.4 D-406 旧表述将 102 列入'法宝召唤激发'类）— **但 v0.6 已推翻 SubType ⊥ Mode 强映射，需慎重**。"
+  关于_IndicatorType_4:
+    含义: "扇形指示器 — 表示这是一个有指向 + 范围的伤害技能。"
+    冲突信号: "IndicatorType=4（扇形 = 主动性强）vs Mode E 双 0（看似无入口）— **看起来矛盾**。"
+    可能解释: "技能本体内部有完整 flow + 扇形伤害逻辑，但入口不通过 SkillConfig 顶层 Active/Passive 而是通过 SkillEffectFlowList 或 SerializedNodes 内嵌的 root 节点（被某个外部 Active 调用 RUN_SKILL_EFFECT_TEMPLATE 或类似机制驱动）。"
+  路径暗示: "'废弃（老技能）' — 这可能是旧版本设计模式，新技能不再用 Mode E + 完整内部 flow 这种结构。也可能是过去某种已知子类的范本。"
+
+prediction:
+  node_count_estimate:
+    range: [80, 180]
+    rationale: "refs_count=210 — 减去元数据/字符串等非节点引用，推测实际节点 80-180。这是大型完整技能体量（对比 cross-check 平均节点数 47）。"
+  topology_shape: "fully_internal_flow_no_top_entry — 内部含完整伤害链（扇形指示器 + Bullet/Trigger + 伤害模板调用 + SkillTag 操作）。但顶层 Active=0/Passive=0。真实入口机制必为内部 SerializedNodes 中存在某个 'self_entry' root 节点 / 或被 SkillEffectFlowList（虽然 len=0）/ 或外部 RUN_TEMPL 调用驱动。"
+  真实入口机制_RQ1猜测:
+    候选优先级: "1. SerializedNodes 内嵌引用（最可能 60%）— 内部某个特殊节点（可能 IsTemplate 子节点 / 自启动 root）作为 flow 入口；2. 外部 RUN_SKILL_EFFECT_TEMPLATE 调用入口（30%）— 此技能被其他主技能引用为模板；3. SkillEvent callback 注册（10%）— 技能注册到全局事件被触发。"
+    关键洞察: "301102 + 305301 法宝形态 = 大型完整 Mode E。这是与'空壳心法'完全不同的子类 — 'fully internal flow but no top entry'。"
+  4子类_RQ2立场: "301102 形态 = '法宝召唤激发' 概念可能对应 — **但 4 子类描述的是触发条件而非文件结构**。新假设：4 子类应该按文件结构 / 入口机制重新归纳 — '空壳心法'（refs ≤ 5）vs '小型辅助'（refs 5-30）vs '大型内嵌'（refs ≥ 50）。"
+  涉及子系统:
+    - SkillEntry 系统（核心 — 大型内嵌 Mode E 子类）
+    - 模板系统（可能 — 内部 IsTemplate 或被 RUN_TEMPL 驱动）
+    - 子弹系统（推测 — 扇形伤害多半含 Bullet）
+    - 触发器与碰撞（推测 — 扇形指示器对应 TShapeType 扇形）
+    - 伤害管线（推测 — 必有伤害节点链）
+  闭卷预测_RQ3立场: "不适用（非 SubType=701）— 但提供反向证据：心法 Mode E 是 refs ≤ 5 极简型，法宝 Mode E 是 refs ≥ 50 大型内嵌型。"
+  闭卷预测_RQ4立场: 不适用（非 1101/1001）
+
+self_assessment_pre_open:
+  conviction_level: 中（65%）
+  最大不确定:
+    - "refs=210 内部到底有什么 root 节点？没读 flow 节点很难精确预测拓扑。"
+    - "SubType=102 此处含义 — 是否真的是'法宝召唤激发'或别的？已学样本范围内无 102 案例。"
+    - "'废弃' 路径暗示是否影响判断 — 旧技能可能用现在已不推荐的范式。"
+  核心赌注: "refs=210 的 Mode E 真技能 ≠ 空壳 ≠ 简单依赖外部，必有内部 flow 主体 — 入口在 SerializedNodes 内某节点，不在顶层。"

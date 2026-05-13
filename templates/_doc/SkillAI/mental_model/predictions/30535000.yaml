@@ -1,0 +1,72 @@
+sample_id: '30535000'
+date: 2026-05-09
+batch: B-003
+predicted_with_mental_model_version: v0.3
+targeted_blindspot:
+  id: blindspot-3
+  description: |
+    SkillEvent 系统 EvType vs Event ID 字段语义混淆 + Event ID 字典扩补。
+    v0.3 字典只有 7 个 Event ID（1/4/7/12/41/42/47）；hold-out 30331000 暴露 EvType=68 + Param[0]=4，
+    30315001 暴露 EvType=68 + Param[0]=38 → 字段语义需澄清"EvType=节点类型 ID / Event ID=Param[0]"。
+    本样本 has_register_event=True + 3 个 REGISTER → 期望发现：
+    a) Event ID 字典外新值（非 1/4/7/12/41/42/47）
+    b) EvType vs Event ID 字段语义需要修订到子系统页
+
+skill_config_metadata_seen:
+  SkillNameEditor: '【土宗门】传承心法_天阶_土系传承心法'
+  SkillSubType: 601
+  Icon: '（未读，但"心法"+ 天阶推测高级被动）'
+  EnhanceSkillBuffConfigID: '（未确认；心法应该非 0）'
+  SkillEffectPassiveExecuteInfo_nonzero: '（未确认；心法很可能 ≠0）'
+  CdType: 0  # 心法/被动型
+  CdTime: 0
+  notes: |
+    从 5 硬信号 + 元数据看：
+    - 名字"传承心法-土系" → 典型心法（替换型普攻 OR 标签效果）
+    - SubType=601 ⚠️ v0.3 字典外（已知 0/102/103/901），完全新段位
+    - CdType=0 + CdTime=0 → 心法/被动语义（v0.3 字典已有 30534004 印证）
+    - has_register_event=True + 3 REGISTER + has_switch=True → 多事件 + 状态切换
+    - has_add_force=True (1 个) + 无 SET_COLL → 微位移
+    - top_classes 含 4 GET_SKILL_ELEMENTS_TYPE + 4 IS_UI_SKILL → 元素属性 + UI 技能判定
+    - 4 ADD_BUFF + 4 BuffConfig → flow 内完美配对
+    - 11 ORDER + 0 DELAY + 0 REPEAT → 不靠时间锚点，而靠事件驱动
+
+prediction:
+  estimated_node_count: 88
+  topology_sketch: |
+    SkillConfig (CdType=0, CdTime=0, SubType=601, Active=0?, Passive ≠ 0?)
+      └─ Passive root = ORDER（推测 模式 C 纯 Passive，标签效果心法变体）
+          ├─ ADD_BUFF × 4 + BuffConfigNode × 4（4 个状态 buff，flow 内全配对）
+          ├─ REGISTER × 3（监听 3 个战场事件）
+          │    ├─ Event 1: 元素响应（GET_SKILL_ELEMENTS_TYPE × 4 暗示元素响应判定）
+          │    ├─ Event 2: 攻击命中
+          │    └─ Event 3: 受击 / 状态切换
+          ├─ CONDITION × N + VALUE_COMPARE × 10 + AND × N（重度条件树，10 VALUE_COMPARE 占 11.4%）
+          ├─ NUM_CALCULATE × 5（数值合成 → 元素加成）
+          └─ ADD_FORCE × 1（极少量微位移）
+
+    猜测：土系传承心法，Passive 入口下监听元素 + 命中 + 状态切换 3 事件，
+    根据元素属性条件给自身或目标加 4 个 buff（土系：固防、减速、增伤、护盾）。
+    SubType=601 是"传承心法"段位（与 30531005 SubType 待对照）。
+
+  expected_templates:
+    - '2 RUN_TEMPL（仅 2 个，不是核心骨架）'
+    - '可能不调 175 / 146 / 18xxx'
+
+  touched_subsystems:
+    - 控制流子系统（11 ORDER + 0 DELAY + 0 REPEAT，事件驱动而非时间驱动）
+    - SkillEntry 系统（推测 模式 C 纯 Passive，与 30534004 / 30531006 同模式）
+    - Buff 系统（4 ADD_BUFF + 4 BuffConfig flow 内）
+    - SkillTag 系统（2 GET + 1 MOD_TAG，轻量）
+    - SkillEvent 系统（3 REGISTER，重点验证 Event ID 字典扩补 + EvType 字段语义）
+    - 元素属性子系统（暂存档 D-211）（4 GET_SKILL_ELEMENTS_TYPE 强信号）
+
+  confidence: 中
+  rationale: |
+    主要不确定的点：
+    1. SubType=601 完全新段位，"传承心法"是否对应 600+ 段？
+    2. 3 个 REGISTER 的 Event ID 是否在 v0.3 字典内（1/4/7/12/41/42/47）？
+       期望发现 Event ID 字典外新值（如 38 from 30315001 或全新）
+    3. 入口模式：模式 C（纯 Passive）OR 模式 B（双 root）？心法两种都见过
+    4. has_switch=True 但 0 SwitchNode in subset → 应是 ConditionExecute 实现的"开关"
+    5. 4 GET_SKILL_ELEMENTS_TYPE 是否能升级建立"元素属性子系统"独立子页（D-211 推进）

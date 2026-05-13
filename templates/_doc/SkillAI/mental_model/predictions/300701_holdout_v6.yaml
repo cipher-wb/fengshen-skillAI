@@ -1,0 +1,100 @@
+sample_id: "300701"
+date: 2026-05-10
+batch: holdout-v0.6
+hold_out_focus: "样本 1 - drift 检测：D-501 SubType ⊥ Mode 矩阵在 SubType=303 内更多 Mode 上的泛化"
+
+# ===== 闭卷信源（仅 corpus_scan metadata + 文件名）=====
+# 注意：闭卷阶段无法获得 SkillConfig 5 硬信号（SkillNameEditor / Icon / EnhanceSkillBuffConfigID 等）
+# 因为 corpus_scan 不包含这些字段。仅有 skill_sub_type / indicator_type / class_counts / flags / 文件名。
+
+skill_config_metadata_seen:
+  SkillNameEditor: "<闭卷不可见>"
+  SkillSubType: 303     # corpus_scan 已抽出
+  Icon: "<闭卷不可见>"
+  EnhanceSkillBuffConfigID: "<闭卷不可见>"
+  SkillEffectPassiveExecuteInfo_nonzero: "<闭卷不可见 - corpus_scan 不抽 root_id>"
+  notes: |
+    可见信号：
+    - 文件名（粗看）：SkillGraph_300701_葫芦（"葫芦"是常见法宝召唤名）
+    - 目录: 法宝（不是子目录"宗门技能"，确认是法宝段位）
+    - SubType=303（v0.6 D-501 标注"法宝召唤型，双模式并存：Mode A + Mode E"）
+    - indicator_type=4（扇形/AOE 指示器）
+    - bullet_count=3（多子弹）
+    - flags：has_collision/has_set_coll/has_create_role/has_add_force/has_skill_select/has_apply_skill_effect/has_repeat_execute=True
+    - top_classes：14 ORDER_EXECUTE / 8 MODIFY_ENTITY_ATTR / 6 DELAY / 6 MODIFY_ENTITY_STATE / 4 SET_COLL / 4 NUM_CALC / 4 GET_ORIGIN_SKILL_ID / 3 CREATE_BULLET
+    - has_register_event=False（注意：与 308072/30073901/30532001 等"双 0 入口" Mode E 法宝典型 REG 模式不同！no SkillEvent callback）
+    - has_get_buff_layer=False（与 SubType=303 Mode E 308072 buff_layer 范式不符）
+    - has_template_146003779=False
+    - 综合：法宝目录 + SubType=303 + bullet=3 + skill_select + create_role + add_force + AOE indicator
+      ≈ 主动激发型法宝（自身位移 + AOE 选目标 + 召唤实体/打子弹）—— 不是"被动放任挂机"型法宝
+
+# ===== 走 D-508 §0 决策树 =====
+predict_decision_tree:
+  step_1_has_SkillConfigNode: "是（推断）"
+  reasoning_step_1: |
+    法宝目录 / 文件名"葫芦" / SubType=303 + 8 位段位 300xxx —— 不是 28xxxxx 调度容器段位，
+    与 B-005 类别 3 (28023113/28017851) 不同。corpus_scan 给出 skill_sub_type=303 = SkillConfig 已抽到
+    （类别 3 文件 corpus_scan 抽 skill_sub_type 通常为 None）。判定: 类别 1 技能。
+
+  step_2_subtype: 303
+  step_2_active_passive_inference: |
+    闭卷无法直接看 Active/Passive root_id（D-meta-2 待修工具），但根据"先看 Active/Passive 再看 SubType"决策树，
+    需用旁证推断：
+    - has_register_event=False —— 与典型 Mode E（依赖 SkillEvent callback 链驱动 fall-back）不符
+    - 14 ORDER_EXECUTE 是高量控制流原语 —— 主入口大概率非 0（双 0 入口主流程为空时往往 ORDER 较少）
+    - has_skill_select + has_create_role + bullet=3 —— 强主动激发模式（玩家点目标→召唤葫芦实体→3 段子弹）
+    - 类比 B-005 308071（Mode A，44 nodes，bullet=1）—— 同 SubType=303 主动激发法宝可能 Mode A
+    - 但 98 nodes 比 308071 大一倍，可能含 Passive 触发后续清理流（候选 Mode B）
+
+  step_3_mode_prediction: "Mode A 纯 Active 优先 / Mode B 双 root 次选 / Mode E 排除"
+  mode_confidence: "中"  # 旁证推理，非直证
+
+# ===== 4 维预测 =====
+prediction:
+  estimated_node_count: 98  # 直接用 corpus_scan，作为基线
+
+  topology_sketch: |
+    法宝主动激发型（推测 Mode A 纯 Active）：
+
+    SkillConfig.Active(非 0) → ORDER_EXECUTE root
+      → SkillSelect (玩家选目标)
+      → CreateRole (召唤葫芦实体 / 法宝本体)
+      → ADD_FORCE (法宝飞向目标 / 自身位移)
+      → DELAY × 3 (子弹时间锚点)
+      → CREATE_BULLET × 3 (3 段子弹)
+      → SET_COLL × N (碰撞开关)
+      → REPEAT_EXECUTE (蓄力/连击)
+      → MODIFY_ENTITY_STATE (法宝实体状态切换)
+    SkillConfig.Passive=0 (无被动响应)
+
+  expected_templates:
+    # 法宝/AOE/子弹技能高频模板
+    - "146003779（持续施法）— 否：has_template_146003779=False 已排除"
+    - "190016404 / 190016485 / 190016523（v0.4 D-401 三联包命中模板）— 候选高（法宝+多子弹场景）"
+    - "175xxx 子弹通用命中模板段 — 候选中（bullet=3，需要命中处理）"
+    - "44xxx 段（v0.5 D-410 callback effect 段）— 候选中"
+    - "其他段：18xxx/22xxx 功能模板 — 候选低"
+
+  touched_subsystems:
+    - "SkillEntry 系统（验证 SubType=303 + Mode A，反 v0.5 D-403 暗示 + 印证 B-005 D-501 矩阵 308071 行）"
+    - "模板系统（三联包跨 SubType=303 + 法宝目录第 5 印证）"
+    - "实体碰撞与可见性（4 SET_COLL + has_collision，第 1 类位移模式：COLL_OFF→ADD_FORCE→COLL_ON）"
+    - "子弹系统（待建页，bullet=3 候选样本）"
+    - "控制流子系统（14 ORDER + 6 DELAY + has_repeat_execute）"
+    - "SkillTag 系统（间接，可能用于子弹间距/伤害）"
+    # 不太涉及：
+    # - "Buff 系统（has_buff_apply=False, has_get_buff_layer=False）"
+    # - "SkillEvent 系统（has_register_event=False）"
+
+# ===== 关键 KPI 标签 =====
+kpis:
+  d_501_mode_test:
+    target: "SubType=303 内 Mode 预测"
+    prediction: "Mode A"
+    rationale: "主动激发模式 + has_register_event=False 排除 Mode E + 类比 B-005 308071"
+  d_508_non_skill_test: 不适用（属类别 1 技能）
+
+# ===== 风险标记 =====
+risk_flags:
+  - "Mode B 双 root 候选不能完全排除（98 nodes 较大可能含 Passive 旁路）"
+  - "三联包能否跨 SubType=303 法宝目录中再印证 = 模板系统 D-503 加强 / 弱化关键检测点"

@@ -1,0 +1,23 @@
+sample_id: 30334002
+filename: SkillGraph_30334002【火宗门】玄火化神_天阶_蓄炎流.json
+subcat: 宗门-火 / 火宗门技能
+nodes: 44
+segment_guess: 30334_5d_火主动_天阶_玄火化神_蓄炎流
+closed_book_inferences:
+  - master_flag: 0 (宗门主动)
+  - structure: 44 nodes 中等偏大 / 天阶 → 高级技能 / 蓄炎流 → 蓄力机制 / 推断 SCN + AR + BUFF 蓄力 + 子弹/伤害
+  - SubClass: SCN + 主动 AR
+  - SC=True / NSC=False
+  - ConfigJson.ElementType: 4 (火 / D-3801 4=火 5/5 实证)
+  - 段位号系 (AR): 推断 220xxxxxxx 9d (D-5601-B 火主动 27 例已实证 / 30334xxx 火主动近邻火主动 220 族)
+  - 关键不确定: 30334002 段位号系是 220 还是 225 ? B-044 cross_tool dump 显示火主动 27 例 220 (D-5601-B) / 0 例 225 / 预测 220
+  - filename_pattern: 【火宗门】玄火化神_天阶_蓄炎流 → 中文宗门 + 名称 + 段位 + 流派
+deltas_touched_predicted:
+  - D-2401 (master flag): expect 0
+  - D-2501 (225 开放矩阵): low prob (火主动倾向 220 / B-044 dump 火主动 27 例全 220 无 225)
+  - D-3801 (ET 完整枚举): expect ET=4 (火) / 已实证 / 不增枚举
+  - D-4001 (44 段位): N/A
+  - D-4006 (path ≠ ET 解耦): expect path=火 + ET=4 = 一致
+  - D-5601-B (9d 220xxxxxxx 跨心法 PR + 主动 AR 64 例 candidate): expect AR=220xxxxxxx 9d (+1 例加固 / 主推升正式 4-gate)
+  - 元发现 #65 蓄炎流相关候选: 蓄力机制可能涉及 BUFF + 触发器形态 / 续累积候选
+predicted_sample_score_self: 0.78 (火主动天阶蓄炎流 44 nodes / 段位号系强预测 220 / 蓄力机制可能含未见形态)

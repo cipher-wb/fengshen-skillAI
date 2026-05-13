@@ -1,0 +1,66 @@
+sample_id: 30325002
+sample_path: 宗门技能/SkillGraph_30325002【土宗门】扩域凝壁-地阶-神通.json
+predicted_at: 2026-05-09
+mental_model_version_used: v0.1
+metadata_known_at_prediction:
+  node_count: 109
+  category: 宗门技能
+  sub_category: 土宗门技能
+  top_classes_visible:
+    TSET_ORDER_EXECUTE: 12
+    TSET_DELAY_EXECUTE: 0
+    TSET_RUN_SKILL_EFFECT_TEMPLATE: 9
+    TSET_GET_SKILL_TAG_VALUE: 11
+    TSET_MODIFY_SKILL_TAG_VALUE: 7
+  flags_visible:
+    delay_zero: true  # ⚠️ 0 次 DELAY 在 100+ 节点技能里少见
+prediction:
+  semantic_intent: |
+    "扩域凝壁_神通" — 名字直觉是"领域扩张+石墙生成"。
+    "扩域" = 范围扩大（可能 indicator + AOE 持续区域）；
+    "凝壁" = 召唤石墙/障碍物（可能 has_summon=true 召唤墙体实体）；
+    "神通" = 高阶非常规技能，地阶但带特殊性；
+    DELAY=0 是异常信号：100+ 节点没有任何延迟 → 可能：
+    a) 即时全部生效（瞬发）
+    b) 用其他时间锚点（生命周期 timer / buff 持续）替代 DELAY
+    c) 是召唤/区域型技能，时间逻辑被委托给召唤物自身
+    GET_TAG=11 + MOD_TAG=7 → SkillTag 读写都很重，可能：
+    - 检测/记录"哪些目标被墙隔开"
+    - 记录召唤物 ID
+  topology_mermaid: |
+    flowchart LR
+      A[出招] --> B[ORDER 主流程]
+      B --> C[GET_TAG 朝向/位置]
+      C --> D[创建领域 indicator]
+      D --> E[ORDER 召唤墙体]
+      E --> F[RUN_TEMPL 墙体实体]
+      F --> G[MOD_TAG 记录召唤物]
+      D --> H[ORDER buff 应用]
+      H --> I[RUN_TEMPL 区域 buff]
+      I --> J[GET_TAG 范围内目标]
+      J --> K[apply effect 逐目标]
+  predicted_node_count: 80
+  templates_used_predicted:
+    - 召唤物/墙体模板
+    - AOE 区域 buff 模板
+    - 土属性减速/根性 debuff
+    - 自身护盾 buff
+  subsystems_touched_predicted:
+    - 控制流子系统 (ORDER 重，DELAY 缺席)
+    - SkillTag 系统 (双向读写)
+    - 召唤系统 (墙体)
+    - 触发器与碰撞 (区域指示器)
+    - 伤害管线 (减速/控制类)
+  prediction_confidence: 中低
+  reasoning: |
+    DELAY=0 这个特征我不懂——常规技能基本都有 5/10/15 帧 DELAY，
+    100+ 节点没 DELAY 可能改变我对"控制流子系统"的认知。
+    "凝壁"是否真的召唤实体（我没见过宗门召唤样本）也是新领域。
+    最大不确定：
+    - DELAY=0 的真正原因（是否本技能"瞬发后委托墙体生命周期"）
+    - 墙体召唤的具体节点类型（用 RUN_TEMPL 还是专门的 spawn 节点？）
+    - GET_TAG 11 次比常规多——读了什么？
+expected_blind_spots:
+  - 召唤系统的实现范式（在心智模型完全空白）
+  - 防御/控制类技能的时间锚点机制
+  - "无 DELAY"技能的合法性边界

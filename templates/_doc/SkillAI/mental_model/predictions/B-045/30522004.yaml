@@ -1,0 +1,22 @@
+sample_id: 30522004
+filename: SkillGraph_30522004【木宗门】密卷-青影术.json
+subcat: 宗门心法 / 木宗门心法
+nodes: 1
+segment_guess: 305_6d_老心法形态_密卷青影术
+closed_book_inferences:
+  - master_flag: 0 (心法 / IsTemplate=False)
+  - structure: 极简 1 节点 / 推断 SCN-only / 无 SEI / 无 SPE / 0 引用 (类比 B-001 30523002 等老心法 1 nodes 形态)
+  - SubClass: SkillConfigNode (SCN-only / 心法标记单节点形态)
+  - dual_NULL: True (无 AR + 无 PR / 单节点 SCN 无 RefIds)
+  - ConfigJson.SkillMainType / SubType / ElementType: 全 0 或全 None (心法 1 节点形态)
+  - SC=True / NSC=False
+  - filename_pattern: 【木宗门】密卷-青影术 → 中文宗门 + 密卷 + 名称
+  - 段位号系 (ConfigJson.SkillEffectExecuteInfo.SkillEffectConfigID): None / 单节点无 AR
+deltas_touched_predicted:
+  - D-2401 (master flag): expect 0 (心法 / 无【模板】filename 标记)
+  - D-2706 (模板第 3 形态): N/A (本样本非模板)
+  - D-2801 (NSC 独立平行路径): N/A (单节点 SCN-only / SC=True 但无 PR)
+  - D-4002 (A) (30512xxx 木心法 ConfigJson 标量全零): close cousin (本 30522 邻居号系) / 期待相似 dual_NULL+全 NULL 形态
+  - D-5601-B (9d 220xxxxxxx ref): N/A (单节点 0 refs)
+  - 元发现 #59 (心法 filename 数字 ref): N/A (filename 含【密卷】中文非数字)
+predicted_sample_score_self: 0.85 (心法老 6 位 nodes=1 形态成熟认知 / 95%+ 确定)

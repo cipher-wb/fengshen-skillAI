@@ -1,0 +1,54 @@
+sample_id: "30510007"
+date: "2026-05-10"
+batch: B-005
+focus: "1A: SubType=701 Mode C closed-book test (drift fix for Mode C ↔ Mode E parallel)"
+
+# 闭卷必读：SkillConfig 5 硬信号（B-001 D-6 教训：名字 ≠ 机制）
+skill_config_metadata_seen:
+  SkillNameEditor: "无伤诀"
+  SkillSubType: 701
+  Icon: "(empty)"
+  EnhanceSkillBuffConfigID: 0
+  SkillEffectExecuteInfo_root: 0
+  SkillEffectPassiveExecuteInfo_root: 44016176
+  SkillEffectFlowList_len: 0
+  IndicatorType: 0
+  notes: |
+    Active=0 / Passive=44016176 / SubType=701 / EnhanceID=0 / FlowList=空。
+    这是 v0.5 SkillEntry §1 "模式 C 纯 Passive" 经典签名：Active=0 + Passive≠0。
+    心法通诀目录 + SubType=701 ("被动响应型心法") + has_register_event + has_skill_event_callback
+    （来自 corpus_scan flags）—— 可能是 Mode C，也可能是模式 E 的边界（fall-back 入口机制候选）。
+    **关键观察**：Passive 非 0 ≠ 双 0 入口。这本身就让 Mode E 候选被消解。
+    **drift 关键信号**：SubType=701 在 v0.4 D-403 + D-407 之后，AI 的"过度推 Mode E"倾向，
+    在见到 Active=0 + Passive≠0 时，按 v0.5 第 1 不变量应**坚定推 Mode C**，不要被 SubType=701 名字误导。
+
+prediction:
+  estimated_node_count: 37  # corpus_scan 已知，但闭卷预测要给区间
+  topology_sketch: |
+    单 root（Passive=44016176）→ ORDER →
+      [REGISTER_SKILL_EVENT × N] (类似 30532001/30525001 范式)
+      → 各事件 callback 内部:
+         [GET_SKILL_TAG_VALUE 检查触发条件]
+         [SKILL_TAG_MODIFY_VALUE 累计层数]
+         [ADD_BUFF / RUN_TEMPL 命中模板]
+    typical buff/event 驱动型心法
+  expected_templates: ["可能 175_xxx 通用"]  # corpus_scan 显示 RUN_TEMPL=3 (175 + 186 + 225 各一)
+  expected_template_segments: ["175xxx", "186xxx", "225xxx"]  # B-005_picks 已扫确认
+  touched_subsystems:
+    - SkillEntry  # Mode C 验证靶心
+    - SkillEvent  # has_register_event / has_skill_event_callback
+    - Buff       # 心法通诀典型
+    - SkillTag   # 心法触发条件
+    - 模板系统    # 3 RUN_TEMPL 调用
+
+  entry_mode_prediction: "C"  # ⭐ drift 修正关键预测
+  entry_mode_rationale: |
+    Active=0 + Passive=44016176 直接命中 SkillEntry §1 不变量 1 模式 C 定义。
+    **不要被 SubType=701 名字误推 Mode E** —— v0.5 D-403 把 SubType=701 标为"被动响应型心法"
+    并加注"3 个新 SubType 共同特征 = 双 0 入口"，这是过度归纳。
+    **正确推理顺序**：先看 Active/Passive，再看 SubType——双 0 是 Mode E，Active=0/Passive≠0 是 Mode C。
+    SubType=701 内同时有 Mode C（30510007 这种）+ Mode E（30532001 已学）。
+
+  expected_quality:
+    sample_score_target: 0.85+
+    high_risk_dimensions: ["拓扑（拓扑是 v0.5 hold-out 唯一下降维度）"]

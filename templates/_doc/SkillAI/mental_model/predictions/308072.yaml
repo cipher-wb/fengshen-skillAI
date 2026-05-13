@@ -1,0 +1,105 @@
+sample_id: 308072
+batch: B-004
+date: 2026-05-09
+role_in_batch: pick5_mid_subtype
+mental_model_version_used: v0.4
+
+# === SkillConfig 5 硬信号 ===
+skill_config_metadata_seen:
+  SkillNameEditor: "青木天葬"
+  SkillSubType: 303
+  Icon: "Skill/GongFa/Mu/skill_mu_302101"
+  EnhanceSkillBuffConfigID: 0
+  SkillEffectExecuteInfo_root_ID: 0
+  SkillEffectPassiveExecuteInfo_root_ID: 0
+  CdType: 0
+  CdTime: 180  # 18 秒
+  notes: |
+    "青木天葬" + category="法宝" + Icon=mu_302101 = 木属性法宝技能。
+    SubType=303 (B-003 §N-3 中优先级新值，87 文件)。
+    Active=0 + Passive=0 + CdType=0 + CdTime=180 = 双 0 入口 + 无 CdType 但有 CdTime。
+    "CdType=0 + CdTime=180" — 这是 v0.3/v0.4 已知的"无 cdtype 但实际有 CD"模式（D-301 修订过）。
+    可能由 buff_layer 计层 + 法宝系统接管 CD 控制（has_get_buff_layer=true 印证）。
+
+# === Corpus 元数据 ===
+corpus_metadata:
+  node_count_actual: 129
+  top_classes:
+    TSET_ORDER_EXECUTE: 17
+    TSET_NUM_CALCULATE: 13
+    TSET_DELAY_EXECUTE: 9
+    TSET_GET_SKILL_TAG_VALUE: 9
+    ModelConfigNode: 7
+    RefConfigBaseNode: 7
+    TSET_RUN_SKILL_EFFECT_TEMPLATE: 5
+    TSET_MODIFY_SKILL_TAG_VALUE: 5
+  flags:
+    has_register_event: true
+    has_skill_event_callback: true
+    has_get_buff_layer: true   # N-5 命中
+    has_displacement: false
+    has_set_coll: false
+    bullet_count: 3
+    has_add_force: false
+
+# === PREDICTION ===
+prediction:
+  estimated_node_count: 129
+  topology_sketch: |
+    SubType=303 + 法宝 + bullet=3 + buff_layer + reg_event = 【法宝召唤型/主动激发型】
+
+    伪 mermaid：
+    ```
+    （由法宝装备/激发系统触发，无显式 root）
+       ↓
+    ORDER × 17（多段时间轴）
+       ↓
+    DELAY × 9（节奏编排）
+       ↓
+    CREATE_BULLET × 3 + ModelConfig × 7（视觉锚点）
+       ↓
+    RUN_TEMPL × 5（命中模板）
+       ↓
+    GET/MODIFY_SKILL_TAG（数值修正）
+       ↓
+    callback (REG_EVENT) 时 GET_BUFF_LAYER 修正
+    ```
+
+    7 个 RefConfigBaseNode 又出现 — 与 pick2 (400001) 类似，是法宝标志？
+
+  expected_event_ids:
+    likely:
+      - 4   # OnDamage
+      - 11  # OnDamageReceived
+      - 15
+    confidence: 中
+
+  expected_templates:
+    likely_segments:
+      - "175xxx (3 子弹命中)"
+      - "280xxx (N-2 主导)"
+      - "300xxx (B-003 N-2 提到，420 调用)"
+    estimated_template_count: 5
+
+  touched_subsystems:
+    - 子弹系统                 # bullet=3 + ModelConfig × 7
+    - 控制流子系统              # 17 ORDER + 9 DELAY
+    - 模板系统                  # 5 RUN_TEMPL
+    - SkillTag 系统           # 9 GET + 5 MODIFY
+    - Buff 系统               # buff_layer
+    - SkillEvent 系统         # reg_event
+    - SkillEntry 系统         # SubType=303（字典扩补）
+
+# === 待验证主张 ===
+risk_points:
+  - "RefConfigBaseNode × 7 在法宝中常见（pick2 也是 13 个）— 这是 v0.4 漏掉的范式：【法宝引用 buff/effect 的桥接节点】？"
+  - "buff_layer 在 303 法宝 SubType 也用 — 与 pick3 在 102 一起佐证：buff_layer 不限心法。"
+  - "无 set_coll + 无 add_force 的法宝技能：怎么不阻挡角色行动？— 法宝可能是【后台计算 + 视觉特效】不影响主角控制。"
+
+# === Confidence 自评 ===
+self_confidence: 中
+reasoning: |
+  法宝是 v0.4 没探过的领域（B-001/B-002/B-003 全宗门）。
+  pick2 (400001) + pick5 (308072) 两个法宝样本对照，能推出"法宝技能"通用范式。
+  SubType=303 字典扩必命中。
+  RefConfigBaseNode 高频可能引出新认知。

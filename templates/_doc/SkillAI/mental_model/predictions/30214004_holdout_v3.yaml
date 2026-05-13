@@ -1,0 +1,109 @@
+sample_id: 30214004
+predicted_with_mental_model_version: v0.3
+phase: holdout-v0.3
+date: 2026-05-09
+
+skill_config_metadata_seen:
+  SkillNameEditor: "人阶爆裂"   # 提示：通用名（30214004 = 火宗门-离火炎径-人阶，按文件名）
+  SkillSubType: 102   # 与 30215001/30431000/30222002 同 SubType（v0.3 已知"奇术-机制不固定"）
+  Icon: "Skill/GongFa/Huo/skill_huo_30214004"
+  EnhanceSkillBuffConfigID: 0
+  SkillEffectPassiveExecuteInfo_nonzero: false   # Passive=0 → 模式 A 纯 Active
+  CdType: 0   # B-002 字典 CdType=0 = 标签型/被动型
+  CdTime: 0   # CdTime=0
+  SkillIndicatorType: 3   # 直线指示器（v0.1 corpus 启发式 indicator=3 = 直线）
+  SkillTagsList: "顶层 4 个 tag: 54(875) / 2200095(30) / 2200096(0) / 2200182(5000)"
+  SkillDamageTagsList: "顶层 2 个: 3(100) / 5(0) — 1 号子弹伤害对子完整！"
+  notes: |
+    硬信号综合解读：
+    - "离火炎径-人阶" + 火宗门 + 模式 A + CdType=0 + CdTime=0 + 直线指示器
+    - SubType=102 + Passive=0 + Icon 是 huo_30214004（具体技能图标） → 火奇术（与 30215001 土奇术/30222002 木奇术同 SubType）
+    - **CdType=0 + CdTime=0** 这与 v0.3 字典 "CdType=0=标签型/被动型/无 CD/引擎托管" 矛盾——
+      30214004 是**主动技**（直线指示器+6 子弹），不是标签效果型
+      → **强烈挑战 v0.3 CdType=0 字典语义**：CdType=0 不一定是"被动型"，可能是"无 CD 主动型（每次释放都触发，靠其他机制控制频次）"
+    - 1 号子弹伤害对子完整：tag=3（威力系数）+ tag=5（额外伤害）→ 印证 [memory/reference_bullet_damage_tag_pairs.md]
+    - bullet_count=6 → 多段子弹（与 30312001 多弹/复合弹幕同范式）
+    - 节点数 145（语料里偏大，p75=55，本样本超过 p95）→ 复杂度高
+
+prediction:
+  estimated_node_count: 130
+  reasoning_for_node_count: |
+    实际 145 / 估 130（误差 ~10%）。
+    - 145 节点 + 28 ORDER + 16 RUN_TEMPL + 15 GET_TAG（已知 corpus_scan）→ 控制流密集 + 模板套用 + 强 SkillTag 计算
+    - 6 子弹 + 直线指示器 → 类似多弹复合弹幕 + 控制流编排
+    - 比一般技能（p50=26 / p75=55）大 2~3 倍
+
+  topology_sketch: |
+    ```mermaid
+    flowchart LR
+      A[SkillConfigNode<br>Active=220004467<br>Passive=0] --> B[**Active root<br>TSET_ORDER_EXECUTE**]
+      B --> C[施法前摇 + 直线指示器]
+      C --> D[**RUN_TEMPL<br>146003779 持续施法?**<br>OR 38xxx 连招型?]
+      D --> E[条件分支:<br>VALUE_COMPARE on tag 2200095 lvl]
+      E --> F[6 段 CREATE_BULLET<br>串行 / DELAY 间隔]
+      F --> G[每段 RUN_TEMPL<br>175_0001 子弹通用命中]
+      G --> H[GET_SKILL_TAG_VALUE × 15<br>动态伤害计算]
+      H --> I[ADD_SKILL_TAG_VALUE<br>蓄力计层]
+      I --> J[ADD_BUFF: 火属性增益]
+    ```
+    主线推测：火奇术-人阶级"离火炎径"——
+    - 高强度直线连击（6 子弹）
+    - flow 内 4 个 SkillTag 用于"层数累加 / 蓄力计算"
+    - 每段子弹走 175_0001 通用命中模板
+    - 控制流 28 ORDER + 9 DELAY 编排时间轴
+
+  expected_templates:
+    - "175_0001（子弹通用命中）— 强推测：6 段子弹 × 1~2 个 RUN_TEMPL/段 = 6~12 次 175 段位调用"
+    - "146003779（持续施法）— 中推测：CdType=0+CdTime=0 偏向'按下持续释放型'"
+    - "175_0102（连招2段）— 弱推测：可能用于多段攻击衔接"
+    - "RUN_TEMPL 总数 16（corpus_scan 已知）→ 主用 175 段位 + 1~2 次 14xxx 段位"
+
+  touched_subsystems:
+    - "[控制流子系统.md] §A 5 控制原语 — ORDER 28 / DELAY 9 / RUN_TEMPL 16（高密度）"
+    - "[控制流子系统.md] §D CdType 字典 — CdType=0 主动技反例（挑战 v0.3 '标签型/被动型' 语义）"
+    - "[控制流子系统.md] §仍不确定 4 PROBABILITY 与 SkillTag 关联 — 不一定触碰，但 RUN_TEMPL 16 + GET_TAG 15 提示 tag-driven 控制流"
+    - "[模板系统.md] 不变量 1（root=ORDER + IsTpl=False）+ 不变量 2 段位字典（16 RUN_TEMPL 主用 175 + 14xxx）+ 反直觉点 1（145 节点 + 16 RUN_TEMPL = 强模板套用）"
+    - "[SkillEntry系统.md] 不变量 1 入口模式 A 纯 Active + §SubType 字典（102 第 5 个实现 — 火奇术多段直线攻击型）"
+    - "[Buff系统.md] 反直觉 3 SubType 102 多种实现（102 第 5 种：火奇术-多段连击型，与 30431000 buff 串联 / 30222002 隐身 / 30215001 真位移 / 30433001 替身 都不同）"
+    - "[SkillTag系统.md] 不变量 A 三源协作（顶层 SkillTagsList 4 + SkillDamageTagsList 2 = 6 顶层声明 + flow 内估计 2~4 个 SkillTagsConfigNode）+ 不变量 D 1号子弹伤害对子完整（tag=3+tag=5）+ 反直觉 4 协作非互斥"
+    - "[SkillEvent系统.md] 不一定触碰 — has_register_event=False，预测 0 个 REGISTER 节点"
+    - "[实体碰撞与可见性.md] 不触碰 — has_set_coll=False / has_add_force=False（无位移）"
+
+  prediction_confidence: 中
+
+  reasoning: |
+    **强依赖 v0.3 子系统页推理**：
+
+    1. **[控制流子系统.md] §D CdType 字典**：v0.3 写道"CdType=0 — 标签效果型/心法被动/身法属性类（无 CD / 引擎托管）"。
+       但本样本 CdType=0 + CdTime=0 + **是主动技**（直线指示器+6 子弹）！
+       → **强烈挑战 v0.3 CdType=0 字典语义**。CdType=0 不一定是被动型，至少有"主动技无 CD"另一种语义。
+       推测：CdType=0 真实语义可能是"无 CD（释放即可重新释放，靠其他机制如 buff/tag 限制频次）"。
+
+    2. **[模板系统.md] 反直觉点 1 + 不变量 2 段位字典**：145 节点 + 16 RUN_TEMPL → 强模板套用。
+       16 次 RUN_TEMPL 推测主用 175 段位（每段子弹接 175_0001 通用命中）+ 1~2 次 14xxx 段位（持续施法或连招型）。
+
+    3. **[SkillEntry系统.md] §SubType 字典 + [Buff系统.md] 反直觉 3**：
+       SubType=102 已知 4 种实现（30431000 金 buff 串联 / 30222002 木 隐身 / 30215001 土 真位移 / 30433001 水 替身复合，**水 901 不算 102**）。
+       本样本是火 SubType=102 + has_set_coll=False + has_add_force=False + 6 子弹直线连击 → **第 5 种实现：火奇术-多段直线连击型**（无位移/无隐身/无 buff 串联，纯多段攻击 + tag 计算）。
+       v0.3 SubType 102 字典需扩补"多段连击型"。
+
+    4. **[SkillTag系统.md] 不变量 A 三源协作 + 不变量 D 1 号子弹伤害对子铁律**：
+       SkillTagsList 顶层 4 项（54/2200095/2200096/2200182）— 大量"功能 tag"（推测：54=普攻类标志、2200095/96=蓄力层数+max、2200182=元素伤害值）
+       SkillDamageTagsList 顶层 2 项（3/5）= 1 号子弹完整伤害对子（铁律印证）
+       flow 内估计有 2~4 个 SkillTagsConfigNode（声明源 1 给出运行时初始值）
+       → 三源协作完全工作，符合 v0.3 反直觉 4。
+
+    5. **[控制流子系统.md] §A 5 原语**：ORDER 28 + DELAY 9 + REPEAT_EXECUTE（has_repeat_execute=True）→ 真正的"控制流密集"样本，
+       70%+ 节点是控制流（28+9 = 37 控制节点 / 145 总 = 26%），加上 16 RUN_TEMPL（间接控制流） = 53/145 = 37% 控制流。
+       v0.3 一句话本质："控制流频次是子弹 17 倍"——本样本控制 53 / 子弹 6 ≈ 9 倍，比例大致符合（虽然子弹数偏多）。
+
+    6. **[SkillEvent系统.md] 不触碰**：has_register_event=False → 预测 0 REGISTER。
+       这是**未触碰子系统**（不算 v0.3 SkillEvent 页的推理依据）。
+
+    7. **[实体碰撞与可见性.md] 不触碰**：has_set_coll/has_add_force/has_create_role/has_apply_entity_effect 全 False
+       → 纯弹幕技能，不涉及实体碰撞控制。
+
+    潜在挑战 v0.3 之处：
+    - **CdType=0 字典语义**（最强挑战）— 非"被动型"也用 CdType=0
+    - **SubType=102 第 5 种实现**（火多段连击型，纯 tag + 子弹 + RUN_TEMPL）
+    - **bullet_count=6 但 has_quick_damage/has_buff_apply 都 False**（corpus_scan 漏检 6 子弹的伤害节点？还是真的全靠 tag 计算无直接伤害节点？）

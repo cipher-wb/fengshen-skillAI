@@ -1,0 +1,41 @@
+sample_id: 30524007
+batch: B-006
+sample_name: 【火宗门】连爆术_地阶_燃爆奇术3
+predict_date: 2026-05-10
+mode_hardconfirmed: E_dual_zero_fallback
+
+skill_config_metadata_seen:
+  SkillID: 30524007
+  SkillSubType: 701
+  CdType: 0
+  EnhanceID: 0
+  ActiveRoot: 0
+  PassiveRoot: 0
+  SkillEffectFlowList_len: 0
+  IndicatorType: 0
+  refs_count: 3
+  filename_hint: "宗门心法/火宗门心法 / '连爆术_地阶_燃爆奇术3' / SubType=701（被动响应型心法）"
+
+mental_model_in_state:
+  对照_30512002: "同 SubType=701 同 Mode E，refs_count 不同（30512002=1 vs 30524007=3）— 测两种 refs 量级差异是否反映真实复杂度。"
+  名字暗示: "'_燃爆奇术3' 暗示这是一个奇术系列（其他 30524005/30524006/30524008 等可能类似）— 'XX 之 N 段' 序列里的某个变体。"
+
+prediction:
+  node_count_estimate:
+    range: [2, 4]
+    rationale: "refs_count=3 — 推测 SkillConfigNode + 1-2 个补充节点（可能：SkillTagsConfigNode 注册 1 个 Tag + 1 个 BuffConfig 引用）。"
+  topology_shape: "minimal_marker_with_tag_or_buff — 比 30512002 多一点点元数据，但仍极简。可能注册 1 个心法专属 SkillTag 或引用 1 个 BuffConfig。"
+  真实入口机制_RQ1猜测:
+    候选优先级: "1. 外部召唤入口（最可能 80%）— Excel 表格驱动 + 极小辅助元数据（SkillTagsConfig）注册占位；2. SkillEvent callback（10%）；3. SerializedNodes 内嵌完整 flow（≤ 5%）— refs=3 装不下完整 flow。"
+    与 30512002 的差异预测: "30524007 比 30512002 多 2 refs = 多了 SkillTag 注册或 Buff 引用。但都是 Mode E 真技能 = 都依赖外部驱动主逻辑。"
+  4子类_RQ2立场: "和 30512002 同类 — '空壳心法 + 极小辅助元数据' 子类。**v0.4-v0.6 的 4 子类（法宝/装备型被动 / 法宝召唤激发 / 被动响应型心法 / 主动型长 CD 大招）不含此类**。预测：corpus 165 Mode E 真技能至少有 5+ 子类，'空壳心法' 是其中 1 类。"
+  涉及子系统:
+    - SkillEntry 系统（核心 — Mode E 真技能空壳子类）
+    - SkillTag 系统（次要，可能注册 1 个 Tag）
+    - Buff 系统（次要，可能引用 1 个 Buff）
+  闭卷预测_RQ3立场: "进一步印证 30512002 假设 — 同 SubType=701，Mode C/E 切换 = 是否在 SkillGraph 内画完整逻辑 vs 依赖外部驱动 + 极小辅助。"
+  闭卷预测_RQ4立场: 不适用
+
+self_assessment_pre_open:
+  conviction_level: 中高（75%）
+  最大不确定: "refs=3 多出来的 2 个 ref 究竟是什么 — 极简 BuffConfig？SkillTag？SkillEvent 注册？"

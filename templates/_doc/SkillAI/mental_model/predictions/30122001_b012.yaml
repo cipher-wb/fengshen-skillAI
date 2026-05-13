@@ -1,0 +1,55 @@
+sample_id: 30122001
+date: 2026-05-10
+batch: B-012
+mode: closed_book
+
+skill_config_metadata_seen:
+  SkillNameEditor: "坠叶三叠"
+  SkillSubType: 101
+  Icon: "Skill/Pugong/PuGong_mu"
+  EnhanceSkillBuffConfigID: 0
+  SkillEffectPassiveExecuteInfo_nonzero: false
+  Mode: A_pure_active
+  IsTemplate: false
+  CdType: 4
+  CdTime: 60
+  SkillIndicatorType: 2
+  notes: |
+    硬信号判读：
+    - SkillSubType=101 = 招式（普攻类，与"PuGong_mu"图标一致）
+    - Mode=A_pure_active = 纯主动（仅 ActiveRoot，无 PassiveRoot 也无 SkillEffectFlowList）
+    - CdType=4 + CdTime=60 = 0.6 秒短 CD（对应普攻的快速触发节奏）
+    - SkillIndicatorType=2 = 简单单体目标指示器
+    - "坠叶三叠"+ 普攻图标 → 推测多段（"三叠"暗示 3 段连击）单弹普攻
+
+prediction:
+  estimated_node_count: 38
+  estimated_node_count_range: [25, 55]
+  topology_sketch: |
+    SkillConfigNode → SkillTagsConfigNode (普攻类标签)
+        ↓
+    ActiveRoot (32xxxxxx) → ORDER_EXECUTE
+        ↓
+    ┌── PLAY_ROLE_ANIM (第 1 段动作)
+    │     ↓ DELAY_EXECUTE (段间延迟)
+    │   PLAY_ROLE_ANIM (第 2 段动作)
+    │     ↓ DELAY_EXECUTE
+    │   PLAY_ROLE_ANIM (第 3 段动作 — 三叠核心)
+    └── 每段 RUN_SKILL_EFFECT_TEMPLATE 调高阶模板（推测调 175xxx 普攻伤害模板）
+        ↓
+    GET_SKILL_TAG_VALUE (读连击 tag 数值)
+        ↓
+    （如果第 3 段触发额外伤害）→ SWITCH_EXECUTE
+  expected_templates: ["1750xxx (普攻伤害模板段)", "可能 1750087 / 1750091 等已知段位"]
+  touched_subsystems:
+    - "技能入口与生命周期 (SkillConfig + ActiveRoot)"
+    - "时间轴系统 (ORDER_EXECUTE + DELAY_EXECUTE 多段连击)"
+    - "动作与动画 (PLAY_ROLE_ANIM × 3)"
+    - "模板调用系统 (RUN_SKILL_EFFECT_TEMPLATE)"
+    - "SkillTag 系统 (普攻类 SkillTagsConfigNode)"
+
+confidence_self_assess: 0.65
+rationale: |
+  名字"坠叶三叠"+ 普攻图标 → 高置信度多段普攻形态。
+  节点数 38 ± 估计依据 corpus_cluster 单弹普攻 p50=39。
+  最大不确定：是否真有"三段动画+模板调用"还是只有 1 个动画 + 内部模板自己处理三段。

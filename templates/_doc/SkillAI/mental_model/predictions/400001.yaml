@@ -1,0 +1,95 @@
+sample_id: 400001
+batch: B-004
+date: 2026-05-09
+role_in_batch: pick2_subtype501
+mental_model_version_used: v0.4
+
+# === SkillConfig 5 硬信号 ===
+skill_config_metadata_seen:
+  SkillNameEditor: "魔气妖婴"
+  SkillSubType: 501
+  Icon: ""  # 空，反常
+  EnhanceSkillBuffConfigID: 0
+  SkillEffectExecuteInfo_root_ID: 0
+  SkillEffectPassiveExecuteInfo_root_ID: 0
+  CdType: 0
+  CdTime: 0
+  notes: |
+    名字"魔气妖婴" + category="法宝" + SubType=501 + Icon 空 + Active=0 + Passive=0 + CdType=0 + CdTime=0。
+    这是一个【法宝技能】（不是宗门技能）。SubType=501 是法宝的代表 SubType（B-003 N-3b 高优先级）。
+    "妖婴"暗示是【召唤型法宝】——可能 CREATE_ROLE 召唤伙伴，或 BuffConfigNode 持续生效。
+    Icon 空 + 双 0 入口 + CdType=0 → 法宝走特殊触发路径（不是技能 CD 限制，而是法宝系统自己管 CD/进入条件）。
+    法宝 = "无主动入口"几率高 — 由战斗系统在装备时调用。
+
+# === Corpus 元数据 ===
+corpus_metadata:
+  node_count_actual: 123
+  top_classes:
+    TSET_ORDER_EXECUTE: 13
+    TSET_GET_SKILL_TAG_VALUE: 13
+    RefConfigBaseNode: 13
+    TSET_DELAY_EXECUTE: 13
+    BuffConfigNode: 10
+    TSET_REMOVE_BUFF: 10
+    TSET_ADD_ENTITY_ATTR_VALUE: 10
+    TSET_NUM_CALCULATE: 7
+  flags:
+    has_register_event: false  # 法宝罕见地不用 SkillEvent！
+    has_skill_event_callback: false
+    has_get_buff_layer: false
+    has_displacement: false
+    has_create_role: false  # 即使叫"妖婴"也不召唤实体
+    bullet_count: 0
+  category_dir: "法宝"
+
+# === PREDICTION ===
+prediction:
+  estimated_node_count: 123
+  topology_sketch: |
+    13 ORDER + 13 DELAY + 10 BuffConfig + 10 REMOVE_BUFF + 10 ADD_ENTITY_ATTR + 13 GET_SKILL_TAG = 这是标准的【buff 时间轴技能】。
+
+    伪 mermaid：
+    ```
+    （无 Active root，由法宝装备系统驱动）
+       ↓
+    ORDER_EXECUTE × 13（每个对应一个 buff 阶段/层级）
+       ↓
+    DELAY_EXECUTE × 13（buff 持续时间编排）
+       ↓
+    ADD_ENTITY_ATTR × 10（属性修正）
+       ↓
+    REMOVE_BUFF × 10（到期清理）
+    ```
+
+    BuffConfig × 10 + RefConfigBase × 13 = 大量本地 buff 元数据快照 + 跨技能引用（其它技能/buff 的引用）。
+
+  expected_event_ids: []  # 没 REG，无 SkillEvent
+
+  expected_templates:
+    likely_segments:
+      - "175xxx (通用命中？不太可能，没 bullet)"
+      - "可能根本不调高阶模板"
+    estimated_template_count: "0-2（corpus 显示无 RUN_TEMPL 在 top）"
+    note: "13 个 RefConfigBaseNode 可能是【buff 引用其它 buff】的协作机制"
+
+  touched_subsystems:
+    - Buff 系统                   # 10 BuffConfig + 10 REMOVE_BUFF + 10 ADD_ENTITY_ATTR
+    - 控制流子系统                 # 13 ORDER + 13 DELAY
+    - SkillTag 系统               # 13 GET_SKILL_TAG（可能法宝靠 tag 取数值）
+    - SkillEntry 系统             # SubType=501（字典扩补 N-3b）
+    # NOT: SkillEvent / 子弹 / 碰撞
+
+# === 待验证主张 ===
+risk_points:
+  - "RefConfigBaseNode × 13 — 这是 v0.4 没深入研究过的范式。可能是 ID-only 引用（不带 BuffConfigNode 元数据）。"
+  - "10 BuffConfig + 13 RefConfigBase = 能否构成"buff 树"（buff 装载更细的 sub-buff）？"
+  - "无 SkillEvent + 无子弹 = 法宝走的不是技能流程，是被动属性修正流程。SubType=501 字典语义 = '法宝/装备型被动'。"
+  - "ADD_ENTITY_ATTR × 10 + REMOVE_BUFF × 10 = 1:1 配对吗？是否每个 ATTR add 对应一个 buff remove？"
+
+# === Confidence 自评 ===
+self_confidence: 中偏低
+reasoning: |
+  法宝是 v0.4 完全没探过的领域（B-001/B-002/B-003 全是宗门）。
+  拓扑大致能预测对（ORDER+DELAY+BUFF 范式），但 RefConfigBaseNode × 13 高度可疑——
+  可能引出新的"配置引用系统"子系统页。
+  SubType=501 字典扩补必命中。

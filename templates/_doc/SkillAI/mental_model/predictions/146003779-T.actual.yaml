@@ -1,0 +1,10 @@
+meta:
+  ir_version: '1.0'
+  skill_id: 0
+  skill_name: (未知)
+flow: []
+tags:
+- id: 1460055
+  desc: 技能短长按参数-开始时间
+- id: 1460056
+  desc: 技能短长按参数-中断标记

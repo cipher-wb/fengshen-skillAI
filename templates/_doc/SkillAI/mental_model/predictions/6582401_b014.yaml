@@ -1,0 +1,90 @@
+---
+sample_id: "6582401"
+batch: B-014
+phase: PREDICT_close_book
+predicted_at: 2026-05-10
+mental_model_version_in: v0.12
+bucket: 65xxx_7d
+filename: "SkillGraph_6582401【炼药】效果24_1.json"
+
+# ============================================================================
+# 闭卷输入（仅看技能名 + category metadata）
+# ============================================================================
+
+close_book_inputs:
+  filename_label: "【炼药】效果24_1"
+  category_dir: "BUFF"
+  sub_category: ""
+  semantic_hint: |
+    "【炼药】" 标签 = 项目"炼药/丹药"系统类（功能模块化 BUFF）；
+    "效果24_1" = 第 24 个炼药效果的子型 1 / 系列模板的一员；
+    65xxx_7d 段位（43 文件 / v0.11 字典未覆盖）= 可能是炼药/丹药/灵药类 BUFF 段位。
+
+# ============================================================================
+# 5 SkillConfig 硬信号预测
+# ============================================================================
+
+predicted_skill_config_5_hard_signals:
+  SkillNameEditor: "【炼药】效果24_1（推断）"
+  SkillSubType_guess: 0  # BUFF 配置文件 SubType 通常 = 0
+  Icon: "未知（炼药丹药相关图标）"
+  EnhanceSkillBuffConfigID_guess: 0
+  SkillEffectPassiveExecuteInfo_guess: "可能 = 0"  # 双 0 fallback Mode E（BUFF 配置纯容器）
+
+# ============================================================================
+# 拓扑预测
+# ============================================================================
+
+predicted_topology:
+  predicted_node_count: 8  # 估算：炼药效果通常简单 / SkillConfig + BuffConfig（炼药效果 buff）+ ADD_BUFF + 触发 / 总数 5-15
+  predicted_mode: "E_dual_zero_fallback"  # SubType=0 + 双 0 + BuffConfig 字段入口
+  predicted_topology_keys:
+    - "BuffConfigNode"        # 核心：炼药效果 buff
+    - "ORDER_EXECUTE"
+    - "ADD_BUFF"              # 应用炼药效果
+    - "REMOVE_BUFF"           # 反向 / 持续时间结束
+    - "REGISTER_SKILL_EVENT"  # 事件触发（吃药/进入战斗）
+
+predicted_subsystems:
+  - "Buff"
+  - "SkillEntry"
+  - "SkillEvent"
+
+# ============================================================================
+# 段位字典命名归纳预测（v0.11 字典未覆盖 65xxx_7d / B-014 新假说）
+# ============================================================================
+
+predicted_segment_naming_dict_check:
+  bucket: 65xxx_7d
+  hypothesis_keywords: ["EVENT", "TAG", "PROC"]
+  predicted_naming_keyword_hits_in_segment_top_16: false  # 预测：65xxx_7d 段位以"通用业务原语"为主 / EVENT/TAG/PROC 等假说关键词命中可能不强
+  predicted_naming_keyword_hits_in_segment_top_32: "uncertain"
+  rationale: |
+    65xxx_7d 段位 43 文件 / v0.11 字典未覆盖 / 命名归纳无先验 /
+    "炼药效果" 系列文件名暗示功能模块化（同 18xxx_7d 法宝/特效模板段位类似）/
+    可能是"丹药/炼药/灵药"功能段位 / 但段位整体语义不应以 EVENT/TAG/PROC 简单归纳 /
+    若双窗口反例则进一步加固 SBL-4 同源候选 / 若部分支持则 hedge 措辞保留
+
+# ============================================================================
+# 当前认知（GATE-MENTAL-IN）
+# ============================================================================
+
+mental_model_understanding:
+  involved_subsystems:
+    Buff:
+      current_understanding: "BUFF 类 Mode E 入口 BuffConfig 字段 vs REGISTER_SKILL_EVENT 双独立轴"
+      uncertain: "炼药效果 BUFF 是 type1 纯空壳还是 type3 BuffConfig 内部 trigger"
+    SkillEntry:
+      current_understanding: "SubType=0 BUFF 配置型 / Mode E type1-5 编码 60.3% / 65xxx_7d 段位未学"
+      uncertain: "65xxx_7d 段位形态是否符合现有 type1-5 编码"
+    SkillEvent:
+      current_understanding: "BUFF 类 REGISTER 触发器存在 / N 对 REG/UNREG"
+      uncertain: "炼药效果是否走 N 对 REG/UNREG"
+    模板系统:
+      current_understanding: "65xxx_7d 段位 v0.11 字典未覆盖 / B-014 新增字典条目候选"
+      uncertain: "65xxx_7d 段位是否需要正式字典条目"
+
+uncertainty_sources:
+  - "未读 BuffConfig 实际配置"
+  - "未读节点拓扑 / 估算 5-15 区间宽"
+  - "65xxx_7d 段位整体语义猜测可能错"

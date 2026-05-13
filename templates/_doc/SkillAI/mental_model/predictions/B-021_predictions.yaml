@@ -1,0 +1,203 @@
+---
+batch: B-021
+predict_phase: 闭卷预测（仅看 picks.json 的 filename + path + node_count + whitelist_subcat）
+rule_6_v2_6_self_apply: |
+  所有 filename_meaning_GUESS 字段标 _guess_status: GUESS_ONLY 物理隔离。
+  PREDICT 阶段不读 ConfigJson / 不查 SubType / 不查 ActiveRoot — 完全依赖 picker_v2 出的 picks.json 元数据。
+date: 2026-05-11
+---
+
+# B-021 PREDICT（闭卷预测 / 10 picks）
+
+## 全局假设（依据 v0.15.4 心智模型）
+
+- D-1606 跨段位 ActiveRoot candidate（累积 11 例 / 5 段位号系 32/190/220/225/44）
+- D-1902 type1_pure_empty_shell candidate（累积 4 例 / SubType=701 单节点心法）
+- D-1904 sub_category=宗门心法 SubType=701 + Mode C（累积 5 例 / 土宗门心法 44017xxx 连号 4 例）
+- 通用 BUFF 形态：通常无 SkillEntry 主节点（独立 effect 模板）
+- 模板（IsTemplate）通常 SubType=0 + Mn=0 + 都 root 空
+
+---
+
+## P-1: 186005883【模板】通用伤害流程-技能 (模板-伤害 / 9 节点 / train)
+filename_meaning_GUESS:
+  _guess_status: GUESS_ONLY
+  guess: 通用伤害流程模板 / 9 节点小型模板
+predict:
+  is_template: true  # filename 含【模板】
+  SkillSubType: 0     # 模板规律
+  SkillMainType: 0
+  has_active_root: maybe  # 模板可能有伤害链 active 段
+  has_passive_root: false
+  bullet_count: 0
+  buff_count: 0
+  skill_tag_count: 0  # 模板通常无 tag
+  template_node_count: ">=1"
+confidence: 中（模板规律稳定）
+
+## P-2: 30511006【金宗门】密卷-地阶30221012 (宗门心法 / 1 节点 / train)
+filename_meaning_GUESS:
+  _guess_status: GUESS_ONLY
+  guess: 金宗门心法【密卷】系列 / 1 节点 = 极简空壳形态 / "地阶30221012" 暗示从 30221012 金宗门技能复制衍生
+predict:
+  is_template: false
+  SkillSubType: 701   # D-1904 sub_category=宗门心法 SubType=701 累积 5 例 / 但 30511006 仅 1 节点 → 也可能是 type1_pure_empty_shell SubType=0
+  SkillMainType: 0    # type1 形态
+  has_active_root: false
+  has_passive_root: false  # 1 节点 = 都 0 空壳 = D-1902 type1_pure_empty_shell candidate 加固第 5 例
+  bullet_count: 0
+  buff_count: 0
+  skill_tag_count: 0
+  hypothesis_lean: type1_pure_empty_shell （D-1902 累积候选第 5 例 / 跨宗门金心法）
+confidence: 高（1 节点 + 心法子目录 + filename 含"密卷"暗示 6/7 位老 ID 衍生）
+
+## P-3: 30234006【火宗门】炎龙噬天_天阶_蓄炎流 (宗门-火 / 104 节点 / train)
+filename_meaning_GUESS:
+  _guess_status: GUESS_ONLY
+  guess: 火宗门主动技 / 蓄炎流派 / 104 节点 = 复杂多段 / 天阶高端段位
+predict:
+  is_template: false
+  SkillSubType: 102 或 101  # 火宗门主动神通常见 SubType
+  SkillMainType: 1          # SkillMainType=1 主动技
+  has_active_root: true
+  has_passive_root: maybe   # 大型主动技偶尔加 buff passive 段（"蓄炎流"暗示蓄力计数 buff）
+  bullet_count: ">=2"       # 蓄炎流多段子弹典型
+  buff_count: ">=1"         # 蓄炎计数 buff
+  skill_tag_count: ">=1"    # 蓄炎层数 tag
+  cond_count: ">=1"         # 蓄力满判定
+confidence: 中（火宗门 102 系大型主动技稳定形态）
+
+## P-4: 30515004【土宗门】坤蚀秘卷_人阶 (宗门心法 / 18 节点 / train)
+filename_meaning_GUESS:
+  _guess_status: GUESS_ONLY
+  guess: 土宗门心法 / "坤蚀"系列 / "秘卷"形态 / 人阶 / 18 节点 = 中型被动
+predict:
+  is_template: false
+  SkillSubType: 701  # D-1904 sub_category=宗门心法 SubType=701 累积 5 例 / 土宗门心法 44017xxx 连号 4 例 → 第 5 例 candidate 加固
+  SkillMainType: 7   # 心法 SubType=701 通常 Mn=7
+  has_active_root: false
+  has_passive_root: true   # 心法 = Passive 形态 / D-1904 Mode C
+  passive_root_id_guess: "44017xxx (土宗门心法同段位连号 candidate 第 5 例)"
+  bullet_count: 0
+  buff_count: ">=1"  # 心法效果通过 buff
+  skill_tag_count: maybe
+  hypothesis_lean: D-1904 同段位连号 44017xxx 累积加固第 5 例 / housekeeping #2 拆分门槛已达成
+confidence: 高（土宗门心法 44017xxx 连号已是 4 例稳定模式）
+
+## P-5: 303514_水宗门_地阶_漩涡 (宗门-水 / 57 节点 / train)
+filename_meaning_GUESS:
+  _guess_status: GUESS_ONLY
+  guess: 6 位 ID 老形态水宗门技能 / "漩涡"形态 / 地阶 / 57 节点 = 中等弹幕
+predict:
+  is_template: false
+  SkillSubType: 0 或 102  # 6 位 ID 老形态可能 SubType 缺失
+  SkillMainType: 0 或 1
+  has_active_root: true   # 主动技
+  has_passive_root: false
+  bullet_count: ">=2"     # 漩涡 = 旋转弹幕典型多弹
+  buff_count: maybe
+  skill_tag_count: maybe
+  hypothesis_lean: 6 位 ID 老形态 vs 8 位 ID 新形态 SubType 分布差异 candidate（B-020 D-2004 candidate 加固）
+confidence: 中（6 位 ID 老形态 SubType 不可靠）
+
+## P-6: 1860401【模板】下一次伤害触发效果（无视命中次数）(模板-技能 / 26 节点 / train)
+filename_meaning_GUESS:
+  _guess_status: GUESS_ONLY
+  guess: 模板【技能】子目录 / 26 节点 = 中等 / "下一次伤害触发"= 一次性 trigger 监听器 / "无视命中次数"= 不依赖 hit count
+predict:
+  is_template: true
+  SkillSubType: 0
+  SkillMainType: 0
+  has_active_root: maybe  # 模板有 trigger 段
+  has_passive_root: maybe
+  bullet_count: 0
+  buff_count: maybe       # trigger 通常借 buff 监听
+  skill_tag_count: ">=1"  # "下一次"语义 = SkillTag 计数器
+  cond_count: ">=1"       # 命中条件判定
+  template_node_count: ">=1"
+confidence: 中（模板形态多变）
+
+## P-7: 12005【通用效果】受击硬直打断技能 (宗门标签-通用BUFF / 9 节点 / train)
+filename_meaning_GUESS:
+  _guess_status: GUESS_ONLY
+  guess: 通用 BUFF 子目录 / 5 位 ID（短 ID 通用效果）/ "受击硬直打断"= buff 触发条件 + 中断 effect
+predict:
+  is_template: false
+  has_SkillConfigNode: false  # 通用BUFF 通常无主 SkillConfig（独立 buff/effect 模板形态）
+  bullet_count: 0
+  buff_count: ">=1"           # 必有 buff
+  skill_tag_count: 0
+  cond_count: maybe           # 受击硬直条件判定
+  template_node_count: ">=1"  # 通用 BUFF 通常 IsTemplate=True
+  hypothesis_lean: 通用 BUFF 形态 = 独立 effect 模板 / 无 SkillConfigNode 主节点 / 与心法/技能形态不同
+confidence: 高（通用BUFF 子目录形态规律）
+
+## P-8: 1860223【模板】召唤单位 (模板-功能 / 18 节点 / train)
+filename_meaning_GUESS:
+  _guess_status: GUESS_ONLY
+  guess: 模板【功能】子目录 / "召唤单位"= summon 模板 / 18 节点中等
+predict:
+  is_template: true
+  SkillSubType: 0
+  SkillMainType: 0
+  has_active_root: maybe
+  has_passive_root: false
+  bullet_count: 0  # 召唤 = 非子弹
+  buff_count: maybe
+  skill_tag_count: maybe
+  cond_count: maybe
+  template_node_count: ">=1"
+  hypothesis_lean: 模板-功能子分类首批 B-021 学习 / 形态未知 / 期望见到 TSET_CREATE_ENTITY 类节点
+confidence: 低（模板-功能子分类 0 历史样本 / 形态未知）
+
+## P-9: 30331001【金宗门】金神通二段_demo (宗门-金 / 80 节点 / holdout)
+filename_meaning_GUESS:
+  _guess_status: GUESS_ONLY
+  guess: 金宗门 / 神通技 / 二段连招 / 80 节点 = 大型 / "_demo"= 早期 demo 样本
+predict:
+  is_template: false
+  SkillSubType: 102 或 101
+  SkillMainType: 1
+  has_active_root: true
+  has_passive_root: maybe  # demo 可能既配 active 又留 passive 段
+  bullet_count: ">=2"      # 二段连招典型多弹
+  buff_count: ">=1"
+  skill_tag_count: ">=1"   # 二段计数 tag
+  cond_count: ">=2"        # 段位判定
+  hypothesis_lean: 二段连招 = Switch 分支或 SkillTag 段位计数 / Mode E_dual_nonzero candidate (D-2001 跨段位 ActiveRoot 累积第 12 例)
+confidence: 中（金宗门二段 demo 形态多变）
+
+## P-10: 30212012【木宗门】奇术_人阶_万叶生发 (宗门-木 / 55 节点 / holdout)
+filename_meaning_GUESS:
+  _guess_status: GUESS_ONLY
+  guess: 木宗门主动 / 奇术系列 / 人阶 / "万叶生发"= 多叶弹幕 / 55 节点中等
+predict:
+  is_template: false
+  SkillSubType: 102
+  SkillMainType: 1
+  has_active_root: true
+  has_passive_root: false
+  bullet_count: ">=3"   # "万叶"暗示多弹分散
+  buff_count: maybe
+  skill_tag_count: ">=1"
+  cond_count: maybe
+confidence: 中（木宗门奇术 102 系标准主动技）
+
+---
+
+## 预测全局总结
+
+| pick | type 假设 | SubType 假设 | confidence |
+|------|---------|------------|-----------|
+| 186005883 模板-伤害 | template | 0 | 中 |
+| 30511006 金宗门密卷 | empty_shell | 0 或 701 | 高 |
+| 30234006 火宗门炎龙 | 主动 | 102 | 中 |
+| 30515004 土宗门坤蚀 | 心法被动 | 701 | 高 |
+| 303514 水宗门漩涡 | 主动6位老 | 0 或 102 | 中 |
+| 1860401 模板伤害触发 | template | 0 | 中 |
+| 12005 通用受击打断 | BUFF 独立 | 无 SC | 高 |
+| 1860223 模板召唤 | template | 0 | 低 |
+| 30331001 金神通二段 | 主动dual | 102 | 中 |
+| 30212012 木宗门万叶 | 主动 | 102 | 中 |
+
+**期望 sample_score 累积**：~0.75（大部分形态可命中 / 但 30511006 SubType 二选一 + 30331001 二段形态 + 1860223 模板-功能首批 = 3 个潜在大失分）

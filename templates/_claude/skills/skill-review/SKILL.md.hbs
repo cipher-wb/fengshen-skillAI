@@ -1,0 +1,198 @@
+---
+name: skill-review
+description: 审核已配置的 SkillEditor 蓝图（SkillGraph_xxx.json）是否合法、合理、最优。当用户说"审一下这个技能"、"看看 XX 技能配得对不对"、"这个 JSON 有问题吗"、"帮我挑刺"、"有更好写法吗"、"提交前自检"等场景时触发。覆盖 4 层审核：结构合法 / 业务规则 / 语义合理 / 实现最优。
+---
+
+# skill-review — 审核 SkillEditor 蓝图
+
+> 用户角色：战斗策划。本 Skill 对一个或多个 SkillGraph JSON 跑 4 层审核，输出**结构化挑刺报告**。
+>
+> **核心原则**：审核**只给建议不自动改**。所有改动建议都列在报告里，由策划/leader 决定是否采纳。
+>
+> **harness 视角**：本流程 = inferential sensors（语义/最优层 AI 评判）+ computational sensors（lint）。最后挂 GATE-MENTAL-OUT 把发现回流到心智模型。
+
+---
+
+## 触发时确认输入
+
+用户输入应包含：
+- **目标 JSON 路径**（必须）— 一个或多个文件
+- **审核范围**（可选）— 不指定就跑全 4 层
+
+只说"审一下"没给路径 → 先问清楚。
+
+---
+
+## R0. ⚠️ GATE-MENTAL-IN（心智回想）— 审核前必做
+
+读 mental_model 对应子系统页（按本 JSON 触碰的子系统），明确：
+- 我对该子系统的**关键不变量**是什么 → 审核时重点查违反点
+- 该子系统**反直觉点**有哪些 → 看蓝图是否踩了
+- 该子系统的**仍不确定的地方** → 审核中如果触碰这些，标 ⚠️ 提醒人工裁决
+
+**汇报模板**：
+
+```
+🧠 GATE-MENTAL-IN 审核前心智回想
+触碰子系统：子弹系统 / 伤害管线
+- 子弹系统不变量重点查：follow_creator 与 AngleAdjustType 互斥
+- 伤害管线反直觉点重点查：威力系数 + 额外伤害必须成对（Tag pair）
+```
+
+---
+
+## 4 层审核流程（**按顺序，前层失败可继续后层但要标注**）
+
+### Layer 1: 结构合法（自动跑 lint）
+
+```powershell
+python doc/SkillAI/tools/skill_lint.py <input.json>
+```
+
+13+ 条规则（详见 [skill_lint.py](../../../doc/SkillAI/tools/skill_lint.py)）：E001~E018 致命错误 / W001~W009 警告。
+
+**报告项**：直接贴 lint 输出，ERROR 必须修给具体修法。
+
+### Layer 2: 业务规则（OnSaveCheck 镜像）
+
+把 SkillEditor 内部 OnSaveCheck 关键校验复制到代码外：
+
+1. **SkillConfigNode 完整性**：SkillIndicatorType / SkillIndicatorParam / SmartCastTarget / SkillEffectExecuteInfo
+2. **引用类节点完整性**：BulletConfigNode 三 dict / ModelConfigNode 必要字段
+3. **TableTash 校验**：节点 TableTash 与所属表匹配
+4. **Config2ID 前缀**：`SkillEffectConfig_<id>` 等
+
+```
+[Layer 2 BUSINESS]
+✗ Bullet 320032 缺 AfterBornSkillEffectExecuteInfo（命中链路）
+  → 修复：补字段，或调用模板"子弹通用逻辑-碰撞"
+✓ SkillConfig 完整性 OK
+```
+
+### Layer 3: 语义合理（AI 评判）
+
+**单节点级别**：数值范围 / 参数语义匹配 / PT=5 (TCommonParamType) 用对 / Desc 命名一致性。
+
+**整体逻辑级别**：流程是否合理（前摇→出手→命中→表现）/ 子弹是否走标准命中链路 / 多段连招衔接 / 元素-类型搭配是否符合宗门设定。
+
+**铁律检查**（来自 [memory/reference_bullet_damage_tag_pairs.md](../../../../memory/reference_bullet_damage_tag_pairs.md)）：
+
+> 子弹序号 → 技能参数 Tag ID 配对：威力系数 + 额外伤害必须成对  
+> 1 号子弹 = (3, 5) / 2 号 = (1201, 1211) / 3 号 = (1202, 1212)
+
+```
+[Layer 3 SEMANTIC]
+✗ TSET_DELAY_EXECUTE id=32900006 frames=200 异常长（约 6.7s 延迟）
+  → 建议：确认是否真要这么久，或改 buffer_frame
+⚠ 伤害系数 coef=30000（300%）超出常规范围（直伤 100~200%，AOE 50~150%）
+  → 提醒人工确认（AI 不动数值）
+✓ 子弹命中链路标准
+```
+
+### Layer 4: 实现最优（AI 评判蓝图写法）
+
+**评判维度**：
+1. **拓扑可简化性**：冗余 ORDER / 嵌套过深 / 单分支条件
+2. **模板复用性**：手写了应该用模板的逻辑（命中链路 / 子弹通用模板）
+3. **节点冗余**：相同 effect 重复创建，该用 effect_return 复用
+4. **更经典写法**：参考 [docs/模板库.md](../../../doc/SkillAI/docs/模板库.md) 11 个原型
+5. **可读性**：Desc 是否清楚、分组是否合理
+
+**召回方式**：
+- [skill_graph_to_mermaid.py](../../../doc/SkillAI/tools/skill_graph_to_mermaid.py) 生成本技能 mermaid
+- 与 [docs/模板库.md](../../../doc/SkillAI/docs/模板库.md) 标准原型对比
+- 与同宗门同类型现有技能拓扑比较
+
+```
+[Layer 4 OPTIMAL]
+🔧 节点拓扑可简化：当前 3 层 ORDER 嵌套，可压成 1 层
+  当前：ORDER[A, ORDER[B, ORDER[C, D]]]
+  建议：ORDER[A, B, C, D]
+
+💡 应用模板：当前手写 12 个节点的"子弹命中+伤害+表现"
+  建议改用模板：子弹通用逻辑-碰撞 (190016404) / 伤害 (190016485) / 表现 (190016523)
+  改完 12 → 4 节点
+
+✓ 与同宗门同类型 30122001 拓扑一致
+```
+
+---
+
+## 输出报告格式
+
+```markdown
+# SkillReview Report — <skill_name> (<skill_id>)
+
+文件：<input.json>
+节点数：N / 边数：M / 审核时间：YYYY-MM-DD HH:MM
+
+## 总评
+- L1 结构合法：✓ / ✗ N 个错误
+- L2 业务规则：✓ / ✗ N 处违规
+- L3 语义合理：✓ / ⚠ N 处建议
+- L4 实现最优：✓ / 🔧 N 处可优化
+- 严重等级：✅ PASS / ⚠️ NEEDS_FIX / ❌ MAJOR_REWORK
+
+## 详细发现
+[Layer 1] [Layer 2] [Layer 3] [Layer 4]
+
+## 优先修复清单（按严重度）
+1. [ERROR] L1: ... → 修法
+2. [WARN]  L3: ... → 建议
+3. [TIP]   L4: ... → 优化
+
+## 配 mermaid 全图（可选）
+```
+
+---
+
+## 硬性 GATE
+
+| GATE | 检查 | 失败动作 |
+|---|---|---|
+| **GATE-MENTAL-IN** | R0 心智回想（说出对触碰子系统的不变量/反直觉点） | 说不出来去翻 mental_model |
+| GATE-R1 | 输入文件存在且能解析 JSON | 退出报告路径错 |
+| GATE-R2 | 4 层全跑完（不能因 L1 失败跳后） | 标注前层失败但继续 |
+| GATE-R3 | 报告里每条 ERROR/WARN 都给具体修法 | 不能只说"有问题"不说怎么改 |
+| GATE-R4 | 输出报告按严重度排序 | 用户先看到最重要的 |
+| **GATE-MENTAL-OUT** | 审核中是否发现**未沉淀的子系统认知**（包括正面印证） | 有 → 调 curator Mode B；无 → 显式说"无心智更新" |
+
+---
+
+## GATE-MENTAL-OUT（任务结束必做）
+
+**动作**：审完后自检——本次审核**对哪些子系统的认知有更新**？
+
+| 情况 | 处理 |
+|------|------|
+| 印证旧不变量（多个样本都不踩 X） | 强化：调 curator Mode B + confidence +1 |
+| 修正旧认知（发现某不变量边界条件） | 调 curator + conflict_flag |
+| 发现新范式（首次审到某种写法） | 调 curator，可能新建子系统页 |
+| 单纯审完没发现新认知 | 显式说"本轮无心智更新" |
+
+**调用方式**：通过 Agent 工具调 [skill-knowledge-curator](../../agents/skill-knowledge-curator.md) Mode B，传入：审核摘要 + 触碰子系统列表 + 认知变化候选 + 证据。
+
+---
+
+## PostMortem 提案（任务结束选做）
+
+如果审核中发现**未沉淀过**的新坑（注意：与 GATE-MENTAL-OUT 不同 — 这里是"新坑"，那里是"新认知"，可能重叠也可能不重叠）：
+
+按 [postmortem 格式](../skill-design/references/postmortem_template.md) 给用户提案。
+
+举例：审完 30 个技能发现 3 个都有"buffer_frame=0"（即没有取消窗口），可能值得沉淀。
+
+---
+
+## 工具脚本
+
+| 脚本 | 用途 |
+|---|---|
+| [skill_lint.py](../../../doc/SkillAI/tools/skill_lint.py) | L1 静态校验 |
+| [skill_graph_to_mermaid.py](../../../doc/SkillAI/tools/skill_graph_to_mermaid.py) | 视觉化 + L4 对比 |
+| [skill_decompiler.py](../../../doc/SkillAI/tools/skill_decompiler.py) | 反编译为 IR 后做 L3/L4 对比 |
+
+## 相关 Skill
+
+- **[skill-design](../skill-design/SKILL.md)** — 创建/修改技能（不是审核）
+- **[skill-knowledge-curator](../../agents/skill-knowledge-curator.md)** — GATE-MENTAL-OUT 调用对象

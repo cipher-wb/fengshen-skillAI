@@ -1,0 +1,455 @@
+{
+    "serializationData": {
+        "SerializedFormat": 0,
+        "SerializedBytes": [],
+        "ReferencedUnityObjects": [],
+        "SerializedBytesString": "",
+        "Prefab": {
+            "instanceID": 0
+        },
+        "PrefabModificationsReferencedUnityObjects": [],
+        "PrefabModifications": [],
+        "SerializationNodes": []
+    },
+    "nodes": [
+        {
+            "rid": 1000
+        },
+        {
+            "rid": 1001
+        },
+        {
+            "rid": 1002
+        },
+        {
+            "rid": 1003
+        },
+        {
+            "rid": 1004
+        },
+        {
+            "rid": 1005
+        },
+        {
+            "rid": 1006
+        },
+        {
+            "rid": 1007
+        }
+    ],
+    "edges": [
+        {
+            "GUID": "0b5b7a25-f4dd-4a01-9026-ce0244185320",
+            "inputNodeGUID": "6295aa61-4685-45a0-a169-608603684838",
+            "outputNodeGUID": "22573a32-170c-438b-ae25-18cdf414549c",
+            "inputFieldName": "ID",
+            "outputFieldName": "PackedParamsOutput",
+            "inputPortIdentifier": "0",
+            "outputPortIdentifier": "0",
+            "isVisible": true
+        },
+        {
+            "GUID": "6f363125-dce1-4bd6-b789-3e6a67bf55ca",
+            "inputNodeGUID": "22573a32-170c-438b-ae25-18cdf414549c",
+            "outputNodeGUID": "86de3b5f-80ec-4b18-a51f-9651f5ce7f1e",
+            "inputFieldName": "ID",
+            "outputFieldName": "PackedParamsOutput",
+            "inputPortIdentifier": "0",
+            "outputPortIdentifier": "0",
+            "isVisible": true
+        },
+        {
+            "GUID": "da222425-ea8b-46fb-a3f9-d26317dcebf7",
+            "inputNodeGUID": "86de3b5f-80ec-4b18-a51f-9651f5ce7f1e",
+            "outputNodeGUID": "d5ee11ea-272d-44ee-aa80-e5782c4d671f",
+            "inputFieldName": "ID",
+            "outputFieldName": "PackedParamsOutput",
+            "inputPortIdentifier": "0",
+            "outputPortIdentifier": "0",
+            "isVisible": true
+        },
+        {
+            "GUID": "987c301c-5be8-4c97-9f7e-f5cb9dbb2c2c",
+            "inputNodeGUID": "1b0aaeec-4139-467b-80bd-44de6a15a2b9",
+            "outputNodeGUID": "92810904-4926-46bf-8347-885ac6edff48",
+            "inputFieldName": "ID",
+            "outputFieldName": "PackedParamsOutput",
+            "inputPortIdentifier": "0",
+            "outputPortIdentifier": "0",
+            "isVisible": true
+        }
+    ],
+    "groups": [],
+    "stackNodes": [],
+    "pinnedElements": [
+        {
+            "position": {
+                "serializedVersion": "2",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 511.0,
+                "height": 629.0
+            },
+            "opened": true,
+            "editorType": {
+                "serializedType": "NodeEditor.ConfigPinnedView, NodeEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"
+            }
+        }
+    ],
+    "exposedParameters": [],
+    "serializedParameterList": [],
+    "stickyNotes": [
+        {
+            "GUID": "b4a43585-9842-4a42-8ffe-0b3d1274816e",
+            "position": {
+                "serializedVersion": "2",
+                "x": -1200.0,
+                "y": -400.0,
+                "width": 800.0,
+                "height": 1300.0
+            },
+            "title": "[MVP1] 30212017 单弹直线右移 — 心智模型 PoC 验证",
+            "content": "[作用]\nMVP1 最简心智模型验证技能：释放后在 caster 当前位置生成 1 颗空子弹（无视觉模型 / 无伤害），通过 OnTick REPEAT 每帧给该子弹的 PosX 属性加 5 单位，连续执行 60 帧（约 2 秒）后子弹自然销毁。目的：验证 'BulletConfig.AfterBorn → OnTick ORDER → REPEAT → ADD_ENTITY_ATTR' 这条链路在宗门技能上下文里是否真的能驱动子弹位移。\n\n[流程]\n释放 SkillConfig 30212017\n  └→ TSET_CREATE_BULLET 302120171 [抬手]\n      └→ 在 caster 位置创建 BulletConfig 302120170\n          └→ AfterBorn (entity ctx) = OnTick init 302120173\n              └→ TSET_ORDER 302120173 [OnTick init]\n                  └→ TSET_REPEAT 302120174 (interval=1 / count=60)\n                      └→ 每帧调 TSET_ORDER 302120175 [frame chain]\n                          └→ TSET_ADD_ENTITY_ATTR_VALUE 302120176\n                              └→ 子弹自身 PosX += 5\n60 帧后\n  └→ 子弹 LastTime=60 / LifeFlag=1 自然销毁\n\n[特殊条件]\n- BulletConfig.Speed = 0 / 全部基础位移参数关闭 → 位移完全交给 OnTick 接管\n- BulletConfig.Model = 4 (空模型 / PostMortem #024：必填非 0)\n- BulletConfig.AfterBorn 必须 = OnTick init 节点 ID (本图 302120173)\n- ADD_ENTITY_ATTR Param[0] V=1 PT=5：在子弹 OnTick 上下文里 caster 语义 = 子弹自身\n  (这是和技能 ctx 的关键区别 / 用同样的 V=1 PT=5 在主技能里指释放者)\n- 不带任何伤害 / 不带 SkillTag / 不带任何指示器\n- 60 帧执行 / +5 单位/帧 = 总位移 300 单位 (≈ 3 米) / 主角面前直线\n- ⚠️ ADD_ENTITY_ATTR 改的是 PosX 属性 / 是否触发 entity 位置同步未实测 / 这正是 PoC 要验证的事\n\n[参数]\n- BulletConfig 数量 = 1\n- BulletConfig.Speed = 0\n- BulletConfig.LastTime = 60 帧\n- BulletConfig.LifeFlag = 1 (定时销毁)\n- BulletConfig.Model = 4 (空)\n- TSET_REPEAT.interval = 1 帧\n- TSET_REPEAT.count = 60 次\n- TSET_ADD_ENTITY_ATTR.delta = +5 单位/帧\n- TSET_ADD_ENTITY_ATTR.attr = TBN_POS_X (= 59)\n- SkillCastFrame = 0 / SkillBufferFrame = 30 / SkillBaseDuration = 30 / CdTime = 60\n- SkillRange = 600 (留余量 / 实际位移 300)\n\n[联动]\n- ID 段位 30212017 顶层 / 7 个子节点 302120170-176\n- 不依赖任何外部模板 / 不依赖任何外部 SkillEffect / 完全 self-contained\n- 配套 30212016 v08 失败路线已 archive (备份在 _archive/30212016_v08_failed_route/)\n- 实测通过后 → 阶段 2 在本图基础上加 SkillTag 8 颗子弹圆周分布 + 旋转扩张\n- 首次 Ctrl+R 后必须在 SkillEditor 打开本技能 → 点 '同步数据' 让 30212017 / 302120170-176 进运行时表"
+        }
+    ],
+    "curTab": 0,
+    "path": "{{SKILLGRAPH_JSONS_ROOT}}宗门技能/木宗门技能/SkillGraph_30212017【MVP1】单弹直线右移.json",
+    "references": {
+        "version": 2,
+        "RefIds": [
+            {
+                "rid": 1000,
+                "type": {
+                    "class": "ModelConfigNode",
+                    "ns": "NodeEditor",
+                    "asm": "NodeEditor"
+                },
+                "data": {
+                    "GUID": "b7a39998-ae56-40fe-b44c-c589ec88548f",
+                    "computeOrder": 0,
+                    "position": {
+                        "serializedVersion": "2",
+                        "x": 954.7392578125,
+                        "y": 132.3913116455078,
+                        "width": 359.0,
+                        "height": 179.0
+                    },
+                    "expanded": false,
+                    "debug": false,
+                    "nodeLock": false,
+                    "visible": true,
+                    "hideChildNodes": false,
+                    "hidePos": {
+                        "x": 0.0,
+                        "y": 0.0
+                    },
+                    "hideCounter": 0,
+                    "ID": 302120172,
+                    "Desc": "空模型占位 (BulletConfig.Model 必填非 0 / Model=4 是空模型枚举)",
+                    "paramVersion": 0,
+                    "templateParamVersion": 0,
+                    "IsTemplate": false,
+                    "TemplateFlags": 0,
+                    "TemplateParams": [],
+                    "TemplateParamsDesc": [],
+                    "TemplateParamsCustomAdd": false,
+                    "TableTash": "7BA4FA1BC830D2432EDD3669D84C3C9A",
+                    "ConfigJson": "{\"SheetRowIndex\":0,\"ID\":302120172,\"ModelTopUIHeight\":0,\"InteractionRange\":0,\"ModelInitAngle\":0,\"IsLoadModelSync\":false,\"DeathEffectId\":0,\"DeathTime\":0,\"ModelAmplify\":0,\"ReadyScale\":0,\"BodyType\":0,\"BodyLevelType\":0,\"BodyForceMoveFactor\":100,\"InEyeModelId\":0,\"ModelBornAudio\":0,\"ModelBornAudioSoundType\":1,\"ModelBornAudioStopOnDisable\":false,\"ModelBornAudioFadeOutFrame\":6,\"ModelLoopAudio\":0,\"ModelLoopAudioSoundType\":1,\"ModelLoopAudioStopOnDisable\":true,\"ModelLoopAudioFadeOutFrame\":6,\"ModelDeathAudio\":0,\"ModelDeathAudioSoundType\":1,\"ModelDeathAudioStopOnDisable\":false,\"ModelDeathAudioFadeOutFrame\":6,\"AttachPos\":0,\"Flags\":0,\"HitEffectAmplify\":100,\"BattleStateBaseSpeed\":0,\"NormalStateBaseSpeed\":0,\"LockCircleRadius\":0,\"IsFollowScale\":false,\"IsFollowAnim\":false,\"MapAnimType\":0,\"MapAnimSubType\":0,\"SelectLevel\":0,\"IsNotBias\":0,\"IsDeadDelete\":false,\"ViewEventTargetType\":0,\"DisappearType\":0,\"BaseScale\":0,\"MapStartSoundID\":0,\"MapDestroySoundID\":0,\"MapTriggerSoundID\":0,\"TransformType\":2,\"MonsterSect\":0}",
+                    "Config2ID": "ModelConfig_302120172"
+                }
+            },
+            {
+                "rid": 1001,
+                "type": {
+                    "class": "BulletConfigNode",
+                    "ns": "NodeEditor",
+                    "asm": "NodeEditor"
+                },
+                "data": {
+                    "GUID": "1b0aaeec-4139-467b-80bd-44de6a15a2b9",
+                    "computeOrder": 2,
+                    "position": {
+                        "serializedVersion": "2",
+                        "x": 471.0,
+                        "y": 252.5,
+                        "width": 0.0,
+                        "height": 0.0
+                    },
+                    "expanded": false,
+                    "debug": false,
+                    "nodeLock": false,
+                    "visible": true,
+                    "hideChildNodes": false,
+                    "hidePos": {
+                        "x": 0.0,
+                        "y": 0.0
+                    },
+                    "hideCounter": 0,
+                    "ID": 302120170,
+                    "Desc": "锚点空子弹 / Model=3200303 (飞叶/可见) (空 / PostMortem #024)\nSpeed=0 全部基础位移参数关闭\nLastTime=60 帧 / LifeFlag=1 (定时销毁)\n⭐ AfterBorn=302120173 → 触发 OnTick init",
+                    "paramVersion": 0,
+                    "templateParamVersion": 0,
+                    "IsTemplate": false,
+                    "TemplateFlags": 0,
+                    "TemplateParams": [],
+                    "TemplateParamsDesc": [],
+                    "TemplateParamsCustomAdd": false,
+                    "TableTash": "1955259A502D05C224412EDD4D1CD75D",
+                    "ConfigJson": "{\"ID\":302120170,\"FlyType\":0,\"ChaseTargetEnemy_AttachPos\":0,\"ChaseTargetEnemy_FaceToTarget\":false,\"ChaseTargetEnemy_PitchFaceToTarget\":false,\"IsAiEscape\":false,\"AngleAdjustType\":0,\"Speed\":0,\"AcceSpeed\":0,\"MaxSpeed\":0,\"TurnSpeed\":0,\"TurnAcceSpeed\":0,\"MaxTurnSpeed\":0,\"IsCloseTurnAutoHit\":false,\"PitchTurnSpeed\":0,\"PitchTurnAcceSpeed\":0,\"PitchMaxTurnSpeed\":0,\"IsOpenPhysicalReflect\":false,\"PhysicalReflectCount\":0,\"PhysicalReflectEndActionType\":0,\"TracePathType\":0,\"TracePathParams\":[],\"LastTime\":60,\"delayDestroyTime\":0,\"DestroyWhenCreatorDie\":false,\"Hp\":0,\"ATK\":0,\"BeforeBornSkillEffectExecuteInfo\":{\"SelectConfigID\":0,\"SkillEffectConfigID\":0},\"AfterBornSkillEffectExecuteInfo\":{\"SelectConfigID\":0,\"SkillEffectConfigID\":302120173},\"DieSkillEffectExecuteInfo\":{\"SelectConfigID\":0,\"SkillEffectConfigID\":0},\"Model\":3200303,\"ModelBaseScalePercent\":100,\"ChainModel\":0,\"ChainModelScalePercent\":0,\"ChainTilingFactor\":0,\"DisappearEffect\":0,\"LifeFlag\":1,\"MaxDistance\":0,\"TrackEntityNoTargetSkillEffectConfigID\":0,\"IsDieKeepMove\":false,\"Flags\":0}",
+                    "Config2ID": "BulletConfig_302120170"
+                }
+            },
+            {
+                "rid": 1002,
+                "type": {
+                    "class": "TSET_ADD_ENTITY_ATTR_VALUE",
+                    "ns": "NodeEditor",
+                    "asm": "NodeEditor"
+                },
+                "data": {
+                    "GUID": "6295aa61-4685-45a0-a169-608603684838",
+                    "computeOrder": 6,
+                    "position": {
+                        "serializedVersion": "2",
+                        "x": 2400.0,
+                        "y": 600.0,
+                        "width": 320.0,
+                        "height": 200.0
+                    },
+                    "expanded": false,
+                    "debug": false,
+                    "nodeLock": false,
+                    "visible": true,
+                    "hideChildNodes": false,
+                    "hidePos": {
+                        "x": 0.0,
+                        "y": 0.0
+                    },
+                    "hideCounter": 0,
+                    "ID": 302120176,
+                    "Desc": "[每帧] 子弹自身 PosX += 5\nParam[0]: V=1 PT=5 (TPT_COMMON_PARAM=caster in bullet ctx = 子弹本身)\nParam[1]: V=59 PT=0 (TBN_POS_X 位置X)\nParam[2]: V=5 PT=0 (delta 5 单位/帧)",
+                    "paramVersion": 0,
+                    "templateParamVersion": 0,
+                    "IsTemplate": false,
+                    "TemplateFlags": 0,
+                    "TemplateParams": [],
+                    "TemplateParamsDesc": [],
+                    "TemplateParamsCustomAdd": false,
+                    "TableTash": "0CFA05568A66FEA1DF3BA6FE40DB7080",
+                    "ConfigJson": "{\"ID\":302120176,\"SkillEffectType\":71,\"Params\":[{\"Value\":1,\"ParamType\":5,\"Factor\":0},{\"Value\":59,\"ParamType\":0,\"Factor\":0},{\"Value\":5,\"ParamType\":0,\"Factor\":0}]}",
+                    "Config2ID": "SkillEffectConfig_302120176",
+                    "SkillEffectType": 71
+                }
+            },
+            {
+                "rid": 1003,
+                "type": {
+                    "class": "TSET_ORDER_EXECUTE",
+                    "ns": "NodeEditor",
+                    "asm": "NodeEditor"
+                },
+                "data": {
+                    "GUID": "22573a32-170c-438b-ae25-18cdf414549c",
+                    "computeOrder": 5,
+                    "position": {
+                        "serializedVersion": "2",
+                        "x": 2000.0,
+                        "y": 600.0,
+                        "width": 320.0,
+                        "height": 200.0
+                    },
+                    "expanded": false,
+                    "debug": false,
+                    "nodeLock": false,
+                    "visible": true,
+                    "hideChildNodes": false,
+                    "hidePos": {
+                        "x": 0.0,
+                        "y": 0.0
+                    },
+                    "hideCounter": 0,
+                    "ID": 302120175,
+                    "Desc": "[每帧 ORDER] 当前只链入 ADD_POSX (后续可扩展)",
+                    "paramVersion": 0,
+                    "templateParamVersion": 0,
+                    "IsTemplate": false,
+                    "TemplateFlags": 0,
+                    "TemplateParams": [],
+                    "TemplateParamsDesc": [],
+                    "TemplateParamsCustomAdd": false,
+                    "TableTash": "0CFA05568A66FEA1DF3BA6FE40DB7080",
+                    "ConfigJson": "{\"ID\":302120175,\"SkillEffectType\":1,\"Params\":[{\"Value\":302120176,\"ParamType\":0,\"Factor\":0}]}",
+                    "Config2ID": "SkillEffectConfig_302120175",
+                    "SkillEffectType": 1
+                }
+            },
+            {
+                "rid": 1004,
+                "type": {
+                    "class": "TSET_REPEAT_EXECUTE",
+                    "ns": "NodeEditor",
+                    "asm": "NodeEditor"
+                },
+                "data": {
+                    "GUID": "86de3b5f-80ec-4b18-a51f-9651f5ce7f1e",
+                    "computeOrder": 4,
+                    "position": {
+                        "serializedVersion": "2",
+                        "x": 1600.0,
+                        "y": 600.0,
+                        "width": 320.0,
+                        "height": 200.0
+                    },
+                    "expanded": false,
+                    "debug": false,
+                    "nodeLock": false,
+                    "visible": true,
+                    "hideChildNodes": false,
+                    "hidePos": {
+                        "x": 0.0,
+                        "y": 0.0
+                    },
+                    "hideCounter": 0,
+                    "ID": 302120174,
+                    "Desc": "[OnTick REPEAT] interval=1 / count=60\n每帧调 ORDER 302120175 / 60 帧后停",
+                    "paramVersion": 0,
+                    "templateParamVersion": 0,
+                    "IsTemplate": false,
+                    "TemplateFlags": 0,
+                    "TemplateParams": [],
+                    "TemplateParamsDesc": [],
+                    "TemplateParamsCustomAdd": false,
+                    "TableTash": "0CFA05568A66FEA1DF3BA6FE40DB7080",
+                    "ConfigJson": "{\"ID\":302120174,\"SkillEffectType\":3,\"Params\":[{\"Value\":302120175,\"ParamType\":2,\"Factor\":0},{\"Value\":60,\"ParamType\":0,\"Factor\":0},{\"Value\":0,\"ParamType\":0,\"Factor\":0},{\"Value\":302120175,\"ParamType\":0,\"Factor\":0},{\"Value\":0,\"ParamType\":0,\"Factor\":0},{\"Value\":0,\"ParamType\":0,\"Factor\":0},{\"Value\":0,\"ParamType\":0,\"Factor\":0},{\"Value\":0,\"ParamType\":0,\"Factor\":0},{\"Value\":0,\"ParamType\":0,\"Factor\":0},{\"Value\":0,\"ParamType\":0,\"Factor\":0}]}",
+                    "Config2ID": "SkillEffectConfig_302120174",
+                    "SkillEffectType": 3
+                }
+            },
+            {
+                "rid": 1005,
+                "type": {
+                    "class": "TSET_ORDER_EXECUTE",
+                    "ns": "NodeEditor",
+                    "asm": "NodeEditor"
+                },
+                "data": {
+                    "GUID": "d5ee11ea-272d-44ee-aa80-e5782c4d671f",
+                    "computeOrder": 3,
+                    "position": {
+                        "serializedVersion": "2",
+                        "x": 1200.0,
+                        "y": 600.0,
+                        "width": 320.0,
+                        "height": 200.0
+                    },
+                    "expanded": false,
+                    "debug": false,
+                    "nodeLock": false,
+                    "visible": true,
+                    "hideChildNodes": false,
+                    "hidePos": {
+                        "x": 0.0,
+                        "y": 0.0
+                    },
+                    "hideCounter": 0,
+                    "ID": 302120173,
+                    "Desc": "[OnTick init / BulletConfig.AfterBorn 入口]\n启动 REPEAT 302120174",
+                    "paramVersion": 0,
+                    "templateParamVersion": 0,
+                    "IsTemplate": false,
+                    "TemplateFlags": 0,
+                    "TemplateParams": [],
+                    "TemplateParamsDesc": [],
+                    "TemplateParamsCustomAdd": false,
+                    "TableTash": "0CFA05568A66FEA1DF3BA6FE40DB7080",
+                    "ConfigJson": "{\"ID\":302120173,\"SkillEffectType\":1,\"Params\":[{\"Value\":302120174,\"ParamType\":0,\"Factor\":0}]}",
+                    "Config2ID": "SkillEffectConfig_302120173",
+                    "SkillEffectType": 1
+                }
+            },
+            {
+                "rid": 1006,
+                "type": {
+                    "class": "TSET_CREATE_BULLET",
+                    "ns": "NodeEditor",
+                    "asm": "NodeEditor"
+                },
+                "data": {
+                    "GUID": "92810904-4926-46bf-8347-885ac6edff48",
+                    "computeOrder": 1,
+                    "position": {
+                        "serializedVersion": "2",
+                        "x": 0.0,
+                        "y": 200.0,
+                        "width": 320.0,
+                        "height": 200.0
+                    },
+                    "expanded": false,
+                    "debug": false,
+                    "nodeLock": false,
+                    "visible": true,
+                    "hideChildNodes": false,
+                    "hidePos": {
+                        "x": 0.0,
+                        "y": 0.0
+                    },
+                    "hideCounter": 0,
+                    "ID": 302120171,
+                    "Desc": "[抬手] 创建 1 颗 BulletConfig 302120170\n位置 = caster 当前位置 (PosX/PosY/FaceDir 都用 PT=1 ATTR 取 caster 实时值)\nParam[4] V=1 PT=5 = caster (创建者)",
+                    "paramVersion": 0,
+                    "templateParamVersion": 0,
+                    "IsTemplate": false,
+                    "TemplateFlags": 0,
+                    "TemplateParams": [],
+                    "TemplateParamsDesc": [],
+                    "TemplateParamsCustomAdd": false,
+                    "TableTash": "0CFA05568A66FEA1DF3BA6FE40DB7080",
+                    "ConfigJson": "{\"ID\":302120171,\"SkillEffectType\":8,\"Params\":[{\"Value\":302120170,\"ParamType\":0,\"Factor\":0},{\"Value\":91,\"ParamType\":1,\"Factor\":0},{\"Value\":59,\"ParamType\":1,\"Factor\":0},{\"Value\":60,\"ParamType\":1,\"Factor\":0},{\"Value\":1,\"ParamType\":5,\"Factor\":0},{\"Value\":0,\"ParamType\":0,\"Factor\":0},{\"Value\":0,\"ParamType\":0,\"Factor\":0},{\"Value\":0,\"ParamType\":0,\"Factor\":0},{\"Value\":0,\"ParamType\":0,\"Factor\":0},{\"Value\":0,\"ParamType\":0,\"Factor\":0},{\"Value\":0,\"ParamType\":0,\"Factor\":0},{\"Value\":0,\"ParamType\":0,\"Factor\":0},{\"Value\":0,\"ParamType\":0,\"Factor\":0},{\"Value\":0,\"ParamType\":0,\"Factor\":0},{\"Value\":0,\"ParamType\":0,\"Factor\":0}]}",
+                    "Config2ID": "SkillEffectConfig_302120171",
+                    "SkillEffectType": 8
+                }
+            },
+            {
+                "rid": 1007,
+                "type": {
+                    "class": "SkillConfigNode",
+                    "ns": "NodeEditor",
+                    "asm": "NodeEditor"
+                },
+                "data": {
+                    "GUID": "cd0618fe-20c1-4390-b404-e7022c765a72",
+                    "computeOrder": 7,
+                    "position": {
+                        "serializedVersion": "2",
+                        "x": -400.0,
+                        "y": 200.0,
+                        "width": 320.0,
+                        "height": 200.0
+                    },
+                    "expanded": false,
+                    "debug": false,
+                    "nodeLock": false,
+                    "visible": true,
+                    "hideChildNodes": false,
+                    "hidePos": {
+                        "x": 0.0,
+                        "y": 0.0
+                    },
+                    "hideCounter": 0,
+                    "ID": 30212017,
+                    "Desc": "30212017 [MVP1] 单弹直线右移\n主入口 SkillEffectConfigID=302120171\nPoC：验证 OnTick init / REPEAT 链路",
+                    "paramVersion": 0,
+                    "templateParamVersion": 0,
+                    "IsTemplate": false,
+                    "TemplateFlags": 0,
+                    "TemplateParams": [],
+                    "TemplateParamsDesc": [],
+                    "TemplateParamsCustomAdd": false,
+                    "TableTash": "E50E65EC1A6EC53E59E9B3A412153E83",
+                    "ConfigJson": "{\"SkillXinfaType\":0,\"ID\":30212017,\"SkillNameKey\":0,\"SkillDescKey\":0,\"Icon\":\"Skill/Pugong/PuGong_mu\",\"ElementType\":2,\"SkillSchoolResType\":0,\"FeatureLabel\":0,\"BDLabels\":[],\"SkillAITags\":[],\"DamageType\":1,\"SkillMainType\":1,\"SkillSubType\":102,\"MPCost\":0,\"HunLiValue\":0,\"SectXinfaEnergyValue\":0,\"SkillCastFrame\":0,\"SkillBufferStartFrame\":0,\"SkillBufferFrame\":30,\"SkillBaseDuration\":30,\"SkillCastIsNotInterruptable\":false,\"IsSkillBufferFrameCanMove\":false,\"CdType\":1,\"CdTime\":60,\"ComboCdList\":[],\"CDMaxStoreCount\":0,\"SkillFixCdTime\":0,\"SkillRange\":600,\"SkillMinRange\":0,\"AISkillRange\":600,\"ExtraAlertRange\":0,\"IsCloseChaseInAlertRange\":true,\"NeedTargetInRange\":false,\"IsSkillCastNoTargetInIdle\":false,\"Condition\":0,\"AICastCondition\":0,\"SkillEffectExecuteInfo\":{\"SelectConfigID\":0,\"SkillEffectConfigID\":302120171},\"SkillEffectPassiveExecuteInfo\":{\"SelectConfigID\":0,\"SkillEffectConfigID\":0},\"SkillEffectOnUnEquip\":0,\"ChantCounterValuesList\":[],\"LGDamageValuesList\":[],\"SkillDamageTagsList\":[],\"SkillTagsList\":[],\"SkillTipsConditionSkillTagsList\":[],\"SkillGrowthDesc\":\"\",\"TalentKeyWord\":[],\"UseSkillSpeedDownValue\":0,\"UseSkillSpeedDownTime\":0,\"SkillIndicatorType\":0,\"SkillIndicatorParam\":[],\"SkillIndicatorParamTagConfigIds\":[],\"SkillIndicatorResParam\":[],\"SkillIndicatorResParamTagConfigIds\":[],\"LockEntityAfterUseSkillDuration\":0,\"LockEntityPosTypeAfterUseSkill\":0,\"SkillEffectOnSkillCastInterrupt\":0,\"UseSkillForbidUpdateFaceDir\":false,\"UseType\":1,\"ButtonUpConfig\":0,\"InterruptConfig\":0,\"ReActiveConfig\":0,\"SkillQuality\":2,\"IsPassiveSkillHideCD\":false,\"IsPassiveSkillNotRunByCD\":false,\"SkillProperty\":0,\"SkillRangeTagConfigId\":0,\"SkillMinRangeTagConfigId\":0,\"SmartCastTargetBasePriority\":3,\"SmartCastTargetCondTemplate\":1,\"SmartCastTargetMonsterRankCond\":[16,15,14,13,12,11,4,5,6,0],\"SmartCastTargetCampCond\":[2],\"SmartCastNoTargetIndicatorPos\":0,\"SmartCastNoTargetCancelUse\":false,\"CastTargetCondTemplate\":1,\"CastTargetMonsterRankCond\":[16,15,14,13,12,11,4,5,6,0],\"CastTargetCampCond\":[2],\"IsHideContinueUseSkillHeadBar\":false,\"SkillPriority\":0,\"EnhanceSkillBuffConfigID\":0,\"StatisticsDamageAloneForSummon\":false,\"SkillNameEditor\":\"[MVP1] 单弹直线右移\",\"SkillDescEditor\":\"[PoC MVP1] 最简心智模型验证。释放后在 caster 位置生成 1 颗空子弹，自身 Speed=0，每帧通过 ADD_ENTITY_ATTR 给 PosX 加 5，60 帧后销毁。目的：验证 OnTick init / REPEAT 改子弹自身位置链路是否真跑通。\"}",
+                    "Config2ID": "SkillConfig_30212017"
+                }
+            }
+        ]
+    }
+}

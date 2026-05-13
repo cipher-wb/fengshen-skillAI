@@ -1,0 +1,38 @@
+sample_id: "146001847"
+date: 2026-05-10
+batch: B-010
+subdir: 功能
+mode: closed-book PREDICT
+
+skill_config_metadata_seen:
+  category: template_body
+  filename_hint: "【模板】基于目标单位位置随机召唤怪物"
+  refs_count: 9
+  IsTemplate_count: 1
+  TemplateParam_count: 0
+  top_classes: {NUM_CALC: 2, GET_ENTITY_ATTR: 2, CREATE_RANDOM_NUM: 2, ORDER: 1, CREATE_ROLE: 1, REPEAT_EXECUTE: 1}
+  notes: |
+    类别 2 模板本体。极小型（refs=9）= "原子级"召唤怪物模板。CREATE_ROLE × 1 + REPEAT × 1 = 重复召唤 N 次怪物；CREATE_RANDOM_NUM × 2 = 随机偏移坐标。
+
+prediction:
+  estimated_node_count: 12  # 9 refs + ORDER root + 2 端口
+  topology_sketch: |
+    ROOT (ORDER, IsTemplate=True, ID=146001847)
+      → REPEAT_EXECUTE (循环 N 次)
+        → CREATE_RANDOM_NUM × 2 (随机角度 + 随机半径)
+        → NUM_CALC × 2 (目标坐标 = 中心 + 偏移)
+        → GET_ENTITY_ATTR × 2 (取施法者/目标位置)
+        → CREATE_ROLE (在计算坐标处召唤怪物)
+  expected_templates_called: []  # 极小模板，不调子模板
+  touched_subsystems: [模板系统, 控制流子系统（REPEAT）, 实体生命周期与替身机制（CREATE_ROLE）]
+  predicted_template_form: |
+    形态：**召唤型小型原子模板**——单一职责（在目标周围随机偏移召唤 N 个怪物）。
+    与 §模板组合模式 三联包"命中模板套件" 形成对比 — 此处无 RUN_TEMPL 调子模板，是叶子级模板。
+    判断：refs<10 + CREATE_ROLE 主导 = "实体级原子模板"，与"流程级编排模板"（如 146004907 27 RUN_TEMPL）正交。
+  predicted_internal_signature_for_skillentry_diff: |
+    与真技能差异：
+    1. 无 SkillConfigNode（与 146004907 同 — 类别 2 模板本体的共性）
+    2. 不含 SkillEffectExecuteInfo / SkillEffectPassiveExecuteInfo 入口字段（v0.6 §SkillEntry 5 类入口模式不适用）
+    3. 形态不可被 §SkillEntry §0 决策树映射到任何 SubType / Mode（IsTemplate=True 应在决策树第 1 步直接分流，不进入 SubType 5 类入口模式判断）
+  notes: |
+    中 confidence：v0.6 §仍不确定 中"模板内 TemplateParam 字段语义" 仍开放。CREATE_ROLE × 1 + REPEAT × 1 是非常具体的"召唤"原语，B-002 D-210 已"实体生命周期与替身机制" 暂存档，此样本可能是该子系统页的首次正式触碰候选。

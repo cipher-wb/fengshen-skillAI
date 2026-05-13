@@ -1,0 +1,36 @@
+=== 30212010 MATH_COS + MATH_SIN + NUM_CALC samples ===
+
+ID=66001755 cls=TSET_MATH_COS Type=51
+  Desc: 模拟轨迹-余弦计算
+  P[0]={'Value': 1006, 'ParamType': 3, 'Factor': 0}
+
+ID=66001759 cls=TSET_MATH_SIN Type=50
+  Desc: 模拟轨迹-正弦计算
+  P[0]={'Value': 1006, 'ParamType': 3, 'Factor': 0}
+
+
+=== SkillTagsConfigNode samples (entity-level Pattern B) ===
+
+ID=320098 Desc: SkillTag 声明
+  TagType: 0
+  Desc: 叶散风行子弹数量
+  NameKey: 0
+  DefaultValue: 12
+  FinalValueEffectID: 0
+  RetainWhenDie: False
+
+ID=320110 Desc: SkillTag 声明
+  TagType: 0
+  Desc: 叶散风行被心法强化
+  NameKey: 0
+  DefaultValue: 0
+  FinalValueEffectID: 0
+  RetainWhenDie: False
+
+ID=320127 Desc: SkillTag 声明
+  TagType: 0
+  Desc: 叶散风行追踪范围
+  NameKey: 0
+  DefaultValue: 0
+  FinalValueEffectID: 0
+  RetainWhenDie: False

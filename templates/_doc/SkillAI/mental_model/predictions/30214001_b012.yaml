@@ -1,0 +1,53 @@
+sample_id: 30214001
+date: 2026-05-10
+batch: B-012
+mode: closed_book
+
+skill_config_metadata_seen:
+  SkillNameEditor: "赤霄流火"
+  SkillSubType: 102
+  Icon: "Skill/GongFa/Huo/skill_huo_30214001"
+  EnhanceSkillBuffConfigID: 0
+  SkillEffectPassiveExecuteInfo_nonzero: false
+  Mode: A_pure_active
+  IsTemplate: false
+  CdType: 1
+  CdTime: 300
+  SkillIndicatorType: 3
+  notes: |
+    硬信号判读：
+    - SkillSubType=102 = 奇术（人阶奇术）
+    - Mode=A_pure_active = 纯主动
+    - CdType=1 + CdTime=300 = 3 秒长 CD（典型奇术节奏）
+    - SkillIndicatorType=3 = 直线指示器（射线 / 弹道）
+    - "赤霄流火"火属性 + 直线指示器 → 推测直线弹道火属性奇术（单/双弹打出去）
+
+prediction:
+  estimated_node_count: 45
+  estimated_node_count_range: [30, 65]
+  topology_sketch: |
+    SkillConfigNode → SkillTagsConfigNode (火宗门标签 / 灼伤?)
+        ↓
+    ActiveRoot → ORDER_EXECUTE
+        ↓
+    ┌── PLAY_ROLE_ANIM (释放动作)
+    │     ↓ DELAY_EXECUTE
+    │   CREATE_BULLET / CreateBulletConfigNode (直线火弹)
+    │     ↓ ModelConfigNode (火焰特效模型)
+    │     ↓ BulletConfigNode (直线 angle_adjust)
+    └── RUN_SKILL_EFFECT_TEMPLATE → 175xxx / 14xxx 火属性伤害模板
+  expected_templates:
+    - "175xxx (核心伤害模板)"
+    - "14xxx (灼伤标签效果模板？呼应 30524001 灼伤标签)"
+  touched_subsystems:
+    - "技能入口与生命周期"
+    - "子弹系统 (直线弹 + 火属性 Model)"
+    - "时间轴系统"
+    - "模板调用"
+    - "SkillTag 系统 (灼伤等火宗门 tag)"
+
+confidence_self_assess: 0.55
+rationale: |
+  奇术 + 直线指示器 + 长 CD = 典型直线弹幕奇术。
+  最大不确定：是否带"灼伤"等持续效果（火宗门 30524001 标签效果灼伤是同 batch 训练样本，可能联动）。
+  节点数估计：奇术形态比普攻略复杂，corpus 直线弹幕 p50=35，本样本可能略大（45 ± 15）。

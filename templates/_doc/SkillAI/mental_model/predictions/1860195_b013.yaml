@@ -1,0 +1,44 @@
+---
+batch: B-013
+sample_id: "1860195"
+bucket: 18xxx
+role: train
+phase: predict_close_book
+predicted_at: 2026-05-10
+mental_model_version_used: v0.11
+---
+
+# 闭卷预测
+
+## 5 硬信号 + extractor
+
+- SkillNameEditor: None（filename 含"测试爆裂阵爆裂"）
+- SkillSubType: 303 → 法宝（B-004 D-407）
+- IsTemplate顶层: False
+- ActiveRoot=0 / PassiveRoot=186006210 → **Mode C 纯被动**（v0.6 D-501 SubType=303 内可有 A/C/E 多形态）
+- bullet=2, buff=0, template=False, register_event=False
+- corpus_scan top_classes: TSET_ORDER_EXECUTE × 4 / TSET_NUM_CALCULATE × 3 / TSET_GET_ENTITY_ATTR_VALUE × 3 / TSET_DELAY_EXECUTE × 2 / TSET_CREATE_BULLET × 2 / BulletConfigNode × 2 / TSET_REPEAT_EXECUTE × 2 / TSKILLSELECT_CIRCLE × 2
+
+## v0.11 mental_model 段位归纳预测
+
+- 18xxx 段位字典：功能 / 特效 / 法宝模板段
+- 1860195 SubType=303 法宝 + Mode C 被动 + bullet=2 + REPEAT_EXECUTE × 2 + TSKILLSELECT_CIRCLE × 2
+- 推测：法宝被动持续触发型（PassiveRoot 接被动入口）+ 圆形 select 选目标 + REPEAT_EXECUTE 重复释放 + 创建子弹 × 2
+- 拓扑：PassiveRoot 186006210 → ORDER → DELAY × 2 → REPEAT_EXECUTE × 2 → TSKILLSELECT_CIRCLE × 2 → CREATE_BULLET × 2
+
+## 触碰子系统
+
+- 模板系统（无 RUN_TEMPL → 自含逻辑型 / 反例 18xxx 主张"功能/特效模板段"）
+- SkillEntry 系统（Mode C / SubType=303 法宝）
+- 子弹系统（双弹）
+- SkillTag 选目标（TSKILLSELECT_CIRCLE）
+- 控制流（REPEAT_EXECUTE）
+
+## 关键发现（PREDICT 阶段）
+
+- 18xxx 段位字典关键词 BUFF/EFFECT/STATE 0 命中（segment top 8 0 关键词命中）
+- 1860195 实际是"法宝被动 + REPEAT 选圆形目标 + 子弹"反复触发型，不是"特效/状态模板"
+
+## confidence
+
+- 中：mental_model 18xxx 段位主张被本样本反证（可能不应叫"特效/法宝模板段"，而是"法宝被动技能段位"）

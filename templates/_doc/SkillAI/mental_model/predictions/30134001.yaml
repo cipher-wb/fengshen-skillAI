@@ -1,0 +1,74 @@
+sample_id: '30134001'
+date: 2026-05-09
+batch: B-003
+predicted_with_mental_model_version: v0.3
+targeted_blindspot:
+  id: blindspot-4
+  description: |
+    Buff 系统 不变量 1 BuffConfigNode 必要性（v0.3 字典写"BuffConfigNode 是 buff 实体定义"，
+    但 30214004 4 ADD_BUFF + 0 BuffConfigNode → flow 内 BuffConfigNode 不是必须）。
+    本样本 30134001 元数据：3 ADD_BUFF + 0 BuffConfig，二阶印证。
+    预期发现：
+    a) buff 引用外部 BuffConfig 表的语法（ADD_BUFF.Param[X] 直接填表 ID）
+    b) v0.3 不变量 1 修订为"BuffConfigNode 可选；ADD_BUFF 有两种模式：flow 内 vs 外部表"
+
+skill_config_metadata_seen:
+  SkillNameEditor: '【火系】天阶功法-普攻'
+  SkillSubType: 101
+  Icon: '（未读，但"普攻"+ 天阶推测连招型普攻）'
+  EnhanceSkillBuffConfigID: '（未确认；心法 → buff 反向引用？）'
+  SkillEffectPassiveExecuteInfo_nonzero: '（未确认）'
+  CdType: 4  # 连招型
+  CdTime: 21
+  notes: |
+    从 5 硬信号 + 元数据看：
+    - 名字"天阶功法-普攻" → 替换型普攻（心法 enhance 类）
+    - SubType=101 ⚠️ v0.3 字典外（已知 0/102/103/601/901），新段位（"普攻/连招"段？）
+    - CdType=4 + CdTime=21（350ms） → 连招型，与 30531005 / 30124001 同模式
+    - 节点 110 / bullet=8 / RUN_TEMPL=16 → 多段连招（8 弹 + 16 工具模板，复杂）
+    - has_register_event=False + has_set_coll=False → 无事件、无碰撞机制
+    - top_classes 主导：18 ORDER + 16 RUN_TEMPL + 9 ModelConfig + 8 CREATE_BULLET + 8 BulletConfig + 6 DELAY
+      → 标准多段子弹型普攻，重度依赖模板调用
+    - 3 ADD_BUFF + 0 BuffConfig → buff 引用外部表的标准证据
+
+prediction:
+  estimated_node_count: 110
+  topology_sketch: |
+    SkillConfig (CdType=4, CdTime=21, SubType=101)
+      ├─ Active root = ORDER（普攻段流程）
+      │   ├─ ORDER × 18 串行多段
+      │   ├─ DELAY × 6 段间隔
+      │   ├─ CREATE_BULLET × 8 + BulletConfig × 8 + Model × 9（8 弹）
+      │   ├─ RUN_TEMPL × 16 → 调 175_0102 连招 2 段 + 175_0001 子弹通用命中（多次）
+      │   └─ ADD_BUFF × 3（外部表，无 BuffConfigNode）
+      └─ Passive root = ORDER（被动响应？模式 B 双 root）
+          └─ 命中后触发的额外 effect
+
+    猜测：火系天阶功法普攻 = 8 段连招的强化普攻，每段子弹 + 命中工具模板 + 偶发 buff（外部表）。
+    类似 30124001（火地阶火球普攻 effect_id 38000289 调 175_0102），但段数更多 + 升阶。
+
+    注意：3 ADD_BUFF 引用的 buff ID 应从 ADD_BUFF.Params 字段读，而非 flow 内 BuffConfigNode；
+    这种写法节省 flow 节点（3 个外部 ID vs 3 个 flow 节点 + 3 个 ID 引用）。
+
+  expected_templates:
+    - '调 175_0102 连招 2 段 / 175_0001 子弹命中'
+    - '可能调 1860xxx 段位（特效模板）'
+    - '不调 146003779（has_146003779=False）'
+
+  touched_subsystems:
+    - 模板系统（16 RUN_TEMPL，多调 175 段位通用工具）
+    - 控制流子系统（18 ORDER + 6 DELAY + 0 REPEAT，时间锚点为主）
+    - SkillEntry 系统（模式 B 双 root 推测，连招型普攻）
+    - Buff 系统（3 ADD_BUFF + 0 BuffConfig — 关键反例验证不变量 1）
+    - SkillTag 系统（6 GET + 0 MOD_TAG，仅读不写）
+    - SkillEvent 系统（0 REGISTER）
+
+  confidence: 高
+  rationale: |
+    元数据丰富：top_classes 完美对应"多段连招普攻"范式（18/16/9/8/8/6 全标志）。
+    主要不确定的点：
+    1. SubType=101 是否对应"普攻"段（与 30134001 / 30215001 SubType 102 区别？）
+    2. 3 ADD_BUFF 引用的 buff 是哪个表？外部 BuffConfig.xlsx 还是其他？
+       期望从 ADD_BUFF.Params[0] 字段名拿到表项 ID，源码 grep 字段定义
+    3. 8 个子弹是否同一 BulletConfig 复用 8 次（节省定义）还是 8 个独立 BulletConfig
+       （元数据：8 BulletConfig + 9 Model → 几乎一对一，应是独立配置）
