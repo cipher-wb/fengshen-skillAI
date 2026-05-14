@@ -10,6 +10,34 @@
 
 ---
 
+## ⚠️ 前置依赖（**安装本工具前必须先装好**）
+
+| # | 依赖 | 验证命令（PowerShell / cmd 跑） | 装的地方 |
+|---|------|--------------------------|---------|
+| 1 | **Node.js ≥ 18** | `node --version` 看到 `v18.0.0` 或更高 | https://nodejs.org/ → 下载 LTS 版 |
+| 2 | **Python ≥ 3.10**（含 pip） | `python --version` 看到 `Python 3.10.0` 或更高 + `pip --version` 不报错 | https://www.python.org/downloads/ → 下载 3.10+（**安装时勾选 "Add Python to PATH"** ⚠️ 关键） |
+| 3 | **Git** | `git --version` 看到版本号 | https://git-scm.com/ |
+| 4 | **Claude Code** | `claude --version` 看到版本号 | https://claude.com/code |
+| 5 | **Unity Editor**（任意版本 / 工程已有 Assets/） | Unity Hub → Projects 看到你的工程 | https://unity.com/download |
+
+### 检查所有依赖（一键验证）
+
+```powershell
+# Windows PowerShell（缺一个看到一个报错就装一个）
+node --version; python --version; pip --version; git --version
+```
+
+```bash
+# macOS / Linux
+node --version && python3 --version && pip3 --version && git --version
+```
+
+### ❗ 常见坑：`'pip' 不是内部或外部命令`
+
+这说明 **Python 没装** 或 **Python 装了但 PATH 没配**。详细解法见 [docs/日常工作流-FAQ.md §Python 安装指南](docs/日常工作流-FAQ.md)。**最常见原因**：装 Python 时**没勾 "Add Python to PATH"** → 重装 Python 时记得勾上。
+
+---
+
 ## 30 秒安装
 
 ```powershell

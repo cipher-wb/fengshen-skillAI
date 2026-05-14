@@ -5,6 +5,150 @@
 
 ---
 
+## ⚠️ 装本工具前 / 你必须先装的 5 个东西
+
+| # | 软件 | 必装 | 验证命令 |
+|---|------|-----|---------|
+| 1 | **Node.js ≥ 18** | ✅ 必须 | `node --version` 看到 v18+ |
+| 2 | **Python ≥ 3.10**（含 pip）| ✅ 必须 | `python --version` 和 `pip --version` 都成功 |
+| 3 | **Git** | ✅ 必须 | `git --version` 看到版本号 |
+| 4 | **Claude Code** | ✅ 必须 | 这是核心 / 没它本工具没意义 |
+| 5 | **Unity Editor** | ✅ 必须 | 至少有一个 Unity 工程（含 `Assets/`）|
+
+下面是详细装法（**踩坑最多的是 Python**，单独一节说）：
+
+### 🐍 Python 安装指南（专治 `'pip' 不是内部或外部命令` 错误）
+
+#### Windows
+
+**最常见错误现象**：
+
+```
+'pip' 不是内部或外部命令，也不是可运行的程序或批处理文件。
+'python' 不是内部或外部命令，也不是可运行的程序或批处理文件。
+```
+
+**根因**：要么没装 Python，要么装了但没勾 "Add Python to PATH"。
+
+##### Windows 安装步骤
+
+1. 打开 https://www.python.org/downloads/
+2. 点黄色按钮 "**Download Python 3.x.x**"（推荐 3.10 / 3.11 / 3.12）
+3. 下载完双击 `python-3.x.x-amd64.exe`
+4. **⚠️ 关键一步**：安装向导第一页**底部勾上 "Add python.exe to PATH"** / 不勾的话后面 pip 用不了
+5. 点 **"Install Now"** → 等几分钟装完
+6. 关掉所有 PowerShell / cmd / Claude Code（**必须**关重开 / PATH 才生效）
+7. 重开 PowerShell → 跑 `python --version` + `pip --version` 都应该有版本号
+
+**如果你之前装过但没勾 PATH**：去控制面板卸载 Python → 重装时记得勾 → 或手动加 PATH（搜"环境变量"教程 / 但重装更省事）。
+
+##### Windows 如何验证装对了
+
+```powershell
+python --version        # 应输出: Python 3.10.x  (或更高)
+pip --version           # 应输出: pip 23.x.x ...
+where python            # 应输出: C:\Users\YourName\AppData\Local\Programs\Python\Python3xx\python.exe
+                         # (有这行说明 PATH 配对了)
+```
+
+##### Windows 还是不行？
+
+- PowerShell **重开** 一遍（已开的窗口拿不到新 PATH）
+- 重启电脑（极少数顽固情况）
+- 用 `py --version`（Python launcher / Windows 安装时一起装的）— 如果 `py` 可以但 `python` 不行 → 用 `py -m pip install ...` 代替
+
+#### macOS
+
+```bash
+# 推荐用 Homebrew (https://brew.sh/)
+brew install python@3.11
+
+# 验证
+python3 --version
+pip3 --version
+
+# 如果 python 命令不存在 (只有 python3) / 加个 alias
+echo 'alias python=python3' >> ~/.zshrc
+echo 'alias pip=pip3' >> ~/.zshrc
+source ~/.zshrc
+```
+
+#### Linux (Ubuntu/Debian)
+
+```bash
+sudo apt update
+sudo apt install python3 python3-pip
+
+# 同 macOS 加 alias
+echo 'alias python=python3' >> ~/.bashrc
+echo 'alias pip=pip3' >> ~/.bashrc
+source ~/.bashrc
+```
+
+### 🟢 Node.js 安装
+
+#### Windows
+
+1. 打开 https://nodejs.org/ → 选 **LTS** 版（推荐 / 比 Current 稳）
+2. 下载 `.msi` 安装包 → 双击 → 默认下一步即可（**npm 自带 / 不用单独装**）
+3. 装完关重开 PowerShell → `node --version` 看到 v18+
+
+#### macOS
+
+```bash
+brew install node@20
+```
+
+#### Linux
+
+```bash
+# 用 nvm 装 (推荐 / 多版本切换方便)
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+source ~/.bashrc
+nvm install 20
+nvm use 20
+```
+
+### 🟣 Git 安装
+
+| OS | 命令 |
+|----|------|
+| Windows | https://git-scm.com/download/win → 下载安装 |
+| macOS | `brew install git` 或装 Xcode Command Line Tools `xcode-select --install` |
+| Linux | `sudo apt install git` |
+
+### 🤖 Claude Code 安装
+
+去 https://claude.com/code → 按平台下载安装。
+
+### 🎮 Unity Editor
+
+去 https://unity.com/download → Unity Hub → 装任意版本（推荐 LTS）→ 打开你的 Unity 工程。
+
+### ✅ 全部装完后 / 一键验证
+
+PowerShell（Windows）：
+
+```powershell
+Write-Host "─── 依赖检查 ───" -ForegroundColor Cyan
+node --version
+python --version
+pip --version
+git --version
+Write-Host "─── 如果上面 4 行都有版本号 = OK ✓ ───" -ForegroundColor Green
+```
+
+Bash（macOS / Linux）：
+
+```bash
+echo "── 依赖检查 ──"
+node --version && python3 --version && pip3 --version && git --version && echo "── 全 OK ✓ ──"
+```
+
+全 OK 后才能跑 `npx fengshen-skillai@latest init <你的 Unity 工程根>`。
+
+---
+
 ## 🗺️ 先看一张图：双仓库结构
 
 ```
