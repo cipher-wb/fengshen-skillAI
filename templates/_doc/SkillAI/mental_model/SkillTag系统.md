@@ -237,6 +237,101 @@ finalValue =
 
 ---
 
+### F.1 心法注入双键映射 / 静默失效铁律（v0.6.1 patch / 2026-05-14 / AI 自决细化 / 非概念反转）
+
+> **状态**：升正式不变量细化（§F v0.6 的工程实现细节补强 / 来源 = 用户 2026-05-14 让 AI 阅读 `心法强化功法的配置.md` §4.2 警示后立刻补 / 等级 1 证据）
+>
+> **rule_2 严守**：§F v0.6 主张本体不变 / 本 §F.1 仅补"双键映射不一致 → 静默失效"的工程实现风险
+
+**核心铁律**：心法注入链路中**同一个 SkillTag 同时被两种 key 引用**，且两端各自维护 / 必须**逐字符一致**：
+
+| 位置 | key 形式 | 示例 |
+|------|---------|------|
+| 心法首节点 Inspector「心法专属-给满足条件的其他技能里塞参数列表」 | **数字 tag ID** | `320058` |
+| `SkillValueConfig.xlsx` → `SkillValueConfig-XinFa` 页签 / `SkillTipsConditionSkillTagsList` 字段 | **tag 中文名**（= `SkillTagsConfig.ConfigJson.Desc`） | `灵木轰击蓄能点数` |
+
+**静默失效特征**（高频踩坑）：
+- 名字差一个字 / 一个空格 / 一个标点 → 整条链路**不报错 / 不警告**
+- 表现：游戏内 UI **不显示**「所受心法加成：XX心法」/ 功法逻辑读不到注入值 / 走 §F 情形 C 兜底（初始值）
+- 排查极困难：四张表（功法/心法/SkillXinfaConfig/SkillValueConfig-XinFa）单独看都"合法"
+
+**与 reference_skilltag_desc_unique.md memory 的因果关系**：
+- 该 memory 已立法 `SkillTagsConfig.ConfigJson.Desc` 必须**全工程唯一 + ≤15 字 + 风格 `<技能名><变量名>`**
+- **本 §F.1 解释了为什么必须这样**：Desc 在 SkillValue 表中作为 **跨表 key** 使用 / 重名 → 多心法注入冲突 / 字符不一致 → 静默失效
+- 例：320957 旧名「叶散风行强化开关」改为「叶散风行-寻踪术装备态」（2026-05-14 用户实例） / 含技能名前缀避免跨技能撞名 / 含具体语义降低改名成本
+
+**配置自检清单**（配心法塞参时强制 4 步）：
+1. 功法 `SkillTagsConfig.ConfigJson.Desc` 全工程 grep 唯一 ✓
+2. 心法首节点 Inspector「塞参数列表」填**数字 tag ID** ✓
+3. `SkillValueConfig-XinFa.SkillTipsConditionSkillTagsList` 填的 tag 名与功法 SkillTag 节点 Desc **逐字符一致** ✓（推荐 Excel 公式从功法 Desc 反查 / 不要手敲）
+4. `SkillXinfaConfig.ConditionSkills[0]` = `条件ID|心法ID|心法等级` 每级一行 ✓
+
+**升正式依据（无需 candidate 走 fast-path 真硬停 #5 / AI 自决细化 4-gate 满足）**：
+- 等级 1 证据：用户 2026-05-14 提供 `E:\wb\封神工作文档\AAAA本地设计工作文档\2025年9月三测相关\技能表格配置工具\心法强化功法的配置.md` §4.2 明文警示「键的形式差异（高频踩坑点）」+ 「tag 名写错一个字、空格、标点，整条链路会静默失效」
+- 等级 1 业务实例：320957「叶散风行-寻踪术装备态」改名事件（2026-05-14）= memory `reference_skilltag_desc_unique.md` 立法的工程根源
+- 非概念反转 / §F 三态主张本体不变 / 仅补"key 形式差异"的工程实现细节
+- 0 反预测 / 不构成跨级 rule 修订 / 不修订正式 rule 段（落盘到 §F 之后新增 §F.1 / 同 v0.6 落盘模式）
+
+**待办（B-054+ 加固）**：
+- 工具：写 lint 脚本对账「功法 SkillTag Desc」↔「SkillValueConfig-XinFa.SkillTipsConditionSkillTagsList tag 名」全量一致性扫描
+- 反例边界：tag 名含 Unicode 全角/半角字符差异是否影响匹配（如 `-` vs `－`）
+
+⭐ **2026-05-14 区分新立**：本节涉及的 `SkillPreConditionConfig`（SkillXinfaConfig.ConditionSkills[0] 里的"条件 ID" / 心法注入触发条件 / **Excel 配**）与 `RUN_SKILL_EFFECT_TEMPLATE.ParamUID 8` 引用的 `SkillConditionConfig`（技能内伤害增益触发条件 / **蓝图 TSCT 节点配 / NodeEditor 自动导出**）**不是同一张表**。详见独立子页 [SkillCondition系统.md](SkillCondition系统.md) §C。
+
+---
+
+### F.2 Inspector「心法专属-塞参数列表」Value 双路径并行（v0.6.2 patch / 2026-05-14 / 反例驱动校准 §F 描述）
+
+> **状态**：升正式不变量校准（§F v0.6 描述"Inspector 是占位 0 + 真实数值由 SkillValueConfig-XinFa 传入"是**单路径描述** / 实际项目存在**双路径并行**惯例 / 本节补强 / 来源 = 用户 2026-05-14 实例 "Inspector 直接填 10"+ 寻踪术 30512005 既有 3 条惯例 [{320962,1000}, {320964,100}, {320957,1}] 全部 Value 非 0 锚定）
+>
+> **rule_2 严守**：§F v0.6 "占位 0 + Excel 传值"路径主张本体保留（适用于按等级配数值的标准 §F 流程）/ 本 §F.2 补强"Inspector 直接填值"路径（适用于固定值 / 不按等级变化的简化场景）
+
+**路径对照表**：
+
+| 路径 | Inspector Value | SkillValueConfig-XinFa | 适用场景 |
+|------|----------------|------------------------|---------|
+| **§F 标准路径**（v0.6）| 0（占位）| 必填 `<tag名>,<实际值>` 每级一行 | 心法等级越高数值越大 / 多等级阶梯配置 |
+| **§F.2 简化路径**（v0.6.2）| **直接填实际值** | 可填可不填（如填仍走 §F 三态合并 + 累加底盘语义）| 固定值 / 心法等级不影响数值 / 装备态 0/1 旗帜 |
+
+**实例（寻踪术 30512005 SkillTipsConditionSkillTagsList 现状）**：
+- `{320962, 1000}` — 直接 1000 / 非占位 0
+- `{320964, 100}` — 直接 100 / 非占位 0
+- `{320957, 1}` — 装备态旗帜 / 直接 1 / 非占位 0
+- `{320966, 10}` — 2026-05-14 新增 / 叶散风行寻踪术条件附加伤害定值 / 直接 10 / 非占位 0
+
+**与 §F 三态合并算法关系**：
+- 简化路径下 Inspector Value 仍参与 §F 三态算法
+- 功法 SkillTagsList 含该 tag = 走 §F 情形 B 累加（Inspector Value + SkillTagsList 原值）
+- 功法 SkillTagsList 不含 = 走 §F 情形 A 直接写入
+- 心法塞入"实际值"还是"占位 0"在三态算法层完全等价 / 路径区别仅在"是否依赖 SkillValueConfig-XinFa 阶梯化"
+
+**判定速查**：策划要"心法升级伤害也跟着涨" → 走 §F 标准路径；要"装备就有 / 不装备就没有 / 与等级无关" → 走 §F.2 简化路径。
+
+**升正式依据**：等级 1 实证（寻踪术 SkillTipsConditionSkillTagsList 4 例 100% Value 非 0）+ 用户 2026-05-14 实操确认 / 非概念反转 / §F 主张本体不动 / 是同一机制的两个并行路径。
+
+---
+
+### F.3 RUN_SKILL_EFFECT_TEMPLATE.ParamUID 10 形式=4 时脱万分比反直觉点（v0.6.3 patch / 2026-05-14）
+
+> **状态**：升正式反直觉点（来源 = 用户 2026-05-14 口头确认 / 等级 1 业务实例 30212010 寻踪术条件附加伤害定值 10）
+
+**铁律**：「子弹通用逻辑-伤害」模板（`SkillEffectType=118`）的 `ParamUID 10 = 技能增伤-值（万分比）` 字段名虽然标注"万分比"，但**仅当 ParamUID 9 = 1/2/3（B类增伤/C类增伤/最终倍率）时单位才是万分比**；当 ParamUID 9 = 4（条件附加伤害）时 **ParamUID 10 是固定数值 / 脱离万分比单位**。
+
+| ParamUID 9 取值 | ParamUID 10 单位 | 示例 |
+|----------------|------------------|------|
+| 1 / B 类增伤 | 万分比 | 1000 = 10% 增伤 |
+| 2 / C 类增伤 | 万分比 | 同上 |
+| 3 / 最终倍率 | 万分比 | 1500 = 1.5x 最终倍率 |
+| **4 / 条件附加伤害** ⭐ | **定值** | **10 = +10 点固定伤害**（不是 0.1%）|
+
+**踩坑特征**：策划想 "+10 点附加伤害" 凭"万分比"字面理解填 100000（= 10% 想成 1）→ 实际生效 100000 点伤害 / 直接秒杀；或填 10 想"0.1%"实际正好就是策划想要的 +10 → 误以为字段单位字面正确。
+
+**配套实例**：叶散风行 30212010 / 4 个伤害 RST 节点 Params[12]（= ParamUID 10）= `{V:0, PT:0}` 占位 + edge 连线到 GET_SKILL_TAG_VALUE(320966) / 寻踪术装备时 tag=10 / 等价 ParamUID 10=10 / 即 +10 点附加伤害。
+
+**升正式依据**：等级 1（用户 2026-05-14 口头确认 + 蓝图实际填法对照）+ 非概念反转 / 与 §F 正交。
+
+---
+
 ### G. SkillTag 命名空间 = (ID, cid) 二元组（candidate / v0.16.40 / B-061 D-6107 / 细化 reference_skilltag_builtin_ids.md / NOT 撤回旧主张）
 
 > **状态**：candidate / 1 对 (ID, cid) 二元组实证 / 升 candidate 后续累积 ≥3 对实证
@@ -422,6 +517,12 @@ SkillTagsConfig 技能参数描述重复：xxx, ID:  320937, 320950
   - **D-MB-3120031 概念补盲（非反转）**：新增 §A.补「系统内置 Tag 豁免」第 4 类声明源（小 ID 如 1001 由引擎 / `SkillTagsConfig.xlsx` 全局预定义，无需蓝图侧声明） / §反直觉点 1 加 v0.5 注脚（30325002 tag 1001 闭环为系统内置，不再视为真 cross-skill positive）/ §仍不确定 §3 拆分（tag 1001 闭环 + tag 301 仍 candidate 待 Excel 对账）。证据 = 用户 2026-05-12 口头裁决（等级 1）+ 30312003 fs 真扫 TagID=1001 出现 3 次 + 顶层与 flow 内 SkillTagsConfigNode 均未声明 1001 + 技能正常运行（等级 2）。**rule_2 严守**：v0.2 §反直觉点 1 / §仍不确定 §3 主张本体保留 / 仅加注脚。
   - **D-MB-3120032 新增 candidate**：新增 §E 跨技能 Tag 耦合模式（木宗门叶雨 30312003 ↔ 三重碧叶 30212011 ADD/GET/CHECK 三角）/ §B 末尾加 v0.5 cross-ref 注脚（§B 主张本体不变）。**candidate 严守不升正式**，待 ≥3 宗门 / ≥5 样本累积。证据 = 用户 2026-05-12 设计意图裁决（等级 1）+ 30312003 fs 真扫双向 ADD+GET +TSCT_HAS_BUFF 范式（等级 2）。
   - **confidence 维持 中**（系统内置 Tag 全集仍待 B-054+ Excel 加固 / §E 仅 1 例尚未升 candidate）。
+
+- **v0.7 → v0.6.1+ patch（2026-05-14 / AI 自决细化 / 非概念反转 / 新增 §F.1 双键映射静默失效铁律）**：来源 = 用户让 AI 阅读 `E:\wb\封神工作文档\AAAA本地设计工作文档\2025年9月三测相关\技能表格配置工具\心法强化功法的配置.md` §4.2 后判定 mental_model 已覆盖 §F 三态主体但缺"双键映射不一致"工程实现铁律 / 用户原话"立刻补"。
+  - **新增 §F.1**：Inspector 用数字 tag ID / SkillValueConfig-XinFa 用 tag 中文名（= SkillTagsConfig.ConfigJson.Desc） / 两端逐字符一致 / 差一字符整链路静默失效不报错
+  - **与 memory `reference_skilltag_desc_unique.md` 因果回填**：该 memory 立法的 Desc 全工程唯一 + ≤15 字 + 风格 `<技能名><变量名>` 的工程根源 = §F.1 双键映射风险 / 320957 改名「叶散风行-寻踪术装备态」（2026-05-14）作业务实例锚定
+  - **AI 自决升正式 4-gate 满足**：(a) 用户提供 md §4.2 明文 + 业务实例 / (b) 阈值 = 等级 1 证据足够 / (c) 0 反预测 / (d) §F 主张本体不变 / 非升 rule 编号 / 非命名空间细化 / 落盘到 §F 之后新增 §F.1 / 非修订正式 rule 段
+  - **rule_2 严守**：§F v0.6 三态主张本体保留 / 本批仅补 §F.1 工程实现细节维度
 
 - **v0.6 → v0.7（2026-05-13 / Mode C 一致性巡检 / memory 升级批 v0.16.41）**：来源 = 用户授权 Step 1 memory 升级，4 个 memory 同主题应聚合到 SkillTag系统.md：
   - `memory/feedback_skilltag_desc_unique.md` → 新增 §H.前 §命名规范铁律（Desc 全工程唯一 + 两层描述模式）

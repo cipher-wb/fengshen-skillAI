@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-05-14T06:10:33.170Z",
+  "generatedAt": "2026-05-14T07:46:20.941Z",
   "files": {
     "_claude/agents/skill-designer.md.hbs": {
       "sha256": "ecd2a72a9e7d553c4c0176fa34bebf93aa4da9d4530454a7e744b68644f890fe",
@@ -867,10 +867,16 @@
       "bytes": 275
     },
     "_doc/SkillAI/mental_model/README.md": {
-      "sha256": "9053383d89dcee72d5b4fc3422d48070dcab99cdddf826bd4cbdb3f0b54ccb8f",
+      "sha256": "00123ceabbef4ba1329a48fdb37d4856d5b525b0cfb6ddbdfd148c3dcf02637d",
       "hbs": false,
       "py": false,
-      "bytes": 730378
+      "bytes": 731197
+    },
+    "_doc/SkillAI/mental_model/SkillCondition系统.md": {
+      "sha256": "af0904f0faca4b00515bc181fcc084b737918d262e36de614fdd769b3577d7ec",
+      "hbs": false,
+      "py": false,
+      "bytes": 7329
     },
     "_doc/SkillAI/mental_model/SkillEditor文件结构.md": {
       "sha256": "d909f3202dbdaa7e911c7de5da60b8d3a46a5f47198f0c31f8cadfa470e5ee75",
@@ -891,10 +897,10 @@
       "bytes": 27634
     },
     "_doc/SkillAI/mental_model/SkillTag系统.md": {
-      "sha256": "1c01bb8c6d62cf3e4e6b9bea9043ad9b28d16fee040ff7a9a7d1f14fa1cf6023",
+      "sha256": "d8375b1f56485fbe592046bf2fa1ac1b381a72ec051c85b6d43654f5511e94ad",
       "hbs": false,
       "py": false,
-      "bytes": 37893
+      "bytes": 47261
     },
     "_doc/SkillAI/mental_model/伤害管线.md": {
       "sha256": "0904b01244fc3fa4aaba369c4d3f3abc44eeacdc529ed70fabfad9b0a6d8d1a9",
@@ -1184,11 +1190,23 @@
       "py": false,
       "bytes": 4766
     },
-    "_doc/SkillAI/postmortem/README.md": {
-      "sha256": "8e69a33533d21bfc94e598aba76b5c68f61f3d3bdc0fbbfb3428c446cea98ea5",
+    "_doc/SkillAI/postmortem/2026-05-14-042-skillcondition-blueprint-misperception.md": {
+      "sha256": "ca441f2bb5c9f96b4e91daef6ae16da3be174fea2119c69e67db58398220cd31",
       "hbs": false,
       "py": false,
-      "bytes": 18489
+      "bytes": 4004
+    },
+    "_doc/SkillAI/postmortem/2026-05-14-043-designer-prompt-iron-rule-burial.md": {
+      "sha256": "2836a5d12206dbd2806c131f9d9bf64603a01ed5e1abcc5961c803bccb34b654",
+      "hbs": false,
+      "py": false,
+      "bytes": 6314
+    },
+    "_doc/SkillAI/postmortem/README.md": {
+      "sha256": "c2061b399b03d0a4a5abdebc3e9cdd6e688e3ffa81d03cea343ffd8bc34f5986",
+      "hbs": false,
+      "py": false,
+      "bytes": 20570
     },
     "_doc/SkillAI/README.md.hbs": {
       "sha256": "0099b1e307b57079145e7d647c909a40eea5abe5bea525a359aa2380f4c2a5e4",
