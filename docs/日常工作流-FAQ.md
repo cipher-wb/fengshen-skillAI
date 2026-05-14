@@ -657,6 +657,27 @@ npx fengshen-skillai@latest update .
 # 自动 3-way merge / 保留他的本地改动 / 拉你的新内容
 ```
 
+### 我学完新批次 / 完整学习痕迹会自动上传到 GitHub 吗？
+
+**v1.0.11+ 自动 ✅**：跑 `pwsh scripts/quick-release.ps1` 时 / 脚本自动检测 mental_model 版本：
+
+| mental_model 版本变化 | 自动行为 |
+|---|---|
+| ✅ 变了（如 v0.16.41 → v0.16.42）| 自动跑 `prepare-release-tarball.js` 生成新 tar.gz → 算 sha256 写回 `package.json` → 挂到 GitHub Release |
+| ❌ 没变（如仅改 CLI / docs）| 跳过 tarball 步骤 / 不浪费时间 |
+
+强制控制：
+
+```powershell
+pwsh scripts/quick-release.ps1                # 智能判定（推荐 / mental_model 变了才打 tarball）
+pwsh scripts/quick-release.ps1 -ForceTarball  # 强制重打 tarball（即使 mental_model 没变）
+pwsh scripts/quick-release.ps1 -SkipTarball   # 跳过 tarball（mental_model 变了也不打）
+```
+
+**v1.0.0~v1.0.10 历史现状**：mental_model 一直是 v0.16.41 没变 / 所以 GitHub Release 上只有 v1.0.0 时挂的那一份 `fengshen-learning-history-v0.16.41.tar.gz`（3.35 MB / 内容是 B-001~B-061 全套学习痕迹）。这是**正确的**——同样的 mental_model 不需要重传同样的 tar.gz。
+
+下次你跑 bootstrap 学习（如 curator 跑 B-062 / B-063+ / mental_model 升到 v0.16.42）→ quick-release 自动检测 → 自动生成 `fengshen-learning-history-v0.16.42.tar.gz` → 挂 GitHub Release v1.0.11。
+
 ### 别人能下载完整学习痕迹吗？
 
 可以。在他的 Unity 工程根：
