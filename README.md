@@ -26,6 +26,14 @@ claude
 
 ✅ 装完会在你工程下生成 `.claude/agents/` (4 agent) + `doc/SkillAI/` (心智模型 + 工具) + `CLAUDE.md` (工作守则) + `fengshen.config.json` (配置)。
 
+> 💡 **嫌一直点 yes 烦？** Claude 默认每次跑 Bash/Edit/Write 都要你确认。加 `--dangerously-skip-permissions` 一次性授权所有工具：
+>
+> ```powershell
+> claude --dangerously-skip-permissions
+> ```
+>
+> ⚠️ **风险**：AI 能在你工程目录任意跑命令 / 改文件 / 不再问你。**仅在 Unity 工程根用**（cd 后再开）/ 别在 `C:\` 或 `~` 这种根目录开 / 否则 AI 可能改到你不希望改的东西。
+
 **装之前先确认 5 项前置依赖** ↓（缺一个都跑不起来）
 
 | # | 依赖 | 装 | 验证 |
