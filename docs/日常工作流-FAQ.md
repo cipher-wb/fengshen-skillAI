@@ -842,7 +842,7 @@ pwsh scripts/quick-release.ps1
 ### Q2: 我源工程改了一个文件 / 但 quick-release 失败了怎么办？
 
 按提示看错误：
-- `ECONNRESET` → 代理没开 / 跑 `Test-NetConnection 127.0.0.1 -Port 7078` 检查
+- `ECONNRESET` → 代理没开 / 跑 `Test-NetConnection 127.0.0.1 -Port <你的代理端口>` 检查（常见端口：Clash 7897 / V2Ray 10809 / Shadowsocks 1080）
 - `e2e 测试失败` → templates 抽出来有问题 / 看哪个测试 fail
 - `npm publish 403` → token 过期 / 重新去 npm 网页生成
 - `git push 失败` → 通常是代理问题 / 临时绕开：`git -c http.proxy= -c https.proxy= push origin main`
