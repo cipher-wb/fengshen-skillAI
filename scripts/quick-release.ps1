@@ -51,11 +51,12 @@ Step 1 "抽源 (extract templates from F:/DreamRivakes2/...)"
 Run "node scripts/extract-from-source.js"
 
 # 抽源后读源工程的 mental_model 真实版本号
+# ⚠ 必须用 (?m)^ 行首锚 / 否则会匹配到 'prior_mental_model_version_v0_16_40' 等 prior 字段（bug v1.0.12 教训）
 $newMentalModelVersion = $oldMentalModelVersion  # default
 $mmReadmePath = "templates/_doc/SkillAI/mental_model/README.md"
 if (Test-Path $mmReadmePath) {
     $mmContent = Get-Content $mmReadmePath -Raw
-    if ($mmContent -match "mental_model_version[:：]\s*(v[\d.]+)") {
+    if ($mmContent -match "(?m)^mental_model_version[:：]\s*(v[\d.]+)") {
         $newMentalModelVersion = $matches[1]
     }
 }

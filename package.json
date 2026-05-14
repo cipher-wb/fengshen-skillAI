@@ -1,6 +1,6 @@
 {
   "name": "fengshen-skillai",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "description": "Claude Code SkillAI 系统 for Unity SkillEditor — 自然语言 → mermaid → IR YAML → JSON 全流程，含 v0.16.41 心智模型 (15 升正式不变量 + 7 道防线 + 4 agent peer review 闭环)",
   "keywords": [
     "claude-code",
@@ -67,7 +67,7 @@
   "engines": {
     "node": ">=18.0.0"
   },
-  "fengshenMentalModelVersion": "v0.16.40",
+  "fengshenMentalModelVersion": "v0.16.41",
   "fengshenLearningHistoryUrl": "https://github.com/cipher-wb/fengshen-skillAI/releases/download/v{cliVersion}/fengshen-learning-history-v{mentalModelVersion}.tar.gz",
-  "fengshenLearningHistorySha256": "3cac86dc34f0e5affe84ee65239b16538cdadaa16d887e2afbf3f50d5dc0512b"
+  "fengshenLearningHistorySha256": "bccdceea59bffbb3470e39fe2d8a891117202eb7243548897cbbc96338ac145c"
 }
