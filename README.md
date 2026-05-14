@@ -12,29 +12,56 @@
 
 ## ⚠️ 前置依赖（**安装本工具前必须先装好**）
 
-| # | 依赖 | 验证命令（PowerShell / cmd 跑） | 装的地方 |
-|---|------|--------------------------|---------|
-| 1 | **Node.js ≥ 18** | `node --version` 看到 `v18.0.0` 或更高 | https://nodejs.org/ → 下载 LTS 版 |
-| 2 | **Python ≥ 3.10**（含 pip） | `python --version` 看到 `Python 3.10.0` 或更高 + `pip --version` 不报错 | https://www.python.org/downloads/ → 下载 3.10+（**安装时勾选 "Add Python to PATH"** ⚠️ 关键） |
-| 3 | **Git** | `git --version` 看到版本号 | https://git-scm.com/ |
-| 4 | **Claude Code** | `claude --version` 看到版本号 | https://claude.com/code |
-| 5 | **Unity Editor**（任意版本 / 工程已有 Assets/） | Unity Hub → Projects 看到你的工程 | https://unity.com/download |
+| # | 依赖 | 怎么装 | 验证 |
+|---|------|--------|-----|
+| 1 | **Node.js ≥ 18** | https://nodejs.org/ → 下 LTS .msi → 默认下一步 | `node --version` |
+| 2 | **Python ≥ 3.10**（含 pip） | https://www.python.org/downloads/ → **安装时勾 "Add Python to PATH"** ⚠️ | `python --version` + `pip --version` |
+| 3 | **Git** | https://git-scm.com/ → 默认安装 | `git --version` |
+| 4 | **Claude Code CLI** | `npm install -g @anthropic-ai/claude-code` | `claude --version` |
+| 5 | **CC Switch**（管 API Key / 桌面 GUI） | https://github.com/farion1231/cc-switch/releases → 下最新 `cc-switch-Setup-x.x.x.exe` → 双击装 | 桌面看到 CC Switch 图标 |
+| 6 | **Unity Editor** | https://unity.com/download → Unity Hub → 装任意版本 | Unity Hub 能看到你的工程 |
 
-### 检查所有依赖（一键验证）
+### 一键验证（全部装好后跑）
 
 ```powershell
-# Windows PowerShell（缺一个看到一个报错就装一个）
-node --version; python --version; pip --version; git --version
+# Windows PowerShell（4 行都有版本号 = OK）
+node --version; python --version; pip --version; claude --version
 ```
 
-```bash
-# macOS / Linux
-node --version && python3 --version && pip3 --version && git --version
+### Claude Code + CC Switch 配置（首次使用）
+
+1. **装 Claude Code CLI**：`npm install -g @anthropic-ai/claude-code`
+   - 国内慢用淘宝镜像：`npm config set registry https://registry.npmmirror.com`
+2. **启动 CC Switch**（桌面图标）→ 添加 Provider → 填 API Key + Base URL → 点 "Apply"
+3. **关掉所有 cmd/PowerShell 终端**，重开一个新的（让环境变量刷新）
+4. 在 Unity 工程根跑 `claude` → 自动用 CC Switch 配的 Provider（不需要登录 Anthropic 官方账号）
+
+### ❗ 常见坑
+
+| 现象 | 修法 |
+|------|------|
+| `'pip' 不是内部或外部命令` | Python 没装 / 或装时没勾 "Add Python to PATH" → 重装 Python 时勾上 |
+| `'claude' 命令找不到` | 关重开终端 / 或重启电脑让 PATH 生效 |
+| 切 Provider 后 claude 还用旧 Key | 关掉当前终端 / 开新终端再跑 `claude`（环境变量需刷新） |
+| `npm install -g` 提示权限不足 | 用"管理员身份"打开 PowerShell / cmd |
+
+详细安装指南（含 macOS/Linux）见 [docs/日常工作流-FAQ.md](docs/日常工作流-FAQ.md)。
+
+---
+
+## ⚠️ 在哪跑 `claude`：必须在 Unity 工程根
+
+```powershell
+# ✅ 正确：cd 到 Unity 工程根（含 Assets/ 那一层）再跑
+cd D:\Unity\MyMOBA
+claude
+
+# ❌ 错误：在桌面 / C:\ / 其他目录跑 → SkillAI 不生效
 ```
 
-### ❗ 常见坑：`'pip' 不是内部或外部命令`
+**为什么**：Claude Code 启动时自动加载**当前目录**的 `.claude/agents/`。fengshen-skillai 把 4 个 agent 装到你 Unity 工程根的 `.claude/agents/` → 必须在那个目录跑 claude 才能触发"配技能/审技能"等命令。
 
-这说明 **Python 没装** 或 **Python 装了但 PATH 没配**。详细解法见 [docs/日常工作流-FAQ.md §Python 安装指南](docs/日常工作流-FAQ.md)。**最常见原因**：装 Python 时**没勾 "Add Python to PATH"** → 重装 Python 时记得勾上。
+**验证**：跑 `claude` 后说一句"你能看到 fengshen-skillai 的 skill-designer agent 吗" / 它能回答 = 正确目录。
 
 ---
 

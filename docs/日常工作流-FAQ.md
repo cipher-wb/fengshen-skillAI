@@ -117,13 +117,138 @@ nvm use 20
 | macOS | `brew install git` 或装 Xcode Command Line Tools `xcode-select --install` |
 | Linux | `sudo apt install git` |
 
-### 🤖 Claude Code 安装
+### 🤖 Claude Code CLI 安装（**不需要登录 Anthropic 官方账号**）
 
-去 https://claude.com/code → 按平台下载安装。
+我们用 npm 装 + CC Switch 管 API Key（中文用户的最佳实践 / 用第三方 Provider 不依赖官方账号）。
+
+#### 1. 全局装 Claude Code CLI
+
+任意 PowerShell / cmd / Terminal：
+
+```bash
+npm install -g @anthropic-ai/claude-code
+```
+
+国内下载慢用淘宝镜像：
+
+```bash
+npm config set registry https://registry.npmmirror.com
+npm install -g @anthropic-ai/claude-code
+```
+
+权限不足报错 → 用**管理员身份**打开 PowerShell / cmd 再跑。
+
+#### 2. 验证
+
+```bash
+claude --version
+```
+
+应输出版本号（如 `1.x.x`）。如果提示"找不到命令"→ 关重开终端 / 或重启电脑让 PATH 刷新。
+
+### 🔄 CC Switch 安装（管 API Key + 多 Provider 切换 / 桌面 GUI）
+
+CC Switch 是个**桌面图形客户端**，用来管理 Claude Code / Codex / Gemini 等多个 AI 工具的 API Key + Provider 配置。一键切换不同账号 / 不同 Provider。
+
+#### 1. 下载
+
+打开 https://github.com/farion1231/cc-switch/releases （或官网 https://ccswitch.io）/ 最新 Release 下：
+
+- `cc-switch-Setup-x.x.x.exe` （推荐 / 带安装向导）
+- 或 `cc-switch-x.x.x-win.zip`（免安装版）
+
+#### 2. 安装
+
+双击 `.exe` → 一路下一步 → 装完桌面 / 开始菜单看到 CC Switch 图标。
+
+#### 3. 首次配置
+
+1. 双击桌面 CC Switch 图标启动
+2. GUI 里点 "添加 Provider / 配置"
+3. 填**名称**（如"官方"/"第三方A"）/ **API Key** / **Base URL**
+4. 选中某条配置 → 点 "应用 / Apply"
+5. **关掉所有 cmd / PowerShell 终端 / Claude Code**，重新打开一个新的（让环境变量刷新）
+6. 在 Unity 工程根跑 `claude` → 自动用 CC Switch 配的 Provider
+
+#### 4. 支持的工具
+
+CC Switch 同时管：Claude Code / Codex CLI / Gemini CLI / OpenCode / Hermes 等。
+
+#### Q1: CC Switch 启动被 Windows Defender 拦？
+
+开源软件未签名 → "更多信息 → 仍要运行"即可。
+
+#### Q2: 切换 Provider 后 `claude` 还用旧 Key？
+
+**关掉当前终端 / 开新的 cmd / PowerShell 再跑 `claude`**（环境变量需刷新）。
+
+#### Q3: 想要纯命令行版？
+
+有个独立项目 `cc-switch-cli`（https://github.com/SaladDay/cc-switch-cli）/ 但本指南推荐 GUI 版。
 
 ### 🎮 Unity Editor
 
 去 https://unity.com/download → Unity Hub → 装任意版本（推荐 LTS）→ 打开你的 Unity 工程。
+
+### 🚨 在哪跑 `claude` 才能用 SkillAI ？（必看）
+
+**答：必须在 Unity 工程根（含 `.claude/` 那一层）跑 `claude` / 不能任意目录**。
+
+| 在哪跑 | 能用 SkillAI 吗 | 原因 |
+|--------|---------------|------|
+| ✅ Unity 工程根（如 `D:\Unity\MyMOBA\`）| **能 / 推荐** | `.claude/agents/` 4 个 fengshen agent 自动注册 |
+| ⚠️ Unity 工程子目录（如 `D:\Unity\MyMOBA\Assets\`）| 部分能 | Claude Code 会向上找父级 `.claude/` / 但启动 cwd 不在工程根 / 某些命令路径解析可能怪 |
+| ❌ Unity 工程外（如 `C:\` / 桌面 / 别的工程）| **不能** | 找不到 `.claude/agents/` → 4 个 fengshen agent 没注册 → 说"配技能"也触发不了 SkillAI |
+
+#### Claude Code 找 `.claude/` 的顺序
+
+```
+1. 当前 cwd 有没有 .claude/  → 有，用它
+2. 父目录 / 父父目录... 有没有 .claude/  → 找到就用
+3. 用户全局 ~/.claude/  → fallback
+4. 都没 → 没 SkillAI / 退到默认 Claude Code 模式
+```
+
+`fengshen-skillai init D:\Unity\MyMOBA` 把 `.claude/` 落到工程根 = 只在那个工程内激活，**不影响**电脑上别的工程。
+
+#### 正确用法（贴墙）
+
+```powershell
+# 1. cd 到 Unity 工程根（永远先做这一步）
+cd D:\Unity\MyMOBA
+
+# 2. 跑 claude
+claude
+
+# 3. Claude Code 自动加载：
+#    .claude/agents/skill-designer.md    → 说"配技能"会触发
+#    .claude/agents/skill-reviewer.md    → 说"审一下"会触发
+#    .claude/agents/skill-knowledge-curator.md  → 蓝队
+#    .claude/agents/skill-knowledge-auditor.md  → 橙队
+#    CLAUDE.md                            → 工作守则
+#    doc/SkillAI/mental_model/            → 15 升正式不变量
+```
+
+#### 不想每次 cd？
+
+**办法 1 - 推荐**：VSCode / Cursor 直接 Open Folder → 选你 Unity 工程根 → 内置 Terminal 跑 `claude` / 自动在工程根。
+
+**办法 2 - 不推荐**：装到 `~/.claude/`（用户全局）。会污染所有工程上下文 / `fengshen.config.json` 不知道写哪个工程 / **多 Unity 工程没法共存** → 强烈不建议。
+
+#### 验证我在对的目录吗？
+
+```powershell
+# 你以为是工程根的路径
+cd D:\Unity\MyMOBA
+
+# 检查 .claude/agents/ 是否存在
+ls .claude\agents\
+# 应该看到 4 个 .md 文件：skill-designer / skill-reviewer / skill-knowledge-curator / skill-knowledge-auditor
+```
+
+或者跑 claude 后问它："你能看到 fengshen-skillai 的 skill-designer agent 吗" / 它能回答 = 对的目录。
+
+---
 
 ### ✅ 全部装完后 / 一键验证
 
