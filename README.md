@@ -12,13 +12,23 @@
 
 ## 30 秒安装
 
-```bash
-# 在 Unity 工程根执行
-npx fengshen-skillai init
+```powershell
+# Windows 例（你的 Unity 工程在 D:\Unity\MyMOBA / 含 Assets/ 子目录的那一层）
+npx fengshen-skillai@latest init D:\Unity\MyMOBA
 
-# 或指定路径
-npx fengshen-skillai init D:/MyUnityProject
+# 或者先 cd 进去再跑
+cd D:\Unity\MyMOBA
+npx fengshen-skillai@latest init .
 ```
+
+```bash
+# macOS / Linux 例
+npx fengshen-skillai@latest init /Users/yourname/Unity/MyProject
+```
+
+**怎么找你的 Unity 工程根**：打开 Unity Hub → Projects 标签页 → 看 "Location" 列。
+工程根 = 含 `Assets/` `Library/` `ProjectSettings/` 子目录的那一层。**不是** Assets 内部 / **不是** Unity Hub 总目录。
+详细路径例子 + 错误反例 + 检测命令见 [docs/日常工作流-FAQ.md](docs/日常工作流-FAQ.md)。
 
 交互式 prompt 收集 3 个核心配置（SkillGraph JSON 根 / Excel 配置表绝对路径 / AI 段位），自动生成：
 - `.claude/agents/` 4 个 agent（红/绿/蓝/橙）
