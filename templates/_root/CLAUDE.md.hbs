@@ -259,6 +259,41 @@ AskUserQuestion({
 - ❌ 用户没选某项 → 主对话仍传过去（违反 user_scope）
 - ❌ 主对话不传 user_scope 给 designer（designer 不知道用户勾了啥）
 
+### 节点 Desc 重写：**全节点 / 不允许只改关键**（用户拍板 2026-05-14 晚 v3.1 / 工业化强制）
+
+历史立法演化：
+- v3.0（2026-05-14 晚早些）：只列关键节点（参数 / SkillTag / 决策 / 创建）/ 辅助节点（NUM_CALC / ORDER）可省
+- **v3.1（2026-05-14 晚后些 / 当前）**：**整个蓝图所有节点都要列 + 写 Desc** / 用户原话"写节点的描述的时候，要把整个蓝图的节点全都重写"
+
+**为什么改**：策划在 SkillEditor 里点开每个节点都要看到中文 Desc。即使是辅助节点（NUM_CALC）空 Desc 也让人困惑"这是干啥的"。
+
+**节点重要性分级 + Desc 详尽度对应**（reviewer 用 / 不是过滤 / 全要列）：
+
+| 等级 | 类型 | Desc 详尽度 |
+|-----|------|-----------|
+| **P0 关键** | 参数 / SkillTag / 决策（VALUE_COMPARE） / 子弹/BUFF 创建 / 状态切换 | 完整大白话 + 说改它影响啥 + 当前值意义 |
+| **P1 重要** | DAMAGE / TEMPLATE / DELAY_EXECUTE | 大白话 + 关键参数 |
+| **P2 辅助** | NUM_CALC / ORDER / 简单串联 | **简短一行 / 速成模板**（如 "算 X 给 Y 用" / "串联 3 个动作"） |
+
+**P2 速成模板**（reviewer 直接套用 / 不要每个都重写创作）：
+
+```
+TSET_NUM_CALCULATE      → "算 X 数值 / 用于 Y" 或 "数值中转"
+TSET_ORDER_EXECUTE      → "依次执行下面 N 件事"
+TSCT_VALUE_COMPARE      → "如果 X == Y 就 ✓"
+TSET_GET_SKILL_TAG_VALUE→ "拿到 XX 标签的值"
+TSET_MODIFY_SKILL_TAG_VALUE → "把 XX 标签改成 Y"
+TSET_GET_ENTITY_ATTR_VALUE  → "拿角色的 XX 属性"
+TSET_RUN_SKILL_EFFECT_TEMPLATE → "套用 XX 模板"
+RefConfigBaseNode       → "引用某个配置"
+```
+
+**designer 收到 ≥ 20 patches 时强制改用 Read → 内存改 → Write 整体覆盖策略**（详见 [skill-designer.md §6.5](.claude/agents/skill-designer.md)）/ 避免 Edit 调用 100+ 次 token 爆炸。
+
+**主对话 AskUserQuestion 选项 2 文案动态化**：
+- `total_count = 145` → 选项文案 "批量写入 **145** 个节点 Desc"
+- 让用户预知工作量（防止他以为只改几个 / 实际 designer 要改一百多个）
+
 ### 防 minimax 等较弱模型偷懒（designer 端强制规约）
 
 designer.md §6.5 强制 6 步：

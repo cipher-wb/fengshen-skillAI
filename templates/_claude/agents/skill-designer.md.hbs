@@ -128,17 +128,37 @@ p0_patches: {...}
 
 ❌ 不允许：user_scope 没含的范围你擅自改（如用户只选 sticky / 你顺手改了 desc → 越权）
 
-#### Step 3 - 用 Edit 工具真改 JSON（**最关键 / 防偷懒**）
+#### Step 3 - 用 Edit / Write 工具真改 JSON（**最关键 / 防偷懒**）
 
+**根据 patches 数量选策略**（v3.1 新增 / 因为全节点重写时数量可能 100+）：
+
+| 改动规模 | 推荐策略 | 原因 |
+|---------|---------|------|
+| **node_desc_patches < 20** | 多次 Edit | token 省 / 精确 |
+| **node_desc_patches ≥ 20** | **Read → 内存改 → Write 整体覆盖** | Edit 调用 100+ 次 token 爆炸 / Write 一次落盘最高效 |
+| sticky_note 单独 | Edit 一次 | 单段替换 |
+| p0_patches | Edit 多次（每个 patch 单独 Edit） | 精确 / 易回溯 |
+
+**全节点重写（≥ 20 patches）推荐做法**：
+
+```python
+# 伪代码 / 你按这个思路用 Read + Write 工具实现
+1. Read 整个 JSON → 解析为 dict
+2. 遍历 node_desc_patches.patches[]：
+   - 找 references.RefIds[guid==X].data.Desc → 改成 new_desc
+   - 同步找 nodes[guid==X].title 或 nodes[guid==X].data.Desc → 改成 new_desc（PostMortem #037 双数组一致）
+3. JSON serialize 回字符串 (ensure_ascii=False / indent=2 / 保持原格式)
+4. Write 覆盖整个文件
+5. Step 5 Read 验证
 ```
-工具：Edit (优先 / 改少量字段 / 减少 token)
-回退：Write (大量改 / 重写整个文件)
-```
+
+注意 JSON 序列化要**保留原格式**（缩进 / Unicode / 字段顺序）/ 避免 SkillEditor 打开时全文件 diff。
 
 ❌ **严禁**：
-- 只在回复里**描述**改了什么 / 不实际调 Edit 工具
+- 只在回复里**描述**改了什么 / 不实际调 Edit/Write 工具
 - 调 Edit 但 old_string / new_string 凑数（不真匹配现有 JSON）
 - 改一半就停 / 留 TODO
+- patches 100+ 但只改前面 10 个就交差（**任务必须全完 / 不允许采样**）
 
 #### Step 4 - 双数组一致性 check（PostMortem #037）
 

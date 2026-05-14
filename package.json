@@ -1,6 +1,6 @@
 {
   "name": "fengshen-skillai",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Claude Code SkillAI 系统 for Unity SkillEditor — 自然语言 → mermaid → IR YAML → JSON 全流程，含 v0.16.41 心智模型 (15 升正式不变量 + 7 道防线 + 4 agent peer review 闭环)",
   "keywords": [
     "claude-code",
