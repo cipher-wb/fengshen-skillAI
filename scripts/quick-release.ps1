@@ -94,9 +94,18 @@ Run "npm test"
 
 Step 4 "$BumpType bump version"
 if (-not $DryRun) {
-    npm version $BumpType --no-git-tag-version
+    $oldPkgVersion = (Get-Content package.json | ConvertFrom-Json).version
+    npm version $BumpType --no-git-tag-version 2>&1 | Out-Host
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "✗ npm version 失败 (LASTEXITCODE=$LASTEXITCODE) / 可能 git working dir 不干净 / 中断" -ForegroundColor Red
+        exit 1
+    }
     $newVersion = (Get-Content package.json | ConvertFrom-Json).version
-    Write-Host "  新版本: $newVersion" -ForegroundColor Green
+    if ($newVersion -eq $oldPkgVersion) {
+        Write-Host "✗ npm version 没有真的 bump version ($oldPkgVersion → $newVersion) / 中断防止 tag 冲突" -ForegroundColor Red
+        exit 1
+    }
+    Write-Host "  新版本: $oldPkgVersion → $newVersion" -ForegroundColor Green
 } else {
     $newVersion = "X.Y.Z (dry-run)"
 }
