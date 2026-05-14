@@ -49,6 +49,85 @@ node --version; python --version; pip --version; claude --version
 
 ---
 
+## 🤖 CC Switch 模型选择推荐（**很重要 / 别图便宜选错**）
+
+> **核心认知**：fengshen-skillai 是"工具 + 守则" / 但**底层 LLM 能力决定 90% 体验**。
+> 9 个 GATE 工作流 + 6 步 designer 规约 + 4 层 review 审核 — 弱模型容易跳步偷懒 / 强模型严格遵守。
+> 不要盲目图便宜选 minimax 等弱模型 / 会让你怀疑 fengshen-skillai 本身的能力。
+
+### 推荐档位（按强度）
+
+| 档位 | 模型 | Provider 选择 | 适用场景 |
+|------|------|--------------|---------|
+| 🥇 **顶级** | **Claude Opus 4.7 / 4.6** | Anthropic 官方 / Console API | 配复杂技能（扇形分层 / 多段连招 / 状态机） / 严格 9 GATE 工作流 |
+| 🥇 **顶级** | **Claude Sonnet 4.6** | Anthropic 官方 / Console API | 日常配审 / 速度比 Opus 快 / 能力 90% |
+| 🥈 **中等偏上** | **GLM-4.6** | 智谱 BigModel 官方 | 国内便宜 / 指令遵循中上 / 大部分技能 OK |
+| 🥈 **中等偏上** | **DeepSeek V3.2** | DeepSeek 官方 | 国内便宜 / 推理强 / 偶尔 GATE 跳步 |
+| 🥉 **中等** | **Qwen3-Max / Qwen3-Plus** | 通义官方 | 中文友好 / 复杂 prompt 偶尔漏读 |
+| ❌ **不推荐** | **minimax 系列 / Yi 系列 / 早期 Kimi** | 任何 Provider | 复杂 agent prompt 跳读 / 工具调用偷懒 / 实战中"嘴上说改实际没改"严重 |
+| ❌ **绝对避免** | 1 元/百万 token 的"超便宜模型" | 任何 Provider | 多半是蒸馏量化版 / 推理深度不够 / **review 100+ 节点必崩** |
+
+### 怎么选
+
+#### 场景 A：你是个人 / 想要最好体验
+
+→ **Claude Opus 4.7 + Anthropic 官方 Console API**（不走 CC Switch）
+
+```powershell
+# 去 https://console.anthropic.com/ 充值 + 拿 API Key
+$env:ANTHROPIC_API_KEY = "sk-ant-..."
+claude   # 直接用 Opus 4.7
+```
+
+成本：~$15/百万 input token / 性价比不算高 / 但能力顶。
+
+#### 场景 B：国内团队 / 性价比优先
+
+→ **GLM-4.6** （智谱 BigModel 官方 / CC Switch 配 Provider）
+
+- 注册 https://open.bigmodel.cn → 拿 API Key
+- CC Switch 添加 Provider:
+  - 名称：智谱 GLM-4.6
+  - Base URL：`https://open.bigmodel.cn/api/anthropic` （智谱兼容 Anthropic API 格式）
+  - API Key：填刚拿的
+- 切到该 Provider → 跑 claude
+
+成本：~¥30/百万 input token / 能力够用 80% 复杂技能。
+
+#### 场景 C：穷预算 / 学习用
+
+→ **DeepSeek V3.2**（DeepSeek 官方）
+
+- 注册 https://platform.deepseek.com → 拿 API Key
+- CC Switch Provider：
+  - Base URL：`https://api.deepseek.com/anthropic`
+- 注意：DeepSeek 偶尔会跳 GATE / 复杂技能可能需要补提示
+
+成本：~¥5/百万 input token / 适合 review 简单技能 / 配复杂技能勉强。
+
+### 怎么验证你的模型能不能严格遵守工作流
+
+跑这个测试：
+
+```
+你：审一下 <某个真实技能 JSON>
+
+预期合格输出（v1.0.7 工业化）：
+  ☑ 4 层审核完整（Layer 1-4 每层都有内容）
+  ☑ <PENDING_APPLY> 块完整（含 sticky_note + node_desc_patches + p0_patches）
+  ☑ 主对话用 AskUserQuestion 工具弹 ☑☑☑☑ 4 选项多选框（不是纯文字问）
+  ☑ 你勾选后 → designer 输出 <APPLY_DONE> + diff 摘要
+  ☑ 检查 SkillEditor / 节点 Desc 真的改了 / sticky 真的新建了
+
+❌ 任何一项缺失 = 模型偷懒（不是 fengshen-skillai 的锅 / 换强模型解决）
+```
+
+### 详细诊断（"我同事 AI 比较蠢" 怎么办）
+
+见 [docs/日常工作流-FAQ.md §模型差异诊断](docs/日常工作流-FAQ.md) / 含 4 层差异源排查（模型 / memory / Provider / 会话历史）。
+
+---
+
 ## ⚠️ 在哪跑 `claude`：必须在 Unity 工程根
 
 ```powershell
@@ -197,17 +276,46 @@ Claude：[自动派 skill-designer agent / 独立上下文]
   4. 落盘到 Assets/Thirds/NodeEditor/SkillEditor/Saves/Jsons/宗门技能/AIGen/
 ```
 
-审技能也是一句话：
+审技能更"工业化"（v1.0.7 / v3.1 强制流程）：
 
 ```
 你：审一下 SkillGraph_30122001_坠叶三叠.json
 
-Claude：[自动派 skill-reviewer agent]
-  1. 4 层审核（结构合法 / 业务规则 / 语义合理 / 实现最优）
-  2. 引用 15 升正式不变量 + 38 PostMortem 挑刺
-  3. 输出大白话 sticky note 重写建议（复制粘贴回去就行）
-  4. 列出关键节点 Desc 重写表
+Claude：[自动派 skill-reviewer agent / 独立上下文]
+  ─── Step 1: 4 层审核 ───
+  1. 结构合法（Lint 24+ 规则）
+  2. 业务规则（SkillConfig / BulletConfig / TableTash / Config2ID）
+  3. 语义合理（拓扑 diff / 数值范围 / 子弹序号→威力 Tag 配对铁律）
+  4. 实现最优（模板/SkillTag/节点冗余）
+  
+  ─── Step 2: 引用 15 升正式不变量 + 39 PostMortem 挑刺 ───
+  
+  ─── Step 3: 准备 4 个 patch payload ───
+  • Sticky Note 重写 (大白话 5 段骨架)
+  • 全部节点 Desc 重写 (按 P0/P1/P2 分级 / 145 个节点全员重写 / 不漏)
+  • P0 必修一起修 (含 change_json_path / old_value / new_value 完整修法)
+  • 全部不写
+
+Claude：[主对话强制弹 ☑☑☑☑ 多选框] AskUserQuestion 工具调用：
+
+  ☑ 写入 Sticky Note   (新增 stickyNotes[0] / 5 段大白话)
+  ☑ 批量写入 145 个节点 Desc   (按 guid 真改 / 含 P0 节点警示)
+  ☑ P0 一起修   (3 条 patches: 改 Tag 320001→320002 / 等)
+  ☐ 全部不写   (仅审完算数)
+
+你勾选 → Claude：[调 skill-designer agent / 6 步强制执行]
+
+  Step 1 Read target_json
+  Step 2 解析 user_scope (用户勾的范围)
+  Step 3 真改 JSON (≥20 patches 时 Read→Write 整体覆盖 / <20 用 Edit)
+  Step 4 双数组一致性 check (nodes[] + RefIds[] / PostMortem #037)
+  Step 5 再 Read 验证
+  Step 6 输出 <APPLY_DONE> + diff 摘要
+
+Claude：「改了 145 个节点 / 双数组一致 OK / sticky 已覆盖 / P0 3 项已修」
 ```
+
+⚠️ **防 minimax 偷懒**：v1.0.7 给 designer 加了 6 步强制规约 + 自检清单 / 弱模型不能"嘴上说改实际没改" / 必须真调用 Edit/Write 工具 + 输出 APPLY_DONE。详见 [📖 docs/日常工作流-FAQ.md](docs/日常工作流-FAQ.md)。
 
 ---
 
@@ -216,7 +324,7 @@ Claude：[自动派 skill-reviewer agent]
 | 命令 | 用途 |
 |---|---|
 | `npx fengshen-skillai init [path]` | Scaffold SkillAI 系统到目标工程 |
-| `npx fengshen-skillai doctor [path]` | 健康检查（10 项验证）|
+| `npx fengshen-skillai doctor [path]` | 健康检查（**12 项验证** / 含 Python / Claude CLI / plugin.json 等）|
 | `npx fengshen-skillai update [path]` | 更新到新版本（v1.1）|
 | `npx fengshen-skillai download-history [path]` | 下载完整学习痕迹 GitHub Release tar.gz |
 | `npx fengshen-skillai version` | 打印版本信息 |
@@ -227,12 +335,17 @@ Claude：[自动派 skill-reviewer agent]
 
 | Agent | 颜色 | 职责 | 触发关键词 |
 |---|---|---|---|
-| **skill-designer** | 🔴 红 | 自然语言 → mermaid → IR → JSON 配技能 | "配/改/加 XX 技能" |
-| **skill-reviewer** | 🟢 绿 | 4 层审核 + 大白话 sticky note 重写 | "审一下"/"挑刺"/"对不对" |
+| **skill-designer** | 🔴 红 | 自然语言 → mermaid → IR → JSON 配技能 / **6 步强制执行规约**（防偷懒）| "配/改/加 XX 技能" |
+| **skill-reviewer** | 🟢 绿 | 4 层审核 + 大白话 Sticky Note + **全部节点 Desc 重写**（P0/P1/P2 分级）+ **P0 一起修** | "审一下"/"挑刺"/"对不对" |
 | **skill-knowledge-curator** | 🔵 蓝 | Bootstrap 学习 / Mode B 心智回流 / Mode C 一致性巡检 | "学一批样本"/"刷新心智" |
 | **skill-knowledge-auditor** | 🟠 橙 | 5 维度独立严审（替代用户手工裁决） | curator 出 delta 后自动触发 |
 
 设计哲学：**两 AI peer review 闭环**（curator 出 → auditor 严审 → 共识达成才 COMMIT）。基于《封神》项目实战 10 次 curator 系统性偏差教训演化而来。
+
+**v1.0.7 review 工作流升级（工业化 v3.1）**：
+1. reviewer **全节点 Desc 重写**（不允许只列关键节点 / 不省辅助节点）
+2. 主对话**强制 AskUserQuestion + multiSelect=true 弹 4 选项** ☑☑☑☑（不允许用纯文字问）
+3. designer **6 步强制写入**（Read → 解析 scope → Edit/Write 真改 → 双数组一致 → 再 Read 验证 → 输出 APPLY_DONE）/ ≥20 patches 自动切 Read→Write 整体覆盖策略
 
 ---
 
