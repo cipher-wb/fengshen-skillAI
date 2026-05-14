@@ -49,6 +49,58 @@ node --version; python --version; pip --version; claude --version
 
 ---
 
+## 🖥️ 终端推荐：PowerShell 7（**强烈建议 / 替换老 cmd**）
+
+如果你跑命令时遇到中文乱码 / 命令补全难用 / 错误信息看不懂，**换 PowerShell 7** 立刻好用 90%。
+
+### 安装（Win10/11 自带 winget / 一行命令）
+
+```powershell
+winget install --id Microsoft.PowerShell --source winget
+```
+
+装完开始菜单搜 "PowerShell 7"（蓝色图标 / 跟旧 Windows PowerShell 5 是两个 / 别开错）。
+
+### 对比表
+
+| 维度 | ❌ cmd（默认）| ⚠️ Windows PowerShell 5（Win10/11 内置）| ✅ **PowerShell 7**（推荐） |
+|------|------|------|------|
+| 出生时间 | 1987 年 | 2016 年 | 2020 年 + 持续更新 |
+| 中文 / Unicode | **乱码常见**（GBK 默认）| 中等（要 `chcp 65001`） | **完美 UTF-8 默认** ✅ |
+| 命令补全 | Tab 补全简陋 | OK | **智能补全 + 颜色提示** ✅ |
+| 错误信息 | 一行红字看不懂 | 多行但拥挤 | **清晰红色 ParserError + 行号定位** ✅ |
+| 跨平台 | 仅 Windows | 仅 Windows | **Win / macOS / Linux 都跑** ✅ |
+| 命令链 (`&&` `\|\|`) | ✅ 支持 | ❌ **不支持**（坑！） | ✅ 支持 |
+| 现代 cmdlets | 无（只有古早 dir/copy）| 中 | 全（`Get-ChildItem` / `Invoke-RestMethod` / 等） |
+| 管道传对象 | 只能传字符串 | 传对象 | 传对象 + 更稳 |
+| 历史命令搜索 | 简陋 | OK | **Ctrl+R 智能搜** + PSReadLine |
+| 性能 | 慢 | 中 | **快 30-50%** ✅ |
+
+### 用 PowerShell 7 跑 fengshen-skillai
+
+```powershell
+# 启动 PowerShell 7 → 直接跑（中文不再乱码）
+cd D:\Unity\MyMOBA
+npx fengshen-skillai@latest init .
+claude
+```
+
+### 进阶推荐：**Windows Terminal + PowerShell 7**
+
+Windows Terminal 是新一代 GUI 终端容器（多标签 / 主题 / 透明背景 / Win11 默认）：
+
+```powershell
+winget install --id Microsoft.WindowsTerminal --source winget
+```
+
+装完打开 Windows Terminal → 设置 → 默认配置文件改为 "PowerShell 7" → 全程现代体验。
+
+### 不会 PowerShell 语法？放心
+
+本工具的命令（`npx ... init` / `npm publish` / `git push` / `cd D:\Unity\...`）在 cmd / PowerShell 5 / PowerShell 7 / Git Bash 里**全都一样**跑得通。换 PowerShell 7 只是**让你跑得更舒服**，不是必须。
+
+---
+
 ## 🤖 CC Switch 模型选择推荐（**很重要 / 别图便宜选错**）
 
 > **核心认知**：fengshen-skillai 是"工具 + 守则" / 但**底层 LLM 能力决定 90% 体验**。
