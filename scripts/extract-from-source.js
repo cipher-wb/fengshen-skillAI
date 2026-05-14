@@ -338,6 +338,18 @@ async function main() {
     }
   }
 
+  // 自动 copy plugin.json 到 templates/_root/.claude-plugin/ (永久修复回归 bug)
+  // 之前手动 cp / 每次 extract 跑都会丢失 / 改为脚本固化
+  const pluginJsonSrc = path.join(REPO_ROOT, '.claude-plugin', 'plugin.json');
+  const pluginJsonDst = path.join(args.dest, '_root', '.claude-plugin', 'plugin.json');
+  if (await fs.pathExists(pluginJsonSrc)) {
+    await fs.ensureDir(path.dirname(pluginJsonDst));
+    await fs.copy(pluginJsonSrc, pluginJsonDst);
+    console.log(`  ✓ 同步 plugin.json → templates/_root/.claude-plugin/plugin.json`);
+  } else {
+    console.warn(`  ⚠ npm 包根 .claude-plugin/plugin.json 缺失 / scaffold 后用户 .claude-plugin/ 会空`);
+  }
+
   // 生成 manifest.json
   console.log('\n生成 templates/manifest.json...');
   const manifest = await buildManifest(args.dest);

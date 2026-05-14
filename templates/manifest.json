@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-05-14T04:19:43.880Z",
+  "generatedAt": "2026-05-14T04:21:20.295Z",
   "files": {
     "_claude/agents/skill-designer.md.hbs": {
       "sha256": "ae3f0c5bb558265682f6fbe5c761f10f5e9760632f1b83815b1b876acb6dc526",
@@ -1765,6 +1765,12 @@
       "hbs": true,
       "py": false,
       "bytes": 151339
+    },
+    "_root/.claude-plugin/plugin.json": {
+      "sha256": "7ab2408cba41db99c189269e1f973bfd25c40cc74199d46c3200671aabc403a2",
+      "hbs": false,
+      "py": false,
+      "bytes": 1873
     },
     "_root/CLAUDE.md.hbs": {
       "sha256": "19d856e8f9b42698a8ced71cda661ffbb1b858240ae091122f9e4aab6b4d4527",
