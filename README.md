@@ -97,6 +97,91 @@ npx fengshen-skillai@latest init /Users/yourname/Unity/MyProject
 
 ---
 
+## 🔍 查看当前版本 / 是否需要升级
+
+### 我装的是哪个版本？
+
+```powershell
+# 方法 1：在你 Unity 工程根跑（推荐 / 看你工程实际装的版本）
+cd D:\Unity\MyMOBA
+npx fengshen-skillai version
+# 输出: fengshen-skillai npm: 1.0.x  /  mental_model: v0.16.41
+
+# 方法 2：查 fengshen.config.json
+cat fengshen.config.json | findstr fengshen_skillai_version
+# 或在 PowerShell：Get-Content fengshen.config.json | Select-String version
+```
+
+### npm 上最新版是几？
+
+```powershell
+# 方法 1：直接拉最新跑（一句话搞定）
+npx fengshen-skillai@latest version
+
+# 方法 2：只看版本号不下载
+npm view fengshen-skillai version
+```
+
+### 两个版本号对比
+
+| 你装的 | npm 最新 | 结论 |
+|--------|---------|------|
+| `1.0.3` | `1.0.3` | ✅ 已是最新 / 不用升 |
+| `1.0.0` | `1.0.3` | ⚠️ 落后 3 个 patch / 建议升 |
+| `1.0.x` | `1.1.0` | 🆙 有新功能 / 推荐升 |
+
+---
+
+## 🔄 升级到新版本
+
+### 场景 A：v1.0.x 之间小版本升级（最常见）
+
+```powershell
+# 1. cd 到你 Unity 工程根（必须）
+cd D:\Unity\MyMOBA
+
+# 2. 强制重新 init / 自动备份你的本地改动
+npx fengshen-skillai@latest init . --force
+```
+
+`--force` 做的事：
+- 备份你现有 `.claude/agents/` 为 `.claude/agents.fengshen.bak.<时间戳>/`
+- 写入新版 `.claude/agents/` `doc/SkillAI/` `CLAUDE.md`
+- **保留**你的 `fengshen.config.json`（不动你配置）
+
+升完验证：
+
+```powershell
+npx fengshen-skillai version   # 看版本对不对
+npx fengshen-skillai doctor    # 12 项健康检查
+```
+
+### 场景 B：你给 mental_model 加了本地 PostMortem 等 / 想保留
+
+```powershell
+cd D:\Unity\MyMOBA
+
+# 升级前手动备份（双保险）
+Copy-Item .claude .claude.user.bak -Recurse
+Copy-Item doc\SkillAI doc\SkillAI.user.bak -Recurse
+
+# 跑升级
+npx fengshen-skillai@latest init . --force
+
+# 用 VSCode / Beyond Compare diff 你的备份 vs 新版
+# 把你加的 PostMortem / candidate 等手动 merge 回去
+```
+
+### 场景 C：怎么知道有新版发了
+
+| 方式 | 怎么用 |
+|------|--------|
+| **GitHub Watch**（推荐）| https://github.com/cipher-wb/fengshen-skillAI → 右上 Watch → "Custom" 勾 "Releases" → 你邮箱收新版通知 |
+| **手动刷** | 跑 `npx fengshen-skillai@latest version` 对比当前 |
+| **看 CHANGELOG** | https://github.com/cipher-wb/fengshen-skillAI/blob/main/CHANGELOG.md |
+
+---
+
 ## 这能干什么？
 
 打开 Claude Code，直接说人话：
