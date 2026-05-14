@@ -205,7 +205,78 @@ flowchart LR
 1. **sticky note 重写**（整段 / 大白话风格 / 用户复制粘贴回 SkillEditor）
 2. **关键节点 Desc 重写**（按节点列 / 大白话 / 用户手动 patch 到 `data.Desc` 字段）
 
-不主动改 JSON（守 skill-reviewer.md §0 "只审不改"原则），只给重写建议**让用户复制粘贴**。
+不主动改 JSON（守 skill-reviewer.md §0 角色边界）。
+
+**审后写入分发流程 v3（用户拍板 2026-05-14 晚 / 工业化强制 / multiSelect 4 选项 + P0 一起修）**：
+
+```
+[Step 1] reviewer 跑完 4 层审核 + 大白话重写表 + P0 明确修法
+[Step 2] reviewer 完整报告返回主对话 (含问题清单 / 修法 / sticky / 节点 Desc / P0 修法)
+[Step 3] reviewer 报告末尾追加 <PENDING_APPLY> 块 schema_v3 (4 个独立 payload: sticky_note / node_desc_patches / p0_patches / excluded_problems)
+[Step 4] 主对话拿到报告 → 终端原样完整展示给用户 (不能省问题清单)
+[Step 5] ★ 主对话强制 AskUserQuestion + multiSelect=true 弹 4 选项 ★
+[Step 6] 用户勾选 → 主对话调 skill-designer agent / 传 <APPLY_REWRITE> 块 (含 user_scope)
+[Step 7] designer 按 §6.5 6 步规约真改 JSON (Read → 解析 scope → Edit → 双数组一致性 → 再 Read 验证 → 输出 <APPLY_DONE>)
+[Step 8] 主对话拿到 <APPLY_DONE> 后向用户报 diff 摘要
+```
+
+### Step 5 主对话强制 AskUserQuestion 模板（**必须用工具调用 / 不允许纯文字问**）
+
+```javascript
+AskUserQuestion({
+  questions: [{
+    question: "Sticky Note + N 个节点 Desc 是否一键写入？(P0 需你跟策划确认意图后另起任务)",
+    header: "应用 patch",
+    multiSelect: true,    // ★ 必须 true / 允许多选
+    options: [
+      // 仅当 reviewer.PENDING_APPLY.sticky_note.has_rewrite=true 时含此项
+      {label: "写入 Sticky Note",
+       description: "新增 stickyNotes[0] / 5 段大白话骨架 (作用/流程/特殊条件/参数/联动)"},
+
+      // 仅当 reviewer.PENDING_APPLY.node_desc_patches.has_patches=true 时含此项
+      // N 替换为 PENDING_APPLY.node_desc_patches.total_count 真实数量
+      {label: "批量写入 N 个节点 Desc",
+       description: "按 guid 覆盖 references.RefIds[].data.Desc / 含 P0 节点的 ⚠ 警示文案"},
+
+      // 仅当 reviewer.PENDING_APPLY.p0_patches.has_patches=true 时含此项
+      {label: "P0 一起修",
+       description: "猜一个最可能的修法 (如 301→某 440xxx / 1001 改 V=35) 直接写入。不推荐: 意图不明"},
+
+      // 永远显示
+      {label: "全部不写",
+       description: "保留 JSON 不动 / 仅审完算数"}
+    ]
+  }]
+})
+```
+
+### 反模式（**主对话严禁**）
+
+- ❌ 跳过 AskUserQuestion 直接调 designer
+- ❌ 用纯文字"要不要写入？请回 Y/N"（必须用 AskUserQuestion 工具 / 用户体验差）
+- ❌ multiSelect=false（用户应该能多选 sticky+desc / 也能多选 sticky+desc+p0）
+- ❌ 选项写死 4 个不按 has_xxx 开关动态调整（reviewer 没准备 p0_patches 还显示 P0 选项 = bug）
+- ❌ 用户没选某项 → 主对话仍传过去（违反 user_scope）
+- ❌ 主对话不传 user_scope 给 designer（designer 不知道用户勾了啥）
+
+### 防 minimax 等较弱模型偷懒（designer 端强制规约）
+
+designer.md §6.5 强制 6 步：
+1. Read target_json
+2. 按 user_scope 决定改哪几样
+3. **Edit / Write 真改**（**最关键** / 防嘴上说改实际没改）
+4. 双数组一致性 check（PostMortem #037）
+5. 再 Read 验证
+6. 输出 `<APPLY_DONE>` + 完整 diff 摘要
+
+详见 [.claude/agents/skill-reviewer.md §0 §8](.claude/agents/skill-reviewer.md) + [.claude/agents/skill-designer.md §6.5](.claude/agents/skill-designer.md)。
+
+> 历史立法 / rule_2 严守：
+> - v0：只审不改 → 用户自己复制粘贴（摩擦大）
+> - v1（2026-05-14 上午）：reviewer 自己 AskUserQuestion → 用户看不到报告就被问"修不修 P0" / 翻车
+> - v2（2026-05-14 下午）：主对话问 2 件事（sticky / node_desc）
+> - **v3（2026-05-14 晚 / 当前）**：扩到 4 件事（multiSelect + P0 一起修）+ designer §6.5 强制执行规约（防 minimax 用户实战痛点：同事用 minimax 2.7 review 后只新建空 sticky / 只改几个 desc / 没真改）
+> 思想史保留 v0+v1+v2 作演化轨迹。
 
 ### 大白话 vs 程序化 — 对比示例
 

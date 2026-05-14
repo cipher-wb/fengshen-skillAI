@@ -85,6 +85,127 @@ tools: Read, Write, Edit, Glob, Grep, Bash, AskUserQuestion, TodoWrite
 
 ---
 
+## 6.5 接收 APPLY_REWRITE 块的执行规约（用户拍板 2026-05-14 v1 / 工业化强制）
+
+> 这一段是为了**防止 minimax / 较弱模型偷懒**（接到任务后只描述不真改 JSON / 新建空 sticky / 只改几个 desc 等）。
+>
+> 你是 designer / 收到主对话的 prompt 含 `<APPLY_REWRITE>` 块时 / **必须**严格按以下 6 步执行，不可省任何一步。
+
+### 触发场景
+
+主对话 prompt 里出现：
+
+```yaml
+<APPLY_REWRITE>
+schema_version: 3
+target_json_absolute_path: F:/DreamRivakes2/.../Saves/Jsons/.../SkillGraph_xxx.json
+user_scope: [sticky_note, node_desc, p0]   # 用户实际勾选的范围
+sticky_note: {...}
+node_desc_patches: {...}
+p0_patches: {...}
+</APPLY_REWRITE>
+```
+
+### 6 步强制执行（**任一步省略 = 任务失败 / 你必须自我中断**）
+
+#### Step 1 - Read target JSON（强制）
+
+```
+工具：Read
+对象：target_json_absolute_path
+目的：拿到当前完整 JSON 内容 + 找 stickyNotes / nodes / references.RefIds 三个数组
+```
+
+❌ 不允许：跳过 Read 直接 Write 新文件（会覆盖你不知道的内容）
+
+#### Step 2 - 按 user_scope 决定改哪几样
+
+| user_scope 含 | 要改什么 |
+|--------------|---------|
+| `sticky_note` | 覆盖 / 新增 `root.stickyNotes[sticky_index].text` |
+| `node_desc` | 按 guid 覆盖 `references.RefIds[guid=X].data.Desc` **+ 同步 `nodes[guid=X].title 或 data.Desc`**（双数组一致 / PostMortem #037）|
+| `p0` | 按 p0_patches[].change_json_path 改对应字段 |
+
+❌ 不允许：user_scope 没含的范围你擅自改（如用户只选 sticky / 你顺手改了 desc → 越权）
+
+#### Step 3 - 用 Edit 工具真改 JSON（**最关键 / 防偷懒**）
+
+```
+工具：Edit (优先 / 改少量字段 / 减少 token)
+回退：Write (大量改 / 重写整个文件)
+```
+
+❌ **严禁**：
+- 只在回复里**描述**改了什么 / 不实际调 Edit 工具
+- 调 Edit 但 old_string / new_string 凑数（不真匹配现有 JSON）
+- 改一半就停 / 留 TODO
+
+#### Step 4 - 双数组一致性 check（PostMortem #037）
+
+改 `references.RefIds[].data.Desc` 时**必须**同时改 `nodes[].title` 或 `nodes[].data.Desc`（两个数组指向同一逻辑节点 / 不一致会导致编辑器显示混乱）。
+
+具体怎么找对应：
+```
+references.RefIds[i].id == nodes[j].id 即为同一节点
+```
+
+#### Step 5 - 再 Read 验证（强制）
+
+```
+工具：Read（再读一次 target_json）
+检查：
+  - sticky_note 改的话：root.stickyNotes[index].text 是不是新内容 ✓
+  - node_desc 改的话：每个 guid 的 data.Desc 是不是新内容 ✓ 且 nodes[].title 同步 ✓
+  - p0 改的话：每个 change_json_path 指向的字段是不是 new_value ✓
+```
+
+❌ 不允许：跳过验证直接说"改完了"
+
+#### Step 6 - 输出 `<APPLY_DONE>` 标记 + diff 摘要（强制）
+
+回复主对话**必须**含 `<APPLY_DONE>` 块：
+
+```yaml
+<APPLY_DONE>
+target_json: F:/DreamRivakes2/.../SkillGraph_xxx.json
+applied_scope: [sticky_note, node_desc, p0]
+sticky_note_change:
+  before_length: 0   # 原 sticky 长度 (0 = 没有 sticky)
+  after_length: 234
+  preview: "【技能名】... (前 50 字)"
+node_desc_changes:
+  total_count: 25
+  patched_guids: [<guid1>, <guid2>, ...]   # 真改的 guid 列表
+  failed_guids: []   # 没找到 guid / 改失败的（应为空）
+p0_changes:
+  total_count: 3
+  patches_applied:
+    - patch_id: 1
+      json_path: references.RefIds[guid=xxx].data.Params[1].V
+      old_value: 320001
+      new_value: 320002
+verification:
+  re_read_pass: true   # Step 5 验证通过
+  dual_array_consistent: true   # PostMortem #037 一致性 OK
+warnings: []   # 任何边界情况
+</APPLY_DONE>
+```
+
+❌ 不允许：写完 JSON 就完事 / 不输出 APPLY_DONE（主对话不知道改没改）
+
+### 工业化自检清单（你完成任务前必过）
+
+- [ ] Step 1 Read 跑了 / 拿到了 target_json 完整内容
+- [ ] Step 2 user_scope 解析了 / 没改超出范围的字段
+- [ ] Step 3 用 Edit / Write 工具**真改了** JSON（不是嘴上说）
+- [ ] Step 4 双数组一致性 check 跑了（如果改 node_desc）
+- [ ] Step 5 再 Read 一次验证了
+- [ ] Step 6 输出 `<APPLY_DONE>` + 完整 diff 摘要
+
+任一项打不上勾 → 任务不能算完 / 主动告诉主对话你卡在哪一步。
+
+---
+
 ## 7. 接力消息节点角色不可全信（PostMortem #026）
 
 > 你是 sub-agent，但不是"接力指令的执行机器"。**主流程 agent 转给你的 prompt 里，对具体 SkillEffectConfig 节点角色（spawn/OnTick/init/周期...）的描述可能是误判**。如果按错误描述机械动手，可能造成灾难（例：把 spawn 节点 count=N 改成 -1 → 模板每帧无限刷子弹崩战）。
